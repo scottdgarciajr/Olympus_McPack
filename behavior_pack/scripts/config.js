@@ -1,0 +1,20 @@
+export const CONFIG = {
+  maxPlayers: 8,
+  allowDuplicateGods: false,
+  claimMessage: 'You have become {god} — {title}. Your powers persist after death and rejoining.',
+  hermesSpeedAmplifier: 5,
+  hermesTurboAmplifier: 13,
+  hermesSprintSpeed: 1.3,
+  poseidonSwimSpeed: 1.08,
+  cooldownSeconds: { hermesPearl: 300, zeusLightning: 180, zeusFlight: 180, aresRage: 300, apolloSunstep: 180 },
+  dionysusSameTargetCooldownSeconds: 3,
+  zeusFlightSeconds: 30,
+  aresRageSeconds: 30,
+  apolloSunstepSeconds: 30,
+  dionysusDebuffs: ['weakness', 'slowness', 'mining_fatigue', 'poison'],
+  dionysusBuffs: ['strength', 'speed', 'resistance', 'regeneration', 'haste'],
+  dionysusTeleportMin: 8,
+  dionysusTeleportMax: 16,
+  friendlyFire: true,
+  debug: false
+};

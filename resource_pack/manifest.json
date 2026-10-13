@@ -1,0 +1,35 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Olympus SMP Resources",
+    "description": "Relic icons for Olympus SMP",
+    "uuid": "def06a91-6e05-457a-a359-714565d4c32c",
+    "version": [
+      1,
+      9,
+      0
+    ],
+    "min_engine_version": [
+      1,
+      21,
+      90
+    ]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "148f6c15-a3b3-4f02-9c59-ff3af25c3e40",
+      "version": [
+        1,
+        9,
+        0
+      ]
+    }
+  ],
+  "metadata": {
+    "authors": [
+      "Olympus SMP"
+    ],
+    "product_type": "addon"
+  }
+}

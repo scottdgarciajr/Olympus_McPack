@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:dionysus_relic",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Dionysus Goblet Relic"
+      },
+      "minecraft:icon": "olympus_dionysus",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Use: Madness Guide / Infinite Bone Meal",
+      "olympus:relic_use": {}
+    }
+  }
+}

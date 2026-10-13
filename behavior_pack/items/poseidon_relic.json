@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:poseidon_relic",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Poseidon Sea Relic"
+      },
+      "minecraft:icon": "olympus_poseidon",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Use: Powers / Sneak: Swim Toggle",
+      "olympus:relic_use": {}
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "resource_pack_name": "Olympus SMP",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "olympus_hermes": {
+      "textures": "textures/items/hermes_relic"
+    },
+    "olympus_zeus": {
+      "textures": "textures/items/zeus_relic"
+    },
+    "olympus_poseidon": {
+      "textures": "textures/items/poseidon_relic"
+    },
+    "olympus_hades": {
+      "textures": "textures/items/hades_relic"
+    },
+    "olympus_ares": {
+      "textures": "textures/items/ares_relic"
+    },
+    "olympus_apollo": {
+      "textures": "textures/items/apollo_relic"
+    },
+    "olympus_hephaestus": {
+      "textures": "textures/items/hephaestus_relic"
+    },
+    "olympus_dionysus": {
+      "textures": "textures/items/dionysus_relic"
+    },
+    "olympus_mountain": {
+      "textures": "textures/items/mountain_sigil"
+    }
+  }
+}
