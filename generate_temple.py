@@ -53,6 +53,8 @@ for (god, (x, y, z)), color in zip(ALTARS.items(), COLORS):
     put(x, 5, z, 'enchanting_table')
     for dx in (-2, 2):
         put(x+dx, 3, z, 'sea_lantern')
+# The Divine Forge uses the Hall's existing Hephaestus bay.
+put(5, 3, 29, 'smithing_table')
 
 def name(value):
     raw = value.encode('utf-8')

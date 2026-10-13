@@ -7,6 +7,14 @@ export const CONFIG = {
   hermesSprintSpeed: 1.3,
   poseidonSwimSpeed: 1.08,
   cooldownSeconds: { hermesPearl: 300, zeusLightning: 180, zeusFlight: 180, aresRage: 300, apolloSunstep: 180 },
+  zeusThunderLightningSeconds: 5,
+  combinations: {
+    sword_pickaxe: { xp: 30, diamond: 12, emerald: 16, lapis_lazuli: 24, netherite_ingot: 1 },
+    ember_axe: { xp: 35, diamond: 16, emerald: 20, lapis_lazuli: 24, netherite_ingot: 1 },
+    tide_boots: { xp: 28, diamond: 12, emerald: 16, lapis_lazuli: 24, netherite_ingot: 1 },
+    lantern_helm: { xp: 24, diamond: 10, emerald: 12, lapis_lazuli: 20, netherite_ingot: 0 }
+  },
+  dominion: { radius: 12, durationSeconds: 30, cooldownSeconds: 300, maxBlocks: 120 },
   dionysusSameTargetCooldownSeconds: 3,
   zeusFlightSeconds: 30,
   aresRageSeconds: 30,

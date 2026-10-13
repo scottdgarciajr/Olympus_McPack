@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, divineOreDrop, stockMissingRelics } from '../behavior_pack/scripts/rules.js';
+import { CONFIG } from '../behavior_pack/scripts/config.js';
 
 test('cooldowns expire and stay independent by stored expiry', () => {
   const now = 1_000_000;
@@ -9,12 +10,21 @@ test('cooldowns expire and stay independent by stored expiry', () => {
   assert.equal(cooldownRemaining(now - 1, now), 0);
 });
 
-test('Zeus bypasses both cooldowns only during a storm', () => {
-  assert.equal(abilityNeedsCooldown('zeusLightning', true), false);
+test('Zeus flight bypasses cooldown in wet weather, while lightning has its own weather rule', () => {
+  assert.equal(abilityNeedsCooldown('zeusLightning', true), true);
   assert.equal(abilityNeedsCooldown('zeusFlight', true), false);
   assert.equal(abilityNeedsCooldown('zeusLightning', false), true);
   assert.equal(abilityNeedsCooldown('zeusFlight', false), true);
   assert.equal(abilityNeedsCooldown('aresRage', true), true);
+});
+
+test('combinations have substantial configurable costs', () => {
+  for (const cost of Object.values(CONFIG.combinations)) {
+    assert.ok(cost.xp >= 24);
+    assert.ok(cost.diamond >= 10);
+    assert.ok(cost.emerald >= 12);
+    assert.ok(cost.lapis_lazuli >= 20);
+  }
 });
 
 test('role claiming works anywhere while enforcing exclusivity', () => {

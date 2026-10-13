@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.0 — God balance and item combinations
+
+- Removed Zeus's weather Strength and added a persistent five-second lightning interval during thunder, unaffected by the Crown. Flight remains unrestricted in wet weather.
+- Added Poseidon's Strength II while submerged and Strength I in exposed rain. His water/rain movement and Riptide remain in place.
+- Added Hades's Overworld night Strength I/Haste I and direct-sunlight-only daytime penalties. Nether/End Strength IV/Haste IV remain.
+- Added Hephaestus-only Divine Combination Forge at the existing Hall smithing table. Four costly, tradeable item combinations replace the proposed over-limit enchantment system. Costs are configurable and effects persist on items.
+- Added Crown Dimensional Dominion with temporary, recorded terrain transformations and a separate five-minute cooldown.
+- The supplied Combine Anything V2 add-on targets newer Bedrock APIs, so its combination idea was adapted rather than importing incompatible scripts and resources. Destructive TNT, projectiles, and high-damage weapons from that pack are excluded; the strongest combination adds only one scripted damage.
+
 ## 2.1.0 — Crown of Olympus
 
 - Added a wearable Crown, visible model, Divine Authority seal, offering trial at the existing Hall center, persistent ownership, PvP transfer, holder reveals, and Glory leaderboard.

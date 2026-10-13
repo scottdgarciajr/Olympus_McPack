@@ -3,7 +3,9 @@ import { ActionFormData } from '@minecraft/server-ui';
 import { CONFIG } from './config.js';
 import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, divineOreDrop, stockMissingRelics } from './rules.js';
 import { FLAIR, flairPoints } from './flair.js';
-import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl } from './crown.js';
+import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl } from './crown.js';
+import { configureDominion, inUnderworldDominion, temporaryBlock, dominionFlair } from './dominion.js';
+import { configureForge, forgeBlock, showForge, onForgeHurt, forgeEquipmentTick } from './forge.js';
 
 const GODS = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus'];
 const TITLES = {
@@ -13,29 +15,29 @@ const TITLES = {
 };
 const DESCRIPTIONS = {
   hermes: 'Speed VI, Flash-fast sprint, and fall protection; Weakness III. Divine Pearl every 5 minutes.',
-  zeus: 'Strength IV in open rain; Mining Fatigue II always. Lightning and 30-second flight recharge instantly during rain or thunder.',
+  zeus: 'Mining Fatigue II always. Lightning has a 5-second interval in thunder; 30-second flight remains unrestricted in rain or thunder.',
   poseidon: 'Conduit Power, Dolphin’s Grace III, and toggled fast movement in water or open rain; rain-only fall protection. Slowness III and Weakness III in Nether/desert.',
   hades: 'Fire Resistance and Night Vision; Slowness III and Weakness III by day. Strength IV and Haste IV in Nether or End.',
   ares: 'Strength II and Resistance II; Slowness III. Strength V and Resistance III rage for 30 seconds every 5 minutes.',
   apollo: 'Infinite Solar Bow with heavy sunlight damage; Weakness III and Mining Fatigue II outside direct sunlight. Daylight flight every 3 minutes.',
-  hephaestus: 'Haste IV and Divine Fortune IV pickaxe with Efficiency V; permanent Weakness III.',
+  hephaestus: 'Haste IV, Divine Fortune IV pickaxe, and exclusive costly item combinations at the Hall forge; permanent Weakness III.',
   dionysus: 'Every new foe can be cursed immediately. Each hit stacks buffs and Nausea, teleports you, and may blind you as madness grows. Infinite Bone Meal.'
 };
 const CONTROLS = {
   hermes: 'Speed VI always; sprint for Speed XIV with extra momentum. Use relic: pearl (5m). Sneak-use: Slow Falling on/off. Weakness III.',
-  zeus: 'Aim at a block or enemy, use relic: lightning. Sneak-use: 30s flight. Each has a 3m cooldown in clear weather, none in rain/thunder.',
+  zeus: 'Aim at a block or enemy, use relic: lightning. Sneak-use: 30s flight. Each has a 3m cooldown in clear weather; thunder lightning has a 5s interval. Flight stays unrestricted in rain/thunder.',
   poseidon: 'Sneak-use relic: Tidal Sprint on/off in water or open rain. Conduit Power and Dolphin’s Grace III; no fall damage during rain. Tidecaller uses Riptide.',
   hades: 'Fire Resistance and Night Vision always; Slowness III/Weakness III by day; Strength IV/Haste IV in Nether and End.',
   ares: 'Use relic: War Rage, Strength V and Resistance III for 30s (5m). Strength II, Resistance II, Slowness III are passive.',
   apollo: 'Use relic in direct daylight: 30s Sunflight (3m). Jump up, sneak down, release to hover. One arrow fuels your infinite Solar Bow.',
-  hephaestus: 'Haste IV and permanent Weakness III. Your pickaxe has Efficiency V and Divine Fortune IV bonus drops.',
+  hephaestus: 'Haste IV and permanent Weakness III. Your pickaxe has Divine Fortune IV bonus drops. Combine equipment at the Hall forge.',
   dionysus: 'Melee-hit different foes to stack buffs instantly. The same foe has a 3s cooldown. Madness builds Nausea and Blindness risk. Bone Meal refills.'
 };
 const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigue', 'conduit_power',
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'jump_boost', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '2.1.2';
+const PACK_VERSION = '2.2.0';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -65,6 +67,7 @@ const poseidonFallGuardTick = new Map();
 const dionysusTargetCooldowns = new Map();
 const warnedFlair = new Set();
 const godPenalties = new Map();
+const godBuffs = new Map();
 const PERSONAL_TOOLS = {
   poseidon: ['minecraft:trident', '§bPoseidon’s Tidecaller'],
   apollo: ['minecraft:bow', '§eApollo’s Solar Bow'],
@@ -92,6 +95,22 @@ function inRain(player) {
 function zeusStorm(player) {
   return player.dimension.id === 'minecraft:overworld' && weather() !== 'Clear';
 }
+function zeusThunder(player) { return player.dimension.id === 'minecraft:overworld' && weather() === 'Thunder'; }
+function submerged(player) {
+  if (!player.isInWater) return false;
+  if (player.isSwimming) return true;
+  const p = player.location;
+  try { return player.dimension.getBlock({ x: Math.floor(p.x), y: Math.floor(p.y + 1.5), z: Math.floor(p.z) })?.typeId === 'minecraft:water'; }
+  catch { return false; }
+}
+function skyExposed(player) {
+  if (player.dimension.id !== 'minecraft:overworld') return false;
+  const p = player.location;
+  try {
+    const top = player.dimension.getTopmostBlock({ x: Math.floor(p.x), z: Math.floor(p.z) });
+    return !!top && top.location.y < p.y + 1;
+  } catch { return false; }
+}
 function owners(god) {
   const raw = world.getDynamicProperty(key(`owner_${god}`));
   if (typeof raw !== 'string' || !raw) return [];
@@ -101,6 +120,8 @@ function owners(god) {
 const owner = (god) => owners(god)[0] || '';
 const now = () => Date.now();
 configureCrown({ role, temple: () => temple(), offeringCount: (p,id) => offeringCount(p,id), takeOffering: (p,id,n) => takeOffering(p,id,n), weather, setWeather: value => { currentWeather = value; world.setDynamicProperty(key('weather'), value); }, fail });
+configureDominion(fail);
+configureForge({ role, temple: () => temple(), fail });
 const nameOf = (god) => god.charAt(0).toUpperCase() + god.slice(1);
 function tell(player, message) { player.sendMessage(prefix + message); }
 function fail(e) { console.warn(`[Olympus] ${e?.stack || e}`); }
@@ -111,6 +132,30 @@ function godPenalty(player, id, seconds, amplifier = 0) {
   if (crowned(player) && role(player) !== 'zeus') return;
   effect(player, id, seconds, amplifier);
   godPenalties.set(`${player.id}:${id}`, { amplifier, tick: system.currentTick });
+}
+function godBuff(player, id, amplifier) {
+  const k = `${player.id}:${id}`;
+  const old = godBuffs.get(k);
+  const active = player.getEffect(id);
+  if (old && old.amplifier > amplifier && active?.amplifier === old.amplifier) { player.removeEffect(id); godBuffs.delete(k); }
+  const current = player.getEffect(id);
+  if (current && current.amplifier > amplifier) return;
+  effect(player, id, 3, amplifier);
+  godBuffs.set(k, { amplifier, tick: system.currentTick });
+}
+function clearGodBuff(player, id) {
+  const k = `${player.id}:${id}`;
+  const tracked = godBuffs.get(k);
+  if (!tracked) return;
+  try { if (player.getEffect(id)?.amplifier === tracked.amplifier && system.currentTick-tracked.tick < 80) player.removeEffect(id); } catch {}
+  godBuffs.delete(k);
+}
+function clearGodPenalty(player, id) {
+  const k = `${player.id}:${id}`;
+  const tracked = godPenalties.get(k);
+  if (!tracked) return;
+  try { if (player.getEffect(id)?.amplifier === tracked.amplifier && system.currentTick-tracked.tick < 120) player.removeEffect(id); } catch {}
+  godPenalties.delete(k);
 }
 function suppressOldPenalties(player) {
   if (!crowned(player) || role(player) === 'zeus') return;
@@ -263,6 +308,15 @@ function remaining(player, ability) {
   return cooldownRemaining(player.getDynamicProperty(key(`cd_${ability}`)), now());
 }
 function ready(player, ability, label) {
+  if (ability === 'zeusLightning') {
+    const stormMs = cooldownRemaining(player.getDynamicProperty(key('cd_zeusStormLightning')), now());
+    const normalMs = weather() === 'Clear' ? remaining(player, ability) : 0;
+    const ms = Math.max(stormMs, normalMs);
+    if (!ms) return true;
+    const seconds = Math.ceil(ms / 1000);
+    player.onScreenDisplay.setActionBar(`§e${label}: ${Math.floor(seconds / 60)}m ${seconds % 60}s remaining`);
+    return false;
+  }
   if (!abilityNeedsCooldown(ability, zeusStorm(player))) return true;
   const ms = remaining(player, ability);
   if (!ms) return true;
@@ -271,6 +325,11 @@ function ready(player, ability, label) {
   return false;
 }
 function startCooldown(player, ability) {
+  if (ability === 'zeusLightning') {
+    if (zeusThunder(player)) player.setDynamicProperty(key('cd_zeusStormLightning'), now() + CONFIG.zeusThunderLightningSeconds * 1000);
+    else if (!zeusStorm(player)) player.setDynamicProperty(key('cd_zeusLightning'), now() + CONFIG.cooldownSeconds.zeusLightning * 1000);
+    return;
+  }
   if (!abilityNeedsCooldown(ability, zeusStorm(player))) {
     player.setDynamicProperty(key(`cd_${ability}`), undefined);
     return;
@@ -446,6 +505,16 @@ function placeTemple(dimension, site) {
   world.setDynamicProperty(key('temple'), JSON.stringify({ ...site, dimension: dimension.id }));
   world.sendMessage(prefix + `Hall of Eight Gods placed in ${dimension.id} at ${site.x}, ${site.y}, ${site.z}.`);
 }
+function ensureForgeStation(player) {
+  const t = temple();
+  if (!t) return;
+  try {
+    const block = world.getDimension(t.dimension || 'minecraft:overworld').getBlock({ x:t.x+5, y:t.y+3, z:t.z+29 });
+    if (block?.typeId === 'minecraft:smithing_table') return;
+    if (block?.isAir) { block.setType('minecraft:smithing_table'); tell(player, 'The Divine Combination Forge was added beside Hephaestus’s altar.'); }
+    else tell(player, 'The forge location is occupied. Clear the block two spaces behind Hephaestus’s altar, then run setup again.');
+  } catch (e) { fail(e); tell(player, 'The Hall chunk must be loaded to add the forge. Return to the Hall and run setup again.'); }
+}
 function placeTempleWithSeal(player) {
   if (temple()) { tell(player, 'The Hall of Eight Gods is already placed.'); return; }
   if (templeBuilding) { tell(player, 'Temple placement is already running.'); return; }
@@ -466,7 +535,7 @@ function placeTempleWithSeal(player) {
   })());
 }
 function setupTemple(player) {
-  if (temple()) { tell(player, 'The Hall of Eight Gods is already placed.'); return; }
+  if (temple()) { ensureForgeStation(player); tell(player, 'The Hall of Eight Gods is already placed.'); return; }
   if (templeBuilding) { tell(player, 'Temple site search is already running.'); return; }
   if (player.dimension.id !== 'minecraft:overworld') { tell(player, 'Run setup in the Overworld.'); return; }
   templeBuilding = true;
@@ -723,18 +792,23 @@ function updatePlayer(player) {
         break;
       case 'zeus':
         godPenalty(player, 'mining_fatigue', 5, 1);
-        if (inRain(player)) effect(player, 'strength', 5, 3);
         break;
       case 'poseidon':
         if (player.isInWater || inRain(player)) { effect(player, 'conduit_power', 5); effect(player, 'dolphins_grace', 5, 2); }
+        if (dim !== 'minecraft:nether' && submerged(player)) godBuff(player, 'strength', 1);
+        else if (inRain(player)) godBuff(player, 'strength', 0);
+        else clearGodBuff(player, 'strength');
         if (dim === 'minecraft:nether' || (dim === 'minecraft:overworld' && player.dimension.getBiome(player.location).id === 'minecraft:desert')) {
           godPenalty(player, 'slowness', 5, 2); godPenalty(player, 'weakness', 5, 2);
         }
         break;
       case 'hades':
         effect(player, 'fire_resistance', 5); effect(player, 'night_vision', 15);
-        if (dim === 'minecraft:overworld' && daylight()) { godPenalty(player, 'slowness', 5, 2); godPenalty(player, 'weakness', 5, 2); }
-        if (otherworld) { effect(player, 'strength', 5, 3); effect(player, 'haste', 5, 3); }
+        if (dim === 'minecraft:overworld' && daylight() && skyExposed(player) && !inUnderworldDominion(player)) { godPenalty(player, 'slowness', 5, 2); godPenalty(player, 'weakness', 5, 2); }
+        else { clearGodPenalty(player, 'slowness'); clearGodPenalty(player, 'weakness'); }
+        if (otherworld || inUnderworldDominion(player)) { godBuff(player, 'strength', 3); godBuff(player, 'haste', 3); }
+        else if (dim === 'minecraft:overworld' && !daylight()) { godBuff(player, 'strength', 0); godBuff(player, 'haste', 0); }
+        else { clearGodBuff(player, 'strength'); clearGodBuff(player, 'haste'); }
         break;
       case 'ares':
         effect(player, 'strength', 5, aresStrengthAmplifier(player.getDynamicProperty(key('rageUntil')), now()));
@@ -803,7 +877,7 @@ function special(player, god, sneaking) {
       if (!aim) { tell(player, 'Aim at a block or enemy within 24 blocks.'); return; }
       player.dimension.spawnEntity('minecraft:lightning_bolt', target ? { x: aim.x, y: aim.y, z: aim.z } : { x: aim.x + 0.5, y: aim.y + 1, z: aim.z + 0.5 });
       startCooldown(player, 'zeusLightning');
-      tell(player, zeusStorm(player) ? 'Lightning Strike! No cooldown while rain or thunder lasts.' : 'Lightning Strike!');
+      tell(player, zeusThunder(player) ? 'Lightning Strike! Another strike is ready in 5 seconds.' : zeusStorm(player) ? 'Lightning Strike! Rain power.' : 'Lightning Strike!');
       showFlair(player, god, true);
     } else if (god === 'poseidon') {
       if (sneaking) {
@@ -933,7 +1007,13 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const m = mountain();
   const b = event.block.location;
   const player = event.player;
+  if (event.itemStack && temporaryBlock(player.dimension.id,b)) { event.cancel = true; return; }
   const t = temple();
+  if (t && player.dimension.id === (t.dimension || 'minecraft:overworld') && forgeBlock(b) && event.block.typeId === 'minecraft:smithing_table') {
+    event.cancel = true;
+    system.run(() => { try { showForge(player); } catch (e) { fail(e); } });
+    return;
+  }
   if (t && player.dimension.id === (t.dimension || 'minecraft:overworld') && atThrone(b) && event.block.typeId === 'minecraft:sea_lantern') {
     event.cancel = true;
     system.run(() => { try { showThrone(player); } catch (e) { fail(e); } });
@@ -1001,6 +1081,15 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
     }
   } catch (e) { fail(e); }
 });
+world.beforeEvents.playerBreakBlock.subscribe((event) => {
+  if (temporaryBlock(event.player.dimension.id,event.block.location)) event.cancel = true;
+});
+world.beforeEvents.explosion.subscribe((event) => {
+  const blocks = event.getImpactedBlocks();
+  if (blocks.some(block => temporaryBlock(event.dimension.id,block.location)))
+    event.setImpactedBlocks(blocks.filter(block => !temporaryBlock(event.dimension.id,block.location)));
+});
+world.afterEvents.entityHurt.subscribe((event) => { try { onForgeHurt(event); } catch (e) { if (CONFIG.debug) fail(e); } });
 world.afterEvents.projectileHitEntity.subscribe((event) => {
   const shooter = event.source;
   if (event.projectile.typeId !== 'minecraft:arrow' || shooter?.typeId !== 'minecraft:player' || role(shooter) !== 'apollo') return;
@@ -1035,6 +1124,7 @@ world.afterEvents.weatherChange.subscribe((event) => {
   world.setDynamicProperty(key('weather'), currentWeather);
 });
 world.afterEvents.entityDie.subscribe((event) => { try { transferOnDeath(event); } catch (e) { fail(e); } });
+world.afterEvents.playerLeave.subscribe((event) => { try { crownOwnerLeft(event.playerId); } catch (e) { fail(e); } });
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (!event.id.startsWith('olympus:')) return;
   const player = event.sourceEntity;
@@ -1123,4 +1213,8 @@ system.runInterval(() => {
 system.runInterval(() => { try { crownTick(); } catch (e) { fail(e); } }, 100);
 system.runInterval(() => { try { cleanCrownDrops(); } catch (e) { if (CONFIG.debug) fail(e); } }, 400);
 system.runInterval(() => { try { crownFlair(); } catch (e) { if (CONFIG.debug) fail(e); } }, 40);
+system.runInterval(() => { try { crownDominionTick(); } catch (e) { fail(e); } }, 10);
+system.runInterval(() => { try { dominionFlair(); } catch (e) { if (CONFIG.debug) fail(e); } }, 40);
+system.runInterval(() => { try { forgeEquipmentTick(); } catch (e) { if (CONFIG.debug) fail(e); } }, 10);
+system.runInterval(() => { for (const player of world.getAllPlayers()) if (['hades','poseidon'].includes(role(player))) updatePlayer(player); }, 10);
 system.runInterval(() => { try { revealCrown(); } catch (e) { fail(e); } }, 6000);

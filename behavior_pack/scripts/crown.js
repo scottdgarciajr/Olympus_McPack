@@ -1,5 +1,7 @@
 import { world, system, ItemStack, EquipmentSlot, WeatherType, MolangVariableMap } from '@minecraft/server';
 import { ActionFormData } from '@minecraft/server-ui';
+import { activateDominion, dismissDominion, dominionState, dominionTick } from './dominion.js';
+import { CONFIG } from './config.js';
 
 const CROWN = 'olympus:crown';
 const CONTROL = 'olympus:crown_control';
@@ -161,15 +163,37 @@ export function showStatus(player) {
   const active = own && crowned(player);
   const cd = format((s.authorityUntil || 0) - time());
   const g = glory(s, player.id);
-  const body = `Holder: ${s.ownerName || 'Unclaimed'} (${s.ownerGod || 'none'})\nCrown: ${active ? 'worn' : own ? 'owned, unequipped' : 'not owned'}\nBenefits: ${active ? s.ownerGod === 'zeus' ? 'Time and weather control' : 'Weakness suppression, half god cooldowns, authority' : 'inactive'}\nDivine Authority: ${cd}\nWeather: ${api.weather()}\nTime: ${world.getTimeOfDay()}\nYour Glory: ${g.points}`;
+  const body = `Holder: ${s.ownerName || 'Unclaimed'} (${s.ownerGod || 'none'})\nCrown: ${active ? 'worn' : own ? 'owned, unequipped' : 'not owned'}\nBenefits: ${active ? s.ownerGod === 'zeus' ? 'Time, weather and Dominion' : 'Weakness suppression, half god cooldowns, authority, Dominion' : 'inactive'}\nDivine Authority: ${cd}\nDominion: ${format((s.dominionUntil || 0)-time())}${dominionState().active ? ' (active)' : ''}\nWeather: ${api.weather()}\nTime: ${world.getTimeOfDay()}\nYour Glory: ${g.points}`;
   new ActionFormData().title('§6CROWN OF OLYMPUS').body(body)
-    .button('Command the Sun and Moon').button('Command the Skies').button('View Crown Status').button('Glory Leaderboard').button('Close')
+    .button('Command the Sun and Moon').button('Command the Skies').button('Dimensional Dominion').button('View Crown Status').button('Glory Leaderboard').button('Close')
     .show(player).then(r => {
       if (r.selection === 0) submenu(player, 'time');
       if (r.selection === 1) submenu(player, 'weather');
-      if (r.selection === 2) showStatus(player);
-      if (r.selection === 3) showLeaderboard(player);
+      if (r.selection === 2) dominionMenu(player);
+      if (r.selection === 3) showStatus(player);
+      if (r.selection === 4) showLeaderboard(player);
     }).catch(api.fail);
+}
+function dominionMenu(player) {
+  const active = dominionState().active;
+  new ActionFormData().title('§6DIMENSIONAL DOMINION')
+    .body(`Command the land itself for ${CONFIG.dominion.durationSeconds} seconds within ${CONFIG.dominion.radius} blocks. Cooldown: ${format((state().dominionUntil || 0)-time())}.`)
+    .button('Underworld Dominion').button('Overworld Dominion').button(active ? 'Dismiss active Dominion' : 'Cancel')
+    .show(player).then(r => {
+      if (r.selection === 0) commandDominion(player,'underworld');
+      if (r.selection === 1) commandDominion(player,'overworld');
+      if (r.selection === 2 && active && crowned(player)) dismissDominion();
+    }).catch(api.fail);
+}
+function commandDominion(player,mode) {
+  const s = state();
+  if (s.ownerId !== player.id || !crowned(player)) { player.sendMessage('§cWear your own Crown to command Dominion.'); return; }
+  if (s.dominionUntil > time()) { player.sendMessage(`§eDominion returns in ${format(s.dominionUntil-time())}.`); return; }
+  if (dominionState().active || dominionState().records?.length) { player.sendMessage('§cA Dominion is active or its terrain is still recovering.'); return; }
+  if (!activateDominion(player,mode)) { player.sendMessage('§cNo safe natural terrain was available here. No cooldown was spent.'); return; }
+  s.dominionUntil = time()+CONFIG.dominion.cooldownSeconds*1000;
+  save(s);
+  announce(`${player.name} has invoked ${mode === 'underworld' ? 'Underworld' : 'Overworld'} Dominion!`);
 }
 function submenu(player, kind) {
   const choices = kind === 'time' ? ['Summon Day', 'Summon Night'] : ['Clear Skies', 'Summon Rain', 'Summon Thunderstorm'];
@@ -200,6 +224,7 @@ function command(player, kind, choice) {
   } catch (e) { api.fail(e); player.sendMessage('§cDivine Authority failed; its cooldown was not consumed.'); }
 }
 export function resetCrown(player) {
+  dismissDominion();
   for (const p of world.getAllPlayers()) { removeItems(p, CROWN); removeItems(p, CONTROL); }
   cleanDrops();
   const s = state();
@@ -221,6 +246,7 @@ export function transferOnDeath(event) {
   const victim = event.deadEntity;
   const s = state();
   if (victim.typeId !== 'minecraft:player' || s.ownerId !== victim.id) return;
+  dismissDominion();
   const source = event.damageSource;
   const direct = source?.damagingEntity;
   let projectileOwner;
@@ -270,6 +296,12 @@ export function crownTick() {
   }
   lastSeen.set(holder.id, current);
 }
+export function crownDominionTick() {
+  const s = state();
+  const holder = ownerPlayer(s);
+  dominionTick(s.ownerId,!!holder && crowned(holder));
+}
+export function crownOwnerLeft(playerId) { if (state().ownerId === playerId) dismissDominion(); }
 export function cleanCrownDrops() { cleanDrops(); }
 export function revealCrown() {
   const s = state();

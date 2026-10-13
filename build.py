@@ -86,5 +86,6 @@ with zipfile.ZipFile(OUT) as archive:
     names = set(archive.namelist())
     check('behavior_pack/manifest.json' in names and 'resource_pack/manifest.json' in names, 'Nested or missing pack root')
     check('behavior_pack/structures/olympus/hall_of_eight.mcstructure' in names, 'Temple was not bundled')
+    check(not any('/st_' in name or 'super_tnt' in name for name in names), 'Destructive Combine Anything content must not be bundled')
     check(len(names) == len(set(names)), 'Duplicate ZIP entries')
 print(f'PASS: manifests, UUIDs, {len(GODS)} relics, functions, textures, JS syntax, rule tests, ZIP. Built {OUT} ({OUT.stat().st_size:,} bytes)')

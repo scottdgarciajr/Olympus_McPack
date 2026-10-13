@@ -4,7 +4,7 @@ export function cooldownRemaining(expiryMs, currentMs) {
 }
 
 export function abilityNeedsCooldown(ability, storm) {
-  return !(storm && (ability === 'zeusLightning' || ability === 'zeusFlight'));
+  return !(storm && ability === 'zeusFlight');
 }
 
 export function claimRejection(currentRole, existingOwner, claimedCount, maxPlayers, allowDuplicateGods) {
