@@ -1,0 +1,1 @@
+scriptevent olympus:crown_setup

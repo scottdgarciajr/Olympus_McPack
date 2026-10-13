@@ -52,9 +52,20 @@ check(sigil['description']['identifier'] == 'olympus:mountain_sigil', 'Missing m
 check('olympus:relic_use' in sigil['components'], 'Mountain sigil is not usable')
 sigil_icon = sigil['components']['minecraft:icon']
 check(sigil_icon in texture_index and (RP / (texture_index[sigil_icon]['textures'] + '.png')).exists(), 'Mountain sigil texture missing')
-for command in ('give_all', 'help', 'status', 'reset', 'summon_mountain', 'controls', 'upgrade_mountain'):
+seal = read_json(BP / 'items' / 'temple_seal.json')['minecraft:item']
+check(seal['description']['identifier'] == 'olympus:temple_seal', 'Temple seal ID missing')
+check('olympus:relic_use' in seal['components'], 'Temple seal is not usable')
+seal_icon = seal['components']['minecraft:icon']
+check(seal_icon in texture_index and (RP / (texture_index[seal_icon]['textures'] + '.png')).exists(), 'Temple seal texture missing')
+for command in ('give_all', 'help', 'status', 'reset', 'summon_mountain', 'controls', 'upgrade_mountain', 'setup', 'crown_setup', 'crown_status', 'crown_reset', 'crown_recover', 'crown_glory', 'crown_help'):
     path = BP / 'functions' / 'olympus' / (command + '.mcfunction')
     check(path.is_file() and path.stat().st_size > 0, f'Function {command} missing')
+check((BP / 'functions' / 'olympus' / 'setup.mcfunction').read_text().strip() == 'scriptevent olympus:setup', 'Temple setup function missing')
+check(read_json(BP / 'items' / 'crown.json')['minecraft:item']['components']['minecraft:wearable']['slot'] == 'slot.armor.head', 'Crown is not wearable')
+check((RP / 'attachables' / 'crown.player.json').exists(), 'Crown worn model missing')
+check((BP / 'scripts' / 'crown.js').exists(), 'Crown manager missing')
+structure_path = BP / 'structures' / 'olympus' / 'hall_of_eight.mcstructure'
+check(structure_path.is_file() and structure_path.stat().st_size > 10000, 'Bedrock temple structure missing')
 check((BP / 'functions' / 'olympus' / 'give_all.mcfunction').read_text().count('give @s ') == 8, 'Kit must contain eight relics')
 check('system.afterEvents.scriptEventReceive' in script, 'Admin script events disconnected')
 check('system.runInterval' in script and 'entityHitEntity' in script, 'Gameplay event loop missing')
@@ -74,5 +85,6 @@ with zipfile.ZipFile(OUT) as archive:
     check(archive.testzip() is None, 'ZIP CRC failure')
     names = set(archive.namelist())
     check('behavior_pack/manifest.json' in names and 'resource_pack/manifest.json' in names, 'Nested or missing pack root')
+    check('behavior_pack/structures/olympus/hall_of_eight.mcstructure' in names, 'Temple was not bundled')
     check(len(names) == len(set(names)), 'Duplicate ZIP entries')
 print(f'PASS: manifests, UUIDs, {len(GODS)} relics, functions, textures, JS syntax, rule tests, ZIP. Built {OUT} ({OUT.stat().st_size:,} bytes)')

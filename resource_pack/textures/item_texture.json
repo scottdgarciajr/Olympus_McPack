@@ -28,6 +28,15 @@
     },
     "olympus_mountain": {
       "textures": "textures/items/mountain_sigil"
+    },
+    "olympus_temple_seal": {
+      "textures": "textures/items/temple_seal"
+    },
+    "olympus_crown": {
+      "textures": "textures/items/crown"
+    },
+    "olympus_crown_control": {
+      "textures": "textures/items/crown_control"
     }
   }
 }

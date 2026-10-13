@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:crown_control",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Seal of Divine Authority"
+      },
+      "minecraft:icon": "olympus_crown_control",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Open Crown Menu",
+      "olympus:relic_use": {}
+    }
+  }
+}

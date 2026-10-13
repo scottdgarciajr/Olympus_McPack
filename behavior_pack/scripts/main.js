@@ -3,6 +3,7 @@ import { ActionFormData } from '@minecraft/server-ui';
 import { CONFIG } from './config.js';
 import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, divineOreDrop, stockMissingRelics } from './rules.js';
 import { FLAIR, flairPoints } from './flair.js';
+import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl } from './crown.js';
 
 const GODS = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus'];
 const TITLES = {
@@ -34,7 +35,24 @@ const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigu
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'jump_boost', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '1.9.0';
+const PACK_VERSION = '2.1.2';
+const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
+const TEMPLE_ALTARS = {
+  hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
+  ares: [5, 5, 20], apollo: [27, 5, 20], hephaestus: [5, 5, 27], dionysus: [27, 5, 27]
+};
+const OFFERINGS = {
+  hermes: ['minecraft:feather', 8], zeus: ['minecraft:copper_ingot', 1],
+  poseidon: ['minecraft:cod', 3], hades: ['minecraft:bone', 4],
+  ares: ['minecraft:stone_sword', 1], apollo: ['minecraft:bow', 1],
+  hephaestus: ['minecraft:furnace', 1], dionysus: ['minecraft:sweet_berries', 3]
+};
+const WEAKNESSES = {
+  hermes: 'Weakness III', zeus: 'Mining Fatigue II', poseidon: 'Slowness III and Weakness III in Nether or desert',
+  hades: 'Slowness III and Weakness III by day', ares: 'Slowness III',
+  apollo: 'Weakness III and Mining Fatigue II outside direct sunlight',
+  hephaestus: 'Weakness III', dionysus: 'Rising Nausea and possible Blindness as madness stacks'
+};
 const NEW_MOUNTAIN_HEIGHT = 24;
 const MOUNTAIN_RADIUS = 31;
 const lastRelicUse = new Map();
@@ -46,6 +64,7 @@ const poseidonTrailTick = new Map();
 const poseidonFallGuardTick = new Map();
 const dionysusTargetCooldowns = new Map();
 const warnedFlair = new Set();
+const godPenalties = new Map();
 const PERSONAL_TOOLS = {
   poseidon: ['minecraft:trident', '§bPoseidon’s Tidecaller'],
   apollo: ['minecraft:bow', '§eApollo’s Solar Bow'],
@@ -81,11 +100,28 @@ function owners(god) {
 }
 const owner = (god) => owners(god)[0] || '';
 const now = () => Date.now();
+configureCrown({ role, temple: () => temple(), offeringCount: (p,id) => offeringCount(p,id), takeOffering: (p,id,n) => takeOffering(p,id,n), weather, setWeather: value => { currentWeather = value; world.setDynamicProperty(key('weather'), value); }, fail });
 const nameOf = (god) => god.charAt(0).toUpperCase() + god.slice(1);
 function tell(player, message) { player.sendMessage(prefix + message); }
 function fail(e) { console.warn(`[Olympus] ${e?.stack || e}`); }
 function effect(entity, id, seconds, amplifier = 0) {
   entity.addEffect(id, seconds * 20, { amplifier, showParticles: false });
+}
+function godPenalty(player, id, seconds, amplifier = 0) {
+  if (crowned(player) && role(player) !== 'zeus') return;
+  effect(player, id, seconds, amplifier);
+  godPenalties.set(`${player.id}:${id}`, { amplifier, tick: system.currentTick });
+}
+function suppressOldPenalties(player) {
+  if (!crowned(player) || role(player) === 'zeus') return;
+  for (const id of ['weakness', 'slowness', 'mining_fatigue', 'nausea', 'blindness']) {
+    const key = `${player.id}:${id}`;
+    const tracked = godPenalties.get(key);
+    if (!tracked) continue;
+    const active = player.getEffect(id);
+    if (active?.amplifier === tracked.amplifier && system.currentTick - tracked.tick < 120) player.removeEffect(id);
+    godPenalties.delete(key);
+  }
 }
 function showFlair(player, god, full = false) {
   const design = FLAIR[god];
@@ -239,7 +275,7 @@ function startCooldown(player, ability) {
     player.setDynamicProperty(key(`cd_${ability}`), undefined);
     return;
   }
-  player.setDynamicProperty(key(`cd_${ability}`), now() + CONFIG.cooldownSeconds[ability] * 1000);
+  player.setDynamicProperty(key(`cd_${ability}`), now() + crownCooldownSeconds(player, CONFIG.cooldownSeconds[ability]) * 1000);
 }
 function mountain() {
   const raw = world.getDynamicProperty(key('mountain'));
@@ -293,17 +329,207 @@ function claim(player, god) {
   updatePlayer(player);
   showFlair(player, god, true);
 }
+function temple() {
+  const raw = world.getDynamicProperty(key('temple'));
+  if (typeof raw !== 'string') return undefined;
+  try { return JSON.parse(raw); } catch { return undefined; }
+}
+function reservation(god) {
+  const raw = world.getDynamicProperty(key(`reservation_${god}`));
+  if (typeof raw !== 'string') return undefined;
+  try {
+    const value = JSON.parse(raw);
+    if (value.until > now()) return value;
+  } catch {}
+  world.setDynamicProperty(key(`reservation_${god}`), undefined);
+  return undefined;
+}
+function offeringCount(player, type) {
+  const bag = player.getComponent('minecraft:inventory')?.container;
+  if (!bag) return 0;
+  let total = 0;
+  for (let slot = 0; slot < bag.size; slot++) {
+    const item = bag.getItem(slot);
+    if (item?.typeId === type) total += item.amount;
+  }
+  return total;
+}
+function takeOffering(player, type, count) {
+  const bag = player.getComponent('minecraft:inventory')?.container;
+  if (!bag || offeringCount(player, type) < count) return false;
+  for (let slot = 0; slot < bag.size && count > 0; slot++) {
+    const item = bag.getItem(slot);
+    if (item?.typeId !== type) continue;
+    const used = Math.min(count, item.amount);
+    if (used === item.amount) bag.setItem(slot, undefined);
+    else { item.amount -= used; bag.setItem(slot, item); }
+    count -= used;
+  }
+  return count === 0;
+}
+function atTempleAltar(player, god) {
+  const t = temple();
+  if (!t || player.dimension.id !== (t.dimension || 'minecraft:overworld')) return false;
+  const [dx, dy, dz] = TEMPLE_ALTARS[god];
+  const p = player.location;
+  return Math.abs(p.x - (t.x + dx + 0.5)) <= 5 && Math.abs(p.y - (t.y + dy)) <= 4 &&
+    Math.abs(p.z - (t.z + dz + 0.5)) <= 5;
+}
+function showTempleAltar(player, god) {
+  if (!atTempleAltar(player, god)) return;
+  const [type, count] = OFFERINGS[god];
+  const r = reservation(god);
+  const claimed = owner(god);
+  const offer = `${count} ${type.replace('minecraft:', '').replaceAll('_', ' ')}`;
+  const state = claimed ? `Claimed by ${claimed}` : r ? `Reserved by ${r.name} for ${Math.ceil((r.until-now())/60000)} more minute(s)` : 'Available';
+  const form = new ActionFormData().title(`§6${nameOf(god)} — ${TITLES[god]}`)
+    .body(`Abilities: ${DESCRIPTIONS[god]}\n\nWeakness: ${WEAKNESSES[god]}\nOffering: ${offer}\n${state}\n\nRelic: ${CONTROLS[god]}`);
+  if (!claimed && !role(player)) form.button(r?.name === player.name ? `Offer ${offer} and claim` : r ? 'Reserved' : 'Reserve for 10 minutes');
+  else form.button('Close');
+  form.show(player).then(result => {
+    if (result.canceled || result.selection !== 0 || !atTempleAltar(player, god)) return;
+    if (owner(god) || role(player)) { tell(player, 'This god is unavailable.'); return; }
+    const active = reservation(god);
+    if (!active) {
+      const other = GODS.find(g => reservation(g)?.name === player.name);
+      if (other) { tell(player, `You already reserved ${nameOf(other)}.`); return; }
+      world.setDynamicProperty(key(`reservation_${god}`), JSON.stringify({ name: player.name, until: now() + 600000 }));
+      tell(player, `${nameOf(god)} is yours for 10 minutes. Bring ${offer} back to this altar.`);
+    } else if (active.name === player.name) {
+      if (!takeOffering(player, type, count)) { tell(player, `You need ${offer} in your inventory.`); return; }
+      claim(player, god);
+      world.setDynamicProperty(key(`reservation_${god}`), undefined);
+    } else tell(player, `${nameOf(god)} is reserved by ${active.name}.`);
+  }).catch(fail);
+}
+const NATURAL_SURFACE = new Set(['minecraft:grass_block', 'minecraft:dirt', 'minecraft:stone', 'minecraft:sand',
+  'minecraft:red_sand', 'minecraft:gravel', 'minecraft:coarse_dirt', 'minecraft:podzol', 'minecraft:mycelium',
+  'minecraft:snow', 'minecraft:deepslate', 'minecraft:clay']);
+const NATURAL_PLANTS = new Set(['minecraft:short_grass', 'minecraft:tall_grass', 'minecraft:tallgrass',
+  'minecraft:fern', 'minecraft:large_fern', 'minecraft:double_plant', 'minecraft:deadbush',
+  'minecraft:poppy', 'minecraft:dandelion', 'minecraft:azure_bluet', 'minecraft:oxeye_daisy',
+  'minecraft:cornflower', 'minecraft:allium', 'minecraft:blue_orchid', 'minecraft:lily_of_the_valley',
+  'minecraft:torchflower', 'minecraft:sunflower', 'minecraft:snow_layer']);
+function* checkTempleSite(dimension, x, z) {
+  let low = Infinity, high = -Infinity;
+  for (let dx = 0; dx < TEMPLE_SIZE.x; dx++) {
+    for (let dz = 0; dz < TEMPLE_SIZE.z; dz++) {
+      let top = dimension.getTopmostBlock({ x: x + dx, z: z + dz });
+      for (let step = 0; top && NATURAL_PLANTS.has(top.typeId) && step < 3; step++)
+        top = dimension.getBlock({ x: x + dx, y: top.location.y - 1, z: z + dz });
+      if (!top || !NATURAL_SURFACE.has(top.typeId)) return undefined;
+      low = Math.min(low, top.location.y);
+      high = Math.max(high, top.location.y);
+    }
+    yield;
+  }
+  if (high - low > 3 || high < -50 || high > 290) return undefined;
+  // The entire volume above the highest natural surface must be empty.
+  for (let dx = 0; dx < TEMPLE_SIZE.x; dx++) {
+    for (let dz = 0; dz < TEMPLE_SIZE.z; dz++) {
+      for (let dy = 0; dy < TEMPLE_SIZE.y; dy++) {
+        const block = dimension.getBlock({ x: x + dx, y: high + 1 + dy, z: z + dz });
+        if (!block || (!block.isAir && !NATURAL_PLANTS.has(block.typeId))) return undefined;
+      }
+    }
+    yield;
+  }
+  return { x, y: high + 1, z };
+}
+let templeBuilding = false;
+function giveTempleSeal(player) {
+  if (offeringCount(player, 'olympus:temple_seal') === 0) giveItem(player, new ItemStack('olympus:temple_seal', 1));
+  tell(player, 'A Hall Placement Seal is ready. Use it where you want the Hall centered; it replaces blocks in a 33×15×33 area.');
+}
+function placeTemple(dimension, site) {
+  world.structureManager.place('olympus:hall_of_eight', dimension, site, { includeBlocks: true, includeEntities: false });
+  world.setDynamicProperty(key('temple'), JSON.stringify({ ...site, dimension: dimension.id }));
+  world.sendMessage(prefix + `Hall of Eight Gods placed in ${dimension.id} at ${site.x}, ${site.y}, ${site.z}.`);
+}
+function placeTempleWithSeal(player) {
+  if (temple()) { tell(player, 'The Hall of Eight Gods is already placed.'); return; }
+  if (templeBuilding) { tell(player, 'Temple placement is already running.'); return; }
+  templeBuilding = true;
+  const dimension = player.dimension;
+  const site = { x: Math.floor(player.location.x) - 16, y: Math.floor(player.location.y), z: Math.floor(player.location.z) - 16 };
+  system.runJob((function* () {
+    try {
+      if (site.y < dimension.heightRange.min || site.y + TEMPLE_SIZE.y > dimension.heightRange.max) {
+        tell(player, 'This height cannot fit the 15-block-tall Hall. Move up or down and use the seal again.');
+        return;
+      }
+      yield;
+      placeTemple(dimension, site);
+      player.teleport({ x: site.x + 16.5, y: site.y + 3, z: site.z + 16.5 }, { dimension });
+    } catch (e) { fail(e); tell(player, `Seal placement failed: ${e?.name || 'Error'}: ${String(e?.message || e).slice(0, 160)}`); }
+    finally { templeBuilding = false; }
+  })());
+}
+function setupTemple(player) {
+  if (temple()) { tell(player, 'The Hall of Eight Gods is already placed.'); return; }
+  if (templeBuilding) { tell(player, 'Temple site search is already running.'); return; }
+  if (player.dimension.id !== 'minecraft:overworld') { tell(player, 'Run setup in the Overworld.'); return; }
+  templeBuilding = true;
+  tell(player, 'Searching for a clear natural site near world spawn. Keep the spawn area loaded.');
+  system.runJob((function* () {
+    let lastIssue = '';
+    try {
+      const spawn = world.getDefaultSpawnLocation();
+      const dimension = world.getDimension('overworld');
+      try { dimension.runCommand('tickingarea remove olympus_setup_temp'); } catch {}
+      if (!world.structureManager.getPackStructureIds().includes('olympus:hall_of_eight')) {
+        tell(player, 'The Hall structure is missing from the active behavior pack. Reimport the current add-on and activate it in this world.');
+        return;
+      }
+      const candidates = [];
+      for (const distance of [48, 80, 112]) for (const [ox, oz] of [
+        [distance, 0], [-distance-32, 0], [0, distance], [0, -distance-32],
+        [distance, distance], [-distance-32, distance], [distance, -distance-32], [-distance-32, -distance-32]
+      ]) candidates.push([ox, oz]);
+      for (const [ox, oz] of candidates) {
+        const x = Math.floor(spawn.x) + ox, z = Math.floor(spawn.z) + oz;
+        const areaName = 'olympus_setup_temp';
+        let areaAdded = false;
+        try {
+          // Site probes outside the player's simulation distance need their own
+          // temporary ticking area; otherwise getTopmostBlock throws immediately.
+          dimension.runCommand(`tickingarea add circle ${x+16} ${Math.floor(spawn.y)} ${z+16} 2 ${areaName} true`);
+          areaAdded = true;
+          for (let ticks = 0; ticks < 20; ticks++) yield;
+          const probe = checkTempleSite(dimension, x, z);
+          let step = probe.next();
+          while (!step.done) { yield; step = probe.next(); }
+          if (!step.value) continue;
+          const site = step.value;
+          placeTemple(dimension, site);
+          return;
+        } catch (e) {
+          lastIssue = `${e?.name || 'Error'}: ${e?.message || e}`;
+          fail(e);
+        } finally {
+          if (areaAdded) try { dimension.runCommand(`tickingarea remove ${areaName}`); }
+          catch (e) { fail(e); }
+        }
+      }
+      tell(player, lastIssue
+        ? `Temple setup could not finish: ${lastIssue.slice(0, 160)}. Try again near world spawn.`
+        : 'No safe 33×33 site was found within 144 blocks of spawn. Clear a flat natural area near spawn, then retry.');
+      giveTempleSeal(player);
+    } catch (e) { fail(e); tell(player, `Temple setup failed: ${e?.name || 'Error'}: ${String(e?.message || e).slice(0, 160)}`); giveTempleSeal(player); }
+    finally { templeBuilding = false; }
+  })());
+}
 function showChoice(player, god) {
   if (!atSummit(player) || role(player)) { tell(player, 'You must be unclaimed and at the summit to choose.'); return; }
   new ActionFormData().title(`§6${nameOf(god)} — ${TITLES[god]}`)
     .body(`${DESCRIPTIONS[god]}\n\n${CONTROLS[god]}`)
-    .button('Claim this god', `textures/items/${god}_relic`)
+    .button('Find this god at the Hall of Eight Gods', `textures/items/${god}_relic`)
     .button('Back to all gods')
     .show(player).then(result => {
       if (result.canceled) return;
       if (result.selection === 1) { showAltar(player); return; }
       if (result.selection !== 0 || !atSummit(player) || role(player)) return;
-      claim(player, god);
+      tell(player, 'Use /function olympus/setup to place the Hall near spawn, then visit its altar with the offering.');
     }).catch(fail);
 }
 function showAltar(player) {
@@ -485,40 +711,41 @@ function updateFlight(player) {
 function updatePlayer(player) {
   const god = role(player);
   if (!god) return;
+  suppressOldPenalties(player);
   const dim = player.dimension.id;
   const otherworld = dim === 'minecraft:nether' || dim === 'minecraft:the_end';
   try {
     switch (god) {
       case 'hermes':
         if (!hermesTurboTick.has(player.id)) effect(player, 'speed', 5, CONFIG.hermesSpeedAmplifier);
-        effect(player, 'weakness', 5, 2);
+        godPenalty(player, 'weakness', 5, 2);
         if (hermesSlowfallEnabled(player)) effect(player, 'slow_falling', 5);
         break;
       case 'zeus':
-        effect(player, 'mining_fatigue', 5, 1);
+        godPenalty(player, 'mining_fatigue', 5, 1);
         if (inRain(player)) effect(player, 'strength', 5, 3);
         break;
       case 'poseidon':
         if (player.isInWater || inRain(player)) { effect(player, 'conduit_power', 5); effect(player, 'dolphins_grace', 5, 2); }
         if (dim === 'minecraft:nether' || (dim === 'minecraft:overworld' && player.dimension.getBiome(player.location).id === 'minecraft:desert')) {
-          effect(player, 'slowness', 5, 2); effect(player, 'weakness', 5, 2);
+          godPenalty(player, 'slowness', 5, 2); godPenalty(player, 'weakness', 5, 2);
         }
         break;
       case 'hades':
         effect(player, 'fire_resistance', 5); effect(player, 'night_vision', 15);
-        if (dim === 'minecraft:overworld' && daylight()) { effect(player, 'slowness', 5, 2); effect(player, 'weakness', 5, 2); }
+        if (dim === 'minecraft:overworld' && daylight()) { godPenalty(player, 'slowness', 5, 2); godPenalty(player, 'weakness', 5, 2); }
         if (otherworld) { effect(player, 'strength', 5, 3); effect(player, 'haste', 5, 3); }
         break;
       case 'ares':
         effect(player, 'strength', 5, aresStrengthAmplifier(player.getDynamicProperty(key('rageUntil')), now()));
         effect(player, 'resistance', 5, aresResistanceAmplifier(player.getDynamicProperty(key('rageUntil')), now()));
-        effect(player, 'slowness', 5, 2);
+        godPenalty(player, 'slowness', 5, 2);
         break;
       case 'apollo':
-        if (!sunlight(player)) { effect(player, 'weakness', 5, 2); effect(player, 'mining_fatigue', 5, 1); }
+        if (!sunlight(player)) { godPenalty(player, 'weakness', 5, 2); godPenalty(player, 'mining_fatigue', 5, 1); }
         break;
       case 'hephaestus':
-        effect(player, 'haste', 5, 3); effect(player, 'weakness', 5, 2); break;
+        effect(player, 'haste', 5, 3); godPenalty(player, 'weakness', 5, 2); break;
     }
   } catch (e) { if (CONFIG.debug) fail(e); }
 }
@@ -606,14 +833,16 @@ function special(player, god, sneaking) {
   } catch (e) { fail(e); tell(player, 'The ability failed. Ask the operator to check the content log.'); }
 }
 function useRelic(player, id, sneaking = player.isSneaking) {
-  if (id !== 'olympus:mountain_sigil' && !(id.startsWith('olympus:') && id.endsWith('_relic'))) return;
+  if (id !== 'olympus:crown_control' && id !== 'olympus:mountain_sigil' && id !== 'olympus:temple_seal' && !(id.startsWith('olympus:') && id.endsWith('_relic'))) return;
   const last = lastRelicUse.get(player.id) || 0;
   if (now() - last < 1500) return;
   lastRelicUse.set(player.id, now());
+  if (id === 'olympus:temple_seal') { placeTempleWithSeal(player); return; }
+  if (id === 'olympus:crown_control') { crownControl(player); return; }
   if (id === 'olympus:mountain_sigil') { summonMountain(player); return; }
   const god = id.startsWith('olympus:') && id.endsWith('_relic') ? id.slice(8, -6) : '';
   if (!GODS.includes(god)) return;
-  if (!role(player)) claim(player, god);
+  if (!role(player)) tell(player, `Claim ${nameOf(god)} at its temple altar with the required offering.`);
   else if (role(player) === god) special(player, god, sneaking);
   else tell(player, `You are already ${nameOf(role(player))}. An operator must reset your role.`);
 }
@@ -704,6 +933,20 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const m = mountain();
   const b = event.block.location;
   const player = event.player;
+  const t = temple();
+  if (t && player.dimension.id === (t.dimension || 'minecraft:overworld') && atThrone(b) && event.block.typeId === 'minecraft:sea_lantern') {
+    event.cancel = true;
+    system.run(() => { try { showThrone(player); } catch (e) { fail(e); } });
+    return;
+  }
+  if (t && player.dimension.id === (t.dimension || 'minecraft:overworld') && event.block.typeId === 'minecraft:enchanting_table') {
+    const god = GODS.find(g => { const [dx, dy, dz] = TEMPLE_ALTARS[g]; return b.x === t.x+dx && b.y === t.y+dy && b.z === t.z+dz; });
+    if (god) {
+      event.cancel = true;
+      system.run(() => { try { showTempleAltar(player, god); } catch (e) { fail(e); } });
+      return;
+    }
+  }
   if (m && player.dimension.id === m.dimension && b.x === m.x + 3 && b.y === m.y + (m.height || 16) + 1 &&
       b.z === m.z && event.block.typeId === 'minecraft:enchanting_table') {
     event.cancel = true;
@@ -711,7 +954,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     return;
   }
   const itemId = event.itemStack?.typeId || '';
-  if (itemId !== 'olympus:mountain_sigil' && !GODS.some(god => itemId === `olympus:${god}_relic`)) return;
+  if (itemId !== 'olympus:mountain_sigil' && itemId !== 'olympus:temple_seal' && itemId !== 'olympus:crown_control' && !GODS.some(god => itemId === `olympus:${god}_relic`)) return;
   event.cancel = true;
   const sneaking = player.isSneaking;
   system.run(() => { try { useRelic(player, itemId, sneaking); } catch (e) { fail(e); } });
@@ -735,9 +978,9 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
     const buffLevel = Math.min(3, (player.getEffect(buff)?.amplifier || 0) + 1);
     effect(target, debuff, 180, debuffLevel);
     effect(player, buff, 180, buffLevel);
-    effect(player, 'nausea', 25 + stacks * 8, Math.min(4, Math.floor(stacks / 2)));
+    godPenalty(player, 'nausea', 25 + stacks * 8, Math.min(4, Math.floor(stacks / 2)));
     const blinded = Math.random() < dionysusBlindnessChance(stacks);
-    if (blinded) effect(player, 'blindness', 4 + Math.floor(stacks / 2));
+    if (blinded) godPenalty(player, 'blindness', 4 + Math.floor(stacks / 2));
     player.setDynamicProperty(key('madnessStacks'), stacks);
     player.setDynamicProperty(key('madnessLast'), now());
     safeTeleport(player);
@@ -791,23 +1034,31 @@ world.afterEvents.weatherChange.subscribe((event) => {
   currentWeather = event.newWeather;
   world.setDynamicProperty(key('weather'), currentWeather);
 });
+world.afterEvents.entityDie.subscribe((event) => { try { transferOnDeath(event); } catch (e) { fail(e); } });
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (!event.id.startsWith('olympus:')) return;
   const player = event.sourceEntity;
   if (!player || player.typeId !== 'minecraft:player') return;
   try {
     if (event.id === 'olympus:reset') reset(player);
+    if (event.id === 'olympus:setup') setupTemple(player);
+    if (event.id === 'olympus:crown_setup') { if (!temple()) setupTemple(player); crownSetup(player); }
+    if (event.id === 'olympus:crown_status') showStatus(player);
+    if (event.id === 'olympus:crown_reset') resetCrown(player);
+    if (event.id === 'olympus:crown_recover') recoverCrown(player);
+    if (event.id === 'olympus:crown_glory') showLeaderboard(player);
+    if (event.id === 'olympus:crown_help') crownHelp(player);
     if (event.id === 'olympus:assign') {
       const god = event.message.trim().toLowerCase();
       if (!GODS.includes(god)) { tell(player, `Unknown god: ${god}`); return; }
       claim(player, god);
     }
     if (event.id === 'olympus:status') {
-      tell(player, `v${PACK_VERSION} script active. Your role: ${role(player) || 'none'}. Mountain: ${mountain() ? 'built' : 'not built'}. Claimed: ${GODS.filter(g => owner(g)).map(nameOf).join(', ') || 'none'}.`);
+      tell(player, `v${PACK_VERSION} script active. Your role: ${role(player) || 'none'}. Temple: ${temple() ? 'placed' : 'not placed'}. Mountain: ${mountain() ? 'built' : 'not built'}. Claimed: ${GODS.filter(g => owner(g)).map(nameOf).join(', ') || 'none'}.`);
       if (role(player) === 'hermes') tell(player, `Your Slow Falling is ${hermesSlowfallEnabled(player) ? 'ON' : 'OFF'}. Sneak-use your relic to toggle it.`);
       if (role(player) === 'poseidon') tell(player, `Your Tidal Sprint is ${poseidonSpeedEnabled(player) ? 'ON' : 'OFF'}. Sneak-use your relic to toggle it.`);
     }
-    if (event.id === 'olympus:controls') tell(player, role(player) ? CONTROLS[role(player)] : 'Use any god relic wherever you are, or climb Olympus and choose at the altar.');
+    if (event.id === 'olympus:controls') tell(player, role(player) ? CONTROLS[role(player)] : 'Reserve a god at its temple altar, gather the offering, and return within 10 minutes.');
     if (event.id === 'olympus:upgrade_mountain') {
       const old = mountain();
       if (!old) { tell(player, 'No Mount Olympus has been summoned yet.'); return; }
@@ -831,7 +1082,7 @@ world.afterEvents.playerSpawn.subscribe((event) => {
   system.runTimeout(() => {
     try {
       const god = role(event.player);
-      tell(event.player, god ? `Welcome back, ${nameOf(god)}.` : 'Welcome! Claim a god by using its relic anywhere, or choose at the Olympian Altar.');
+      tell(event.player, god ? `Welcome back, ${nameOf(god)}.` : 'Welcome! Visit the Hall of Eight Gods, reserve an altar, and return with its offering.');
       if (god) tell(event.player, CONTROLS[god]);
     }
     catch (e) { if (CONFIG.debug) fail(e); }
@@ -853,6 +1104,7 @@ system.runInterval(() => {
 }, 40);
 system.runInterval(() => {
   for (const player of world.getAllPlayers()) {
+    suppressOldPenalties(player);
     updateFlight(player);
     if (role(player) === 'hermes') { hermesFallProtection(player); hermesMotion(player); }
     if (role(player) === 'poseidon') { poseidonMotion(player); poseidonFallProtection(player); }
@@ -868,3 +1120,7 @@ system.runInterval(() => {
   const current = now();
   for (const [targetKey, expiry] of dionysusTargetCooldowns) if (expiry <= current) dionysusTargetCooldowns.delete(targetKey);
 }, 400);
+system.runInterval(() => { try { crownTick(); } catch (e) { fail(e); } }, 100);
+system.runInterval(() => { try { cleanCrownDrops(); } catch (e) { if (CONFIG.debug) fail(e); } }, 400);
+system.runInterval(() => { try { crownFlair(); } catch (e) { if (CONFIG.debug) fail(e); } }, 40);
+system.runInterval(() => { try { revealCrown(); } catch (e) { fail(e); } }, 6000);

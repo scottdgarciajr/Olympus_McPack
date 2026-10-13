@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:temple_seal",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Hall Placement Seal"
+      },
+      "minecraft:icon": "olympus_temple_seal",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Place Hall of Eight Gods",
+      "olympus:relic_use": {}
+    }
+  }
+}

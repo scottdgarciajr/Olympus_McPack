@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-VERSION = [1, 9, 0]
+VERSION = [2, 1, 2]
 GODS = {
     'hermes': ('Hermes Winged Relic', '#f4cf58'),
     'zeus': ('Zeus Thunder Relic', '#f4eb7b'),
@@ -133,15 +133,98 @@ d = ImageDraw.Draw(im)
 d.polygon([(2, 29), (16, 3), (30, 29)], fill='#a8afbb', outline='#3a3b50', width=2)
 d.polygon([(11, 13), (16, 3), (21, 13), (17, 11), (14, 15)], fill='#ffffff')
 im.save(RP / 'textures' / 'items' / 'mountain_sigil.png')
+write_json(BP / 'items' / 'temple_seal.json', {
+    'format_version': '1.21.90',
+    'minecraft:item': {
+        'description': {'identifier': 'olympus:temple_seal', 'menu_category': {'category': 'items'}},
+        'components': {
+            'minecraft:display_name': {'value': 'Hall Placement Seal'},
+            'minecraft:icon': 'olympus_temple_seal', 'minecraft:max_stack_size': 1,
+            'minecraft:interact_button': 'Place Hall of Eight Gods', 'olympus:relic_use': {}
+        }
+    }
+})
+texture_data['olympus_temple_seal'] = {'textures': 'textures/items/temple_seal'}
+im = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
+d = ImageDraw.Draw(im)
+d.rectangle((3, 9, 28, 26), fill='#ede6d4', outline='#9b792e', width=2)
+d.polygon([(2, 10), (16, 2), (30, 10)], fill='#e5c66e', outline='#84601d')
+for x in (7, 13, 19, 25):
+    d.rectangle((x-1, 12, x+1, 24), fill='#d7d0bd')
+d.rectangle((2, 25, 29, 28), fill='#b7903c')
+im.save(RP / 'textures' / 'items' / 'temple_seal.png')
+write_json(BP / 'items' / 'crown.json', {
+    'format_version': '1.21.90',
+    'minecraft:item': {'description': {'identifier': 'olympus:crown', 'menu_category': {'category': 'equipment'}},
+      'components': {'minecraft:display_name': {'value': 'Crown of Olympus'},
+        'minecraft:icon': 'olympus_crown', 'minecraft:max_stack_size': 1,
+        'minecraft:wearable': {'slot': 'slot.armor.head', 'protection': 1},
+        'minecraft:glint': True}}
+})
+write_json(BP / 'items' / 'crown_control.json', {
+    'format_version': '1.21.90',
+    'minecraft:item': {'description': {'identifier': 'olympus:crown_control', 'menu_category': {'category': 'items'}},
+      'components': {'minecraft:display_name': {'value': 'Seal of Divine Authority'},
+        'minecraft:icon': 'olympus_crown_control', 'minecraft:max_stack_size': 1,
+        'minecraft:interact_button': 'Open Crown Menu', 'olympus:relic_use': {}}}
+})
+texture_data['olympus_crown'] = {'textures': 'textures/items/crown'}
+texture_data['olympus_crown_control'] = {'textures': 'textures/items/crown_control'}
+im = Image.new('RGBA', (32, 32), (0, 0, 0, 0))
+d = ImageDraw.Draw(im)
+d.polygon([(3, 11), (10, 19), (16, 6), (22, 19), (29, 11), (26, 27), (6, 27)], fill='#edbb35', outline='#69420b', width=2)
+d.rectangle((7, 21, 25, 25), fill='#ffe787')
+for x, y in ((9, 17), (16, 13), (23, 17)):
+    d.ellipse((x-2, y-2, x+2, y+2), fill='#70c7e7', outline='#245878')
+im.save(RP / 'textures' / 'items' / 'crown.png')
+im.save(RP / 'textures' / 'items' / 'crown_control.png')
+model_texture = Image.new('RGBA', (32, 32), '#e6ae29')
+td = ImageDraw.Draw(model_texture)
+td.rectangle((0, 0, 31, 4), fill='#fff1a0')
+td.rectangle((0, 5, 31, 8), fill='#8d5817')
+td.rectangle((0, 9, 31, 12), fill='#d4931f')
+td.rectangle((0, 13, 31, 18), fill='#69b8df')
+model_texture.save(RP / 'textures' / 'items' / 'crown_worn.png')
+write_json(RP / 'attachables' / 'crown.player.json', {
+    'format_version': '1.19.80',
+    'minecraft:attachable': {'description': {
+        'identifier': 'olympus:crown.player',
+        'item': {'olympus:crown': "query.is_owner_identifier_any('minecraft:player')"},
+        'materials': {'default': 'armor', 'enchanted': 'armor_enchanted'},
+        'textures': {'default': 'textures/items/crown_worn', 'enchanted': 'textures/misc/enchanted_item_glint'},
+        'geometry': {'default': 'geometry.olympus_crown'},
+        'scripts': {'parent_setup': 'variable.helmet_layer_visible = 0.0;'},
+        'render_controllers': ['controller.render.armor']}}
+})
+write_json(RP / 'models' / 'entity' / 'crown.geo.json', {
+    'format_version': '1.16.0',
+    'minecraft:geometry': [{'description': {'identifier': 'geometry.olympus_crown',
+        'texture_width': 32, 'texture_height': 32, 'visible_bounds_width': 2,
+        'visible_bounds_height': 3.5, 'visible_bounds_offset': [0, 1.25, 0]},
+      'bones': [{'name': 'crown', 'pivot': [0, 0, 0],
+        'binding': 'q.item_slot_to_bone_name(context.item_slot)',
+        'cubes': [
+            {'origin': [-5, 30, -5], 'size': [10, 2, 1], 'uv': [0, 0]},
+            {'origin': [-5, 30, 4], 'size': [10, 2, 1], 'uv': [0, 0]},
+            {'origin': [-5, 30, -4], 'size': [1, 2, 8], 'uv': [0, 0]},
+            {'origin': [4, 30, -4], 'size': [1, 2, 8], 'uv': [0, 0]},
+            {'origin': [-1, 32, -5], 'size': [2, 3, 1], 'uv': [0, 0]},
+            {'origin': [-5, 32, -5], 'size': [2, 2, 1], 'uv': [0, 0]},
+            {'origin': [3, 32, -5], 'size': [2, 2, 1], 'uv': [0, 0]}]}]}]
+})
 write_json(RP / 'textures' / 'item_texture.json', {'resource_pack_name': 'Olympus SMP', 'texture_name': 'atlas.items', 'texture_data': texture_data})
 
 functions = BP / 'functions' / 'olympus'
 functions.mkdir(parents=True, exist_ok=True)
-(functions / 'give_all.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus kit: clear eight inventory slots. Use a relic anywhere to claim; if air use does nothing, aim at any block and use. Overflow may drop at your feet."}]}\n' + '\n'.join(f'give @s olympus:{g}_relic 1' for g in GODS) + '\n', encoding='utf-8')
+(functions / 'give_all.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus relic kit for operators. Players claim gods at the Hall of Eight Gods altars with offerings. Overflow may drop at your feet."}]}\n' + '\n'.join(f'give @s olympus:{g}_relic 1' for g in GODS) + '\n', encoding='utf-8')
 (functions / 'summon_mountain.mcfunction').write_text('give @s olympus:mountain_sigil 1\ntellraw @s {"rawtext":[{"text":"Use the sigil in a large clear area in the Overworld. Mount Olympus rises 33 blocks east of you."}]}\n', encoding='utf-8')
-(functions / 'help.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus: /function olympus/give_all gives eight relics. Take one and use it anywhere to claim a god; if air-use does nothing, use it on any block. /function olympus/summon_mountain gives the mountain sigil. Olympus has a summit altar and stocked chest as another way to choose. /function olympus/controls shows role controls. /function olympus/status, /function olympus/reset, and /function olympus/upgrade_mountain are operator tools."}]}\n', encoding='utf-8')
+(functions / 'help.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus: /function olympus/setup searches near world spawn and places the Hall of Eight Gods. Interact with a god altar to reserve for 10 minutes, gather its offering, and return to claim. /function olympus/controls shows powers. /function olympus/status and /function olympus/reset are operator tools."}]}\n', encoding='utf-8')
+(functions / 'setup.mcfunction').write_text('scriptevent olympus:setup\n', encoding='utf-8')
 (functions / 'status.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus function layer loaded. Script diagnostic follows:"}]}\nscriptevent olympus:status\n', encoding='utf-8')
 (functions / 'reset.mcfunction').write_text('scriptevent olympus:reset\n', encoding='utf-8')
 (functions / 'controls.mcfunction').write_text('scriptevent olympus:controls\n', encoding='utf-8')
 (functions / 'upgrade_mountain.mcfunction').write_text('scriptevent olympus:upgrade_mountain\n', encoding='utf-8')
+for name in ('crown_setup', 'crown_status', 'crown_reset', 'crown_recover', 'crown_glory', 'crown_help'):
+    (functions / f'{name}.mcfunction').write_text(f'scriptevent olympus:{name}\n', encoding='utf-8')
+(functions / 'help.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus: /function olympus/setup places the Hall of Eight Gods. Reserve a god at its altar for 10 minutes, then return with its offering to claim. The center contains the Crown throne. /function olympus/crown_status and /function olympus/crown_help explain the Crown trial."}]}\n', encoding='utf-8')
 print('Generated pack assets and functions.')

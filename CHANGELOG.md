@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.0 — Crown of Olympus
+
+- Added a wearable Crown, visible model, Divine Authority seal, offering trial at the existing Hall center, persistent ownership, PvP transfer, holder reveals, and Glory leaderboard.
+- Added god penalty suppression and activation-time cooldown reduction for crowned non-Zeus players. Zeus keeps his existing storm rules; Poseidon's existing open-rain suite applies to natural and crowned rain.
+- Added persistent weather override and shared Authority cooldown, Crown recovery and reset functions, and included the throne in the one-command Hall setup.
+
 ## 1.9.0 — Final package
 
 - Removed Poseidon's permanent Slow Falling. While it rains or thunders, brief Resistance V protects him from fall damage without changing descent speed; the protection ends after landing or when the weather clears.
