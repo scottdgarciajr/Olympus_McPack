@@ -1,6 +1,6 @@
 # Olympus SMP
 
-A Minecraft **Bedrock Edition** add-on for the eight Olympian gods and the forbidden ninth god, Kratos. This download contains a behavior pack (the game rules) and a resource pack (the art). Install **both**. Current version: **2.7.2**. It requires Minecraft Bedrock 1.21.90 or newer. It is not a Java Edition mod.
+A Minecraft **Bedrock Edition** add-on for the eight Olympian gods and the forbidden ninth god, Kratos. This download contains a behavior pack (the game rules) and a resource pack (the art). Install **both**. Current version: **2.7.3**. It requires Minecraft Bedrock 1.21.90 or newer. It is not a Java Edition mod.
 
 ## Start here: add the pack to your world
 
@@ -9,7 +9,7 @@ A Minecraft **Bedrock Edition** add-on for the eight Olympian gods and the forbi
 3. For a **new world**, choose **Play → Create New → Create New World**. For an **existing world**, choose **Play**, then the pencil/edit button next to that world. In the world settings, open **Add-Ons → Behavior Packs → My Packs**, find **Olympus SMP Behavior**, and choose **Activate**. Check **Resource Packs → My Packs** and activate **Olympus SMP Resources** if it was not activated automatically. On a server or Realm, see the sections below.
 4. Turn on **Cheats** in the world settings so setup commands work. Cheats can disable achievements for that world. Enter the world as its owner or an operator.
 5. Open chat and run **`/function olympus/setup`**. This one command places the Hall, all god altars, the Crown throne, the forge, and Kratos's chamber beneath the Hall. The Hall is 33 × 15 × 33 blocks, with the lower chamber extending seven blocks underground; keep the area clear. The script searches for a safe site near world spawn. If it cannot find one, it gives you a **Hall Placement Seal**. Stand where you want the Hall centered and use the seal.
-6. Run **`/function olympus/status`**. It should say `v2.7.2 script active`. If it reports an older version, leave the world, open its pack settings, deactivate the older Olympus packs, activate the newly imported packs, and rejoin.
+6. Run **`/function olympus/status`**. It should say `v2.7.3 script active`. If it reports an older version, leave the world, open its pack settings, deactivate the older Olympus packs, activate the newly imported packs, and rejoin.
 
 ### First steps in the Hall
 
@@ -28,7 +28,7 @@ For a normal Survival world, claim Hephaestus at his altar and craft the portabl
 
 ## Updating an existing Olympus world
 
-Back up the world, close it, import the new `.mcaddon`, then edit that world's Behavior Packs and Resource Packs. Deactivate older Olympus versions and activate version 2.7.2 of both packs. Rejoin and check `/function olympus/status`. Existing god assignments, Crown ownership, cooldowns, Glory, and previously forged items are stored in the world. If the Hall was placed by an earlier pack, stand in the loaded Hall and run `/function olympus/setup` again to add the lower chamber. It leaves the existing upper Hall in place and opens a scaffolding entrance in its floor.
+Back up the world, close it, import the new `.mcaddon`, then edit that world's Behavior Packs and Resource Packs. Deactivate older Olympus versions and activate version 2.7.3 of both packs. Rejoin and check `/function olympus/status`. Existing god assignments, Crown ownership, cooldowns, Glory, and previously forged items are stored in the world. If the Hall was placed by an earlier pack, stand in the loaded Hall and run `/function olympus/setup` again to add the lower chamber. It leaves the existing upper Hall in place and opens a scaffolding entrance in its floor.
 
 ## World setup and Crown details
 

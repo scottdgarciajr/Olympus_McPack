@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.3 — Clear Crown throne checklist
+
+- The throne now lists the eight required item names with possession checkmarks, without tying items to gods or domains. The first-claim prompt and Crown help use the same neutral wording.
+
 ## 2.7.2 — Ability-earned Crown offerings and God Slayer progression
 
 - Replaced the crafted Crown offerings with resources each god is especially equipped to obtain: Creeper Head, Prismarine Crystals, Ominous Bottle, and Poisonous Potato. Hermes, Hades, Ares, and Hephaestus retain their ability-earned offerings.

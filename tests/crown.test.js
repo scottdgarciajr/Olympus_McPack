@@ -27,7 +27,7 @@ function crownHarness() {
   const api={role:p=>p.god,temple:()=>({x:0,y:0,z:0}),offeringCount:(_p,id)=>counts.get(id)||0,
     takeOffering:(_p,id,n)=>{if ((counts.get(id)||0)<n) return false;counts.set(id,counts.get(id)-n);return true;},fail:error=>{throw error;}};
   const script=new Function('world','system','ItemStack','EquipmentSlot','WeatherType','MolangVariableMap','ActionFormData','activateDominion','dismissDominion','dominionState','dominionTick','CONFIG','dragonVictoriesAvailable',
-    `${source}\nreturn {configureCrown,CROWN_OFFERINGS,duplicate};`);
+    `${source}\nreturn {configureCrown,CROWN_OFFERINGS,offeringsText,duplicate};`);
   const crown=script(world,{},ItemStack,slots,{},class {},class {},()=>{},()=>{},()=>{},()=>{}, {}, (wins,used)=>wins-(used||0));
   crown.configureCrown(api);
   props.set('olympus:crown_state',JSON.stringify({crowns:[{serial:1,ownerId:owner.id,ownerName:owner.name,ownerGod:owner.god}]}));
@@ -57,4 +57,14 @@ test('Only a current wearer can consent to a duplicate; their original Crown rem
   assert.equal(h.counts.get('minecraft:dragon_egg'),0);
   for (const offering of h.crown.CROWN_OFFERINGS) assert.equal(h.counts.get(offering.id),0);
   assert.equal(saved.dragonUses,1);
+});
+
+test('Throne checklist shows item names without god or domain hints',()=>{
+  const h=crownHarness();
+  const list=h.crown.offeringsText(h.owner);
+  assert.match(list,/Creeper Head/);
+  assert.match(list,/Ominous Bottle/);
+  assert.equal(list.split('\n').length,8);
+  for (const offering of h.crown.CROWN_OFFERINGS) assert.ok(!list.includes(offering.domain));
+  assert.doesNotMatch(list,/Hermes|Zeus|Poseidon|Hades|Ares|Apollo|Hephaestus|Dionysus|domain/i);
 });
