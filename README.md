@@ -1,6 +1,6 @@
 # Olympus SMP
 
-A Minecraft Bedrock Survival add-on for eight friends. Import **`dist/Olympus_SMP_FINAL.mcaddon`** (version 2.2.0), activate **Olympus SMP Behavior** and its linked resource pack, and enable cheats for setup commands. Requires Bedrock 1.21.90+ and stable `@minecraft/server` and `@minecraft/server-ui` 2.0.0.
+A Minecraft Bedrock Survival add-on for eight friends. Import **`dist/Olympus_SMP_FINAL.mcaddon`** (version 2.3.0), activate **Olympus SMP Behavior** and its linked resource pack, and enable cheats for setup commands. Requires Bedrock 1.21.90+ and stable `@minecraft/server` and `@minecraft/server-ui` 2.0.0.
 
 ## Quick setup
 
@@ -38,20 +38,28 @@ The older Mount Olympus mountain remains available with `/function olympus/summo
 
 | God | Passive buffs | Passive debuff | Ability or equipment |
 | --- | --- | --- | --- |
-| Hermes | Speed VI normally; Speed XIV plus scripted sprint momentum; fall protection | Weakness III | Use relic for a Divine Ender Pearl every **5 min**. Sneak-use toggles Slow Falling glide. |
+| Hermes | Speed VI normally; Speed XIV plus scripted sprint momentum; fall protection; optional Jump Boost II | Weakness III | Use relic for a Divine Ender Pearl every **5 min**. Sneak-use opens the Slow Falling and Divine Leap toggles. |
 | Zeus | Unrestricted flight in rain or thunder | Mining Fatigue II always | Aim at a block or enemy and use relic for lightning. Thunder lightning has a **5 sec** interval; clear weather retains its **3 min** cooldown. Sneak-use for **30 sec** of flight, unrestricted in rain or thunder. |
 | Poseidon | Strength II while submerged, Strength I in exposed rain, plus Conduit Power and Dolphin's Grace III in water or open rain; scripted movement and rain fall protection | Slowness III and Weakness III in Nether or desert | Sneak-use toggles Tidal Sprint; Tidecaller retains Riptide III and its boosted launch. |
-| Hades | Fire Resistance and Night Vision always; Strength I/Haste I at Overworld night; Strength IV/Haste IV in Nether or End | Slowness III and Weakness III only in direct Overworld daylight | Covered caves and buildings protect him from daylight debuffs. |
+| Hades | Fire Resistance and Night Vision always; Strength I/Haste I at Overworld night; Strength IV/Haste IV in Nether or End | Slowness III and Weakness III only in direct Overworld daylight | Covered caves and buildings protect him from daylight debuffs. Use the relic while standing in fire or soul fire to launch Hellfire (15 sec cooldown; 6 damage). |
 | Ares | Strength II and Resistance II | Slowness III | Strength V and Resistance III rage for **30 sec** on a **5 min** cooldown. |
-| Apollo | Solar Bow with Power V, Infinity I, Unbreaking III, plus **6 scripted arrow damage in direct sunlight** or 2 out of sunlight | Weakness III and Mining Fatigue II without direct sunlight | Daylight flight for **30 sec**, **3 min** cooldown. One arrow is given and must remain in inventory. |
+| Apollo | Solar Bow with Power V, Infinity I, Unbreaking III, plus **6 scripted arrow damage in direct sunlight** or 2 out of sunlight | Weakness III and Mining Fatigue II without direct sunlight | Relic menu: daylight flight for **30 sec** (3 min cooldown), arm one Solar Flare arrow (45 sec cooldown after impact), or use Oracle’s Sight (40-block radius, 8 sec reveal, 2 min cooldown). |
 | Hephaestus | Haste IV, Efficiency V and Divine Fortune IV pickaxe | Permanent Weakness III | The pickaxe has a **35% chance** for one bonus ore drop. Only Hephaestus can combine equipment at the Hall forge. |
-| Dionysus | Each melee hit on a new target adds a random level II self buff for 180 sec; further hits can raise existing buffs up to level IV. A Bone Meal stack refills automatically. | Madness rises to 10 stacks: longer, stronger Nausea, random teleportation, and an increasing chance of Blindness | The same hit gives that target a debuff for 180 sec and teleports Dionysus 8–16 blocks when a safe spot exists. **Different targets trigger instantly; the same target has a 3 sec cooldown.** Debuffs can coexist and strengthen up to level IV. |
+| Dionysus | Each melee hit on a new target adds a random level II self buff for 180 sec; further hits can raise existing buffs up to level IV. Successfully used Bone Meal replenishes one-for-one. | Madness rises to 10 stacks: longer, stronger Nausea, random teleportation, and an increasing chance of Blindness | The same hit gives that target a debuff for 180 sec and teleports Dionysus 8–16 blocks when a safe spot exists. **Different targets trigger instantly; the same target has a 3 sec cooldown.** Debuffs can coexist and strengthen up to level IV. |
 
 **Hermes:** Speed VI is always active. Hold sprint to enter Speed XIV with additional directional momentum targeting 1.3 blocks per tick, designed to outrun a very fast horse. Left/right input now maps to the correct strafing directions; release sprint or sneak for a slower pace. A bright gold trail appears while sprinting. Slow Falling starts on. Sneak-use can switch the constant glide off; a dangerous fall automatically reactivates protection during descent.
+
+**Divine Leap:** Sneak-use Hermes's relic and choose the Divine Leap toggle. It starts OFF, persists across death and restart, and applies Jump Boost II while enabled. Turning it off lets the short managed effect expire within roughly one second; external Jump Boost is not removed. The exact obstacle height depends on Bedrock movement and must be checked in game.
 
 **Poseidon:** Sneak-use the relic to toggle Tidal Sprint on or off. When on, movement in water or exposed land during rain targets 1.08 blocks per tick with correct left/right steering and a blue trail. It works in shallow water as well as while swimming. Conduit Power and Dolphin's Grace III apply in water or exposed rain even with Tidal Sprint off. During rain or thunder, falling applies brief Resistance V so landings do not deal fall damage without slowing the fall. The native Riptide III trident still requires water or rain; a successful launch receives an extra forward push. Nether and desert penalties counter the mobility advantage.
 
 **Zeus:** Lightning and flight each have a three-minute cooldown in clear weather. Thunder lightning has a separate persistent five-second interval; switching weather or transferring the Crown does not clear it. Rain retains the existing lightning behavior. Flight has no cooldown in rain or thunder, even under cover, and lasts 30 seconds per use. Zeus receives no role-specific Strength.
+
+**Apollo:** Use the relic to choose Sunflight, arm/disarm Solar Flare, or activate Oracle’s Sight. An armed Solar Flare marks only the next arrow fired from Apollo’s divine bow. On block or entity impact it creates a golden burst, blinds eligible targets within 3 blocks for 3 seconds, and deals up to 4 extra health points to nearby targets. The direct-hit target receives Apollo's normal scripted bow bonus instead of another Flare damage bonus. Oracle scans once within 40 blocks in the current dimension, then displays up to three colored directional/distance-band hints for 8 seconds without world coordinates. Players are prioritized; animals and other mobs appear when present. This is a HUD reveal, not a through-wall outline. Both cooldowns use the Crown's existing half-cooldown rule.
+
+**Hades:** Use the relic while physically inside regular or soul fire to launch Hellfire along the crosshair. It uses a safe snowball projectile with a flame trail and one scripted 6-health-point impact. It has a 15-second cooldown, or 7.5 seconds when crowned. Nether residence, netherrack, lava nearby, and Underworld Dominion alone do not meet the fire requirement. The projectile cannot ignite or break terrain.
+
+**Dionysus Divine Harvest:** Dionysus receives one ordinary Bone Meal when claimed. A successful vanilla use on a growth target restores the consumed unit, so crops, saplings, and vegetation follow their normal Bedrock growth rules. The old periodic 64-item refill is gone to prevent inventory duplication. If the last Bone Meal is lost, using the relic grants one replacement at most once every five minutes. Other players receive no refill.
 
 **Hephaestus:** Use the existing smithing table beside his altar in the Hall. Hold the base item and carry the second ingredient. The forge previews and deducts the cost after confirmation. The four combinations are diamond pickaxe + diamond sword → Sword-Pickaxe (+1 melee damage), diamond axe + blaze rod → Ember Axe (3-second fire), diamond boots + Heart of the Sea → Tide Boots (Dolphin's Grace I in water), and diamond helmet + lantern → Lantern Helm (Night Vision). All finished items retain the base item's enchantments and durability, and can be traded, dropped, looted, and used by anyone. Each item may be combined once. Edit `CONFIG.combinations` in `behavior_pack/scripts/config.js` to balance costs; recipes cost 24–35 XP levels, 10–16 diamonds, 12–20 emeralds, 20–24 lapis, and up to one netherite ingot, in addition to both inputs. The supplied *Combine Anything V2* pack inspired this mechanic; its 1.26.40/Script API 2.7.0 dependency prevents directly bundling it into this 1.21.90 pack. Its world-destroying TNT and high-damage weapons are not included.
 
@@ -65,6 +73,7 @@ Each god has a custom relic icon, colored particle emblem, sound, and ambient au
 - Stable Script API 2.0.0 has no cancellable fall-damage event. Hermes uses Slow Falling, which changes descent speed; Poseidon instead receives brief Resistance V while falling in rain or thunder. That may also briefly block other damage during the fall. Test extreme falls and server lag before relying on it.
 - Bedrock caps real enchantments at vanilla levels. Divine Fortune IV is Fortune III plus a scripted ore bonus. Apollo's enhanced bow damage is a scripted bonus on hit.
 - Combined items use standard Minecraft equipment with persistent per-item Script API metadata and lore. Their added effects are scripted; the four recipes do not raise vanilla enchantment limits. A missing or incompatible behavior pack removes those added effects. A scripted +1 hit follows the vanilla melee hit and may have slightly different armor interactions.
+- Hellfire uses a non-destructive projectile body with scripted damage, so its in-flight model appears as a snowball under the flame particles. Oracle uses a directional HUD because this pack does not provide a Bedrock through-wall Glowing outline. Solar Flare particles and sounds are cosmetic and do not create a world explosion.
 - Rain powers use the stable weather-change event. If installed during existing rain, a weather transition may be needed before the pack recognizes it. Covered areas and dry biomes do not count as open rain.
 
 ## Operator commands
@@ -87,9 +96,9 @@ For player-specific functions from a command block, use `execute as <player> at 
 
 Stop the Bedrock Dedicated Server and back up the world. Extract the `.mcaddon` ZIP. Copy `behavior_pack` to `behavior_packs/OlympusSMP_BP` and `resource_pack` to `resource_packs/OlympusSMP_RP`. Preserve other entries and add these entries to the arrays in the world's pack files:
 
-`world_behavior_packs.json`: `{"pack_id":"a06ad1f9-8b44-4af1-995a-95dc9c684c25","version":[2,2,0]}`
+`world_behavior_packs.json`: `{"pack_id":"a06ad1f9-8b44-4af1-995a-95dc9c684c25","version":[2,3,0]}`
 
-`world_resource_packs.json`: `{"pack_id":"def06a91-6e05-457a-a359-714565d4c32c","version":[2,2,0]}`
+`world_resource_packs.json`: `{"pack_id":"def06a91-6e05-457a-a359-714565d4c32c","version":[2,3,0]}`
 
 Restart, join as operator, follow Quick setup, and have clients accept the resource pack. For a Realm, activate the pack on a local world, verify it, then upload that world with Replace World.
 

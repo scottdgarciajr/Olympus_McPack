@@ -73,7 +73,7 @@ check('claimRejection(old, owner(god)' in script and 'not_at_summit' not in scri
 
 for path in (BP / 'scripts').glob('*.js'):
     subprocess.run(['node', '--check', str(path)], check=True)
-subprocess.run(['node', '--test', str(ROOT / 'tests' / 'rules.test.js'), str(ROOT / 'tests' / 'flair.test.js')], check=True, stdout=subprocess.DEVNULL)
+subprocess.run(['node', '--test', str(ROOT / 'tests' / 'rules.test.js'), str(ROOT / 'tests' / 'flair.test.js'), str(ROOT / 'tests' / 'divine_combat.test.js')], check=True, stdout=subprocess.DEVNULL)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(OUT, 'w', zipfile.ZIP_DEFLATED) as archive:

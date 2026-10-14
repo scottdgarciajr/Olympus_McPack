@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.0 — Divine archer, Hellfire, Leap, and Harvest
+
+- Apollo's relic now opens an ability menu for existing Sunflight, an armed Solar Flare arrow, and Oracle's Sight. Flare blinds within three blocks and damages nearby secondary targets without adding another full bonus to the direct hit. Oracle provides an eight-second directional HUD for nearby players, animals, and mobs.
+- Hades can launch a safe, non-igniting Hellfire projectile only while occupying fire or soul fire. Damage and new cooldowns are configurable and use Crown reduction.
+- Hermes gained a persistent, default-OFF Divine Leap toggle in the sneak-use mobility menu. Jump Boost II is short-lived and refreshed while enabled; turning it off does not remove external Jump Boost.
+- Dionysus's ordinary Bone Meal now replenishes only after successful vanilla use. Replaced the periodic full-stack refill, which could generate transferable supplies without growing plants.
+- Preserved existing bow, flight, god buffs, Crown, Dominion, and forge systems. No resource artwork was needed for the new effects.
+
 ## 2.2.0 — God balance and item combinations
 
 - Removed Zeus's weather Strength and added a persistent five-second lightning interval during thunder, unaffected by the Crown. Flight remains unrestricted in wet weather.

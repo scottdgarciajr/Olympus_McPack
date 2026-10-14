@@ -13,7 +13,7 @@
       },
       "minecraft:icon": "olympus_hades",
       "minecraft:max_stack_size": 1,
-      "minecraft:interact_button": "View Underworld powers",
+      "minecraft:interact_button": "Use: Hellfire from actual flames",
       "olympus:relic_use": {}
     }
   }

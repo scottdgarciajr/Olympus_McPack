@@ -6,7 +6,11 @@ export const CONFIG = {
   hermesTurboAmplifier: 13,
   hermesSprintSpeed: 1.3,
   poseidonSwimSpeed: 1.08,
-  cooldownSeconds: { hermesPearl: 300, zeusLightning: 180, zeusFlight: 180, aresRage: 300, apolloSunstep: 180 },
+  cooldownSeconds: { hermesPearl: 300, zeusLightning: 180, zeusFlight: 180, aresRage: 300, apolloSunstep: 180, apolloSolarFlare: 45, apolloOracle: 120, hadesHellfire: 15 },
+  solarFlare: { radius: 3, areaDamage: 4, blindnessSeconds: 3, arrowTimeoutSeconds: 12 },
+  oracle: { radius: 40, durationSeconds: 8 },
+  hellfire: { damage: 6, projectileSpeed: 1.5, lifetimeTicks: 40 },
+  hermesLeapAmplifier: 1,
   zeusThunderLightningSeconds: 5,
   combinations: {
     sword_pickaxe: { xp: 30, diamond: 12, emerald: 16, lapis_lazuli: 24, netherite_ingot: 1 },

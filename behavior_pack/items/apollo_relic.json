@@ -13,7 +13,7 @@
       },
       "minecraft:icon": "olympus_apollo",
       "minecraft:max_stack_size": 1,
-      "minecraft:interact_button": "Use: Sunflight",
+      "minecraft:interact_button": "Use: Apollo ability menu",
       "olympus:relic_use": {}
     }
   }

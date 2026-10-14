@@ -3,6 +3,13 @@ import { test } from 'node:test';
 import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, divineOreDrop, stockMissingRelics } from '../behavior_pack/scripts/rules.js';
 import { CONFIG } from '../behavior_pack/scripts/config.js';
 
+test('new ability cooldowns and damage caps stay within the requested balance', () => {
+  assert.deepEqual([CONFIG.cooldownSeconds.apolloSolarFlare,CONFIG.cooldownSeconds.apolloOracle,CONFIG.cooldownSeconds.hadesHellfire],[45,120,15]);
+  assert.equal(CONFIG.solarFlare.areaDamage,4);
+  assert.equal(CONFIG.hellfire.damage,6);
+  assert.equal(CONFIG.hermesLeapAmplifier,1);
+});
+
 test('cooldowns expire and stay independent by stored expiry', () => {
   const now = 1_000_000;
   assert.equal(cooldownRemaining(now + 300_000, now), 300_000);

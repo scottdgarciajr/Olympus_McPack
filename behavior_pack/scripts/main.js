@@ -6,6 +6,7 @@ import { FLAIR, flairPoints } from './flair.js';
 import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl } from './crown.js';
 import { configureDominion, inUnderworldDominion, temporaryBlock, dominionFlair } from './dominion.js';
 import { configureForge, forgeBlock, showForge, onForgeHurt, forgeEquipmentTick } from './forge.js';
+import { configureDivine, armSolarFlare, oracleSight, hellfire, onDivineProjectileSpawn, onDivineBowRelease, onDivineProjectileHitBlock, onDivineProjectileHitEntity, divineTick } from './divine_combat.js';
 
 const GODS = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus'];
 const TITLES = {
@@ -14,30 +15,30 @@ const TITLES = {
   hephaestus: 'God of Craftsmanship', dionysus: 'God of Wine and Madness'
 };
 const DESCRIPTIONS = {
-  hermes: 'Speed VI, Flash-fast sprint, and fall protection; Weakness III. Divine Pearl every 5 minutes.',
+  hermes: 'Speed VI, Flash-fast sprint, fall protection, and toggleable Divine Leap; Weakness III. Divine Pearl every 5 minutes.',
   zeus: 'Mining Fatigue II always. Lightning has a 5-second interval in thunder; 30-second flight remains unrestricted in rain or thunder.',
   poseidon: 'Conduit Power, Dolphin’s Grace III, and toggled fast movement in water or open rain; rain-only fall protection. Slowness III and Weakness III in Nether/desert.',
-  hades: 'Fire Resistance and Night Vision; Slowness III and Weakness III by day. Strength IV and Haste IV in Nether or End.',
+  hades: 'Fire Resistance and Night Vision; sheltered from daylight weakness. Nether/End power and Hellfire from actual flames.',
   ares: 'Strength II and Resistance II; Slowness III. Strength V and Resistance III rage for 30 seconds every 5 minutes.',
-  apollo: 'Infinite Solar Bow with heavy sunlight damage; Weakness III and Mining Fatigue II outside direct sunlight. Daylight flight every 3 minutes.',
+  apollo: 'Infinite Solar Bow, Sunflight, Solar Flare arrow, and Oracle’s Sight; Weakness III and Mining Fatigue II without sunlight.',
   hephaestus: 'Haste IV, Divine Fortune IV pickaxe, and exclusive costly item combinations at the Hall forge; permanent Weakness III.',
-  dionysus: 'Every new foe can be cursed immediately. Each hit stacks buffs and Nausea, teleports you, and may blind you as madness grows. Infinite Bone Meal.'
+  dionysus: 'Every new foe can be cursed immediately. Each hit stacks buffs and Nausea, teleports you, and may blind you as madness grows. Divine Harvest replenishes used Bone Meal.'
 };
 const CONTROLS = {
-  hermes: 'Speed VI always; sprint for Speed XIV with extra momentum. Use relic: pearl (5m). Sneak-use: Slow Falling on/off. Weakness III.',
+  hermes: 'Speed VI always; sprint for Speed XIV. Use relic: pearl (5m). Sneak-use: mobility menu for Slow Falling and Divine Leap toggles. Weakness III.',
   zeus: 'Aim at a block or enemy, use relic: lightning. Sneak-use: 30s flight. Each has a 3m cooldown in clear weather; thunder lightning has a 5s interval. Flight stays unrestricted in rain/thunder.',
   poseidon: 'Sneak-use relic: Tidal Sprint on/off in water or open rain. Conduit Power and Dolphin’s Grace III; no fall damage during rain. Tidecaller uses Riptide.',
-  hades: 'Fire Resistance and Night Vision always; Slowness III/Weakness III by day; Strength IV/Haste IV in Nether and End.',
+  hades: 'Use relic while physically in fire or soul fire: Hellfire projectile (15s). Sneak-use checks readiness. Fire Resistance/Night Vision always; night and otherworld buffs remain.',
   ares: 'Use relic: War Rage, Strength V and Resistance III for 30s (5m). Strength II, Resistance II, Slowness III are passive.',
-  apollo: 'Use relic in direct daylight: 30s Sunflight (3m). Jump up, sneak down, release to hover. One arrow fuels your infinite Solar Bow.',
+  apollo: 'Use relic for Sunflight (3m), arm a Solar Flare arrow (45s after impact), or Oracle’s Sight (2m). One arrow fuels your infinite Solar Bow.',
   hephaestus: 'Haste IV and permanent Weakness III. Your pickaxe has Divine Fortune IV bonus drops. Combine equipment at the Hall forge.',
-  dionysus: 'Melee-hit different foes to stack buffs instantly. The same foe has a 3s cooldown. Madness builds Nausea and Blindness risk. Bone Meal refills.'
+  dionysus: 'Melee-hit different foes to stack buffs instantly. The same foe has a 3s cooldown. Madness grows. Used Bone Meal replenishes; use relic for one if lost.'
 };
 const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigue', 'conduit_power',
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
-  'levitation', 'jump_boost', 'nausea', 'blindness', 'regeneration'];
+  'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '2.2.0';
+const PACK_VERSION = '2.3.0';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -122,6 +123,7 @@ const now = () => Date.now();
 configureCrown({ role, temple: () => temple(), offeringCount: (p,id) => offeringCount(p,id), takeOffering: (p,id,n) => takeOffering(p,id,n), weather, setWeather: value => { currentWeather = value; world.setDynamicProperty(key('weather'), value); }, fail });
 configureDominion(fail);
 configureForge({ role, temple: () => temple(), fail });
+configureDivine({role,ready,startCooldown,tell,heldItem,fail});
 const nameOf = (god) => god.charAt(0).toUpperCase() + god.slice(1);
 function tell(player, message) { player.sendMessage(prefix + message); }
 function fail(e) { console.warn(`[Olympus] ${e?.stack || e}`); }
@@ -258,6 +260,14 @@ function hermesFallProtection(player) {
     if (system.currentTick - previous < 10) return;
     hermesFallTick.set(player.id, system.currentTick);
     effect(player, 'slow_falling', 2);
+  } catch (e) { if (CONFIG.debug) fail(e); }
+}
+function hermesLeap(player) {
+  if (role(player)!=='hermes' || player.getDynamicProperty(key('hermesLeap'))!==true) return;
+  try {
+    const active=player.getEffect('jump_boost');
+    if (!active || (active.amplifier <= CONFIG.hermesLeapAmplifier && active.duration <= 10))
+      player.addEffect('jump_boost',20,{amplifier:CONFIG.hermesLeapAmplifier,showParticles:false});
   } catch (e) { if (CONFIG.debug) fail(e); }
 }
 function poseidonMotion(player) {
@@ -624,6 +634,8 @@ function reset(player) {
   for (const ability of Object.keys(CONFIG.cooldownSeconds)) player.setDynamicProperty(key(`cd_${ability}`), undefined);
   player.setDynamicProperty(key('rageUntil'), undefined);
   player.setDynamicProperty(key('hermesSlowfall'), undefined);
+  player.setDynamicProperty(key('hermesLeap'), undefined);
+  player.setDynamicProperty(key('flareArmed'), undefined);
   player.setDynamicProperty(key('poseidonSpeed'), undefined);
   player.setDynamicProperty(key('flightUntil'), undefined);
   player.setDynamicProperty(key('madnessStacks'), undefined);
@@ -712,29 +724,26 @@ function giveEquipment(player, god) {
       pick.setDynamicProperty(key('divineFortune'), true);
       giveItem(player, pick);
     }
-    if (god === 'dionysus') giveItem(player, new ItemStack('minecraft:bone_meal', 64));
+    if (god === 'dionysus') {
+      const meal = new ItemStack('minecraft:bone_meal', 1);
+      meal.keepOnDeath = true;
+      giveItem(player, meal);
+    }
   } catch (e) { fail(e); tell(player, 'Equipment could not be created. Ask the operator to check the content log.'); }
 }
-function refillDionysusBoneMeal(player) {
-  try {
-    const inventory = player.getComponent('minecraft:inventory')?.container;
-    if (!inventory) return;
-    let freeSlot = -1;
-    let foundBoneMeal = false;
-    for (let slot = 0; slot < inventory.size; slot++) {
-      const item = inventory.getItem(slot);
-      if (item?.typeId === 'minecraft:bone_meal') {
-        foundBoneMeal = true;
-        if (item.amount < 64) {
-          item.amount = 64;
-          inventory.setItem(slot, item);
-        }
-        continue;
-      }
-      if (!item && freeSlot < 0) freeSlot = slot;
-    }
-    if (!foundBoneMeal && freeSlot >= 0) inventory.setItem(freeSlot, new ItemStack('minecraft:bone_meal', 64));
-  } catch (e) { if (CONFIG.debug) fail(e); }
+function replaceLostBoneMeal(player) {
+  const inventory=player.getComponent('minecraft:inventory')?.container;
+  if (!inventory || role(player)!=='dionysus') return;
+  for (let i=0;i<inventory.size;i++) if (inventory.getItem(i)?.typeId==='minecraft:bone_meal') {
+    tell(player,'You already have Bone Meal. Use it on plants; spent meal replenishes.'); return;
+  }
+  const expiry=Number(player.getDynamicProperty(key('harvestRestockUntil')) || 0);
+  if (expiry>now()) { tell(player,`Divine Harvest replacement available in ${Math.ceil((expiry-now())/1000)}s.`); return; }
+  const meal=new ItemStack('minecraft:bone_meal',1);
+  meal.keepOnDeath=true;
+  giveItem(player,meal);
+  player.setDynamicProperty(key('harvestRestockUntil'),now()+300000);
+  tell(player,'One Bone Meal restored. Using it on plants replenishes what was spent.');
 }
 function heldItem(player) {
   return player.getComponent('minecraft:inventory')?.container?.getItem(player.selectedSlotIndex);
@@ -845,18 +854,46 @@ function safeTeleport(player) {
   }
   return false;
 }
+function hermesMobilityMenu(player) {
+  new ActionFormData().title('§6HERMES MOBILITY')
+    .body(`Slow Falling: ${hermesSlowfallEnabled(player)?'ON':'OFF'}\nDivine Leap: ${player.getDynamicProperty(key('hermesLeap'))===true?'ON':'OFF'}`)
+    .button('Toggle Slow Falling').button('Toggle Divine Leap').button('Close')
+    .show(player).then(result => {
+      if (role(player)!=='hermes') return;
+      if (result.selection===0) {
+        const enabled=!hermesSlowfallEnabled(player);
+        player.setDynamicProperty(key('hermesSlowfall'),enabled);
+        if (enabled) effect(player,'slow_falling',5);
+        else player.removeEffect('slow_falling');
+        tell(player,`Slow Falling ${enabled?'ON':'OFF'}. Dangerous falls are still cushioned automatically.`);
+      }
+      if (result.selection===1) {
+        const enabled=player.getDynamicProperty(key('hermesLeap'))!==true;
+        player.setDynamicProperty(key('hermesLeap'),enabled);
+        tell(player,`Divine Leap ${enabled?'ON':'OFF'}. ${enabled?'Jump Boost II helps clear two-block obstacles.':'Normal jump returns shortly.'}`);
+      }
+    }).catch(fail);
+}
+function apolloAbilityMenu(player) {
+  new ActionFormData().title('§eAPOLLO ABILITIES')
+    .body(`Solar Flare: ${player.getDynamicProperty(key('flareArmed'))?'ARMED':'not armed'}\nSunflight needs direct daylight.`)
+    .button('Sunflight').button('Arm / Disarm Solar Flare').button('Oracle’s Sight').button('Close')
+    .show(player).then(result => {
+      if (role(player)!=='apollo') return;
+      if (result.selection===0) {
+        if (!sunlight(player)) { tell(player,'Sunstep requires direct daylight.'); return; }
+        if (!ready(player,'apolloSunstep','Sunstep')) return;
+        startFlight(player,CONFIG.apolloSunstepSeconds,'Sunflight');
+        startCooldown(player,'apolloSunstep'); showFlair(player,'apollo',true);
+      }
+      if (result.selection===1) armSolarFlare(player);
+      if (result.selection===2) oracleSight(player);
+    }).catch(fail);
+}
 function special(player, god, sneaking) {
   try {
     if (god === 'hermes') {
-      if (sneaking) {
-        const enabled = !hermesSlowfallEnabled(player);
-        player.setDynamicProperty(key('hermesSlowfall'), enabled);
-        if (enabled) effect(player, 'slow_falling', 5);
-        else player.removeEffect('slow_falling');
-        tell(player, `Slow Falling ${enabled ? 'ON' : 'OFF'}. Dangerous falls are still cushioned automatically.`);
-        showFlair(player, god, true);
-        return;
-      }
+      if (sneaking) { hermesMobilityMenu(player); return; }
       if (!ready(player, 'hermesPearl', 'Divine Pearl')) return;
       giveItem(player, new ItemStack('minecraft:ender_pearl', 1));
       startCooldown(player, 'hermesPearl'); tell(player, 'Divine Ender Pearl granted. Use it to teleport; another is available in 5 minutes.'); showFlair(player, god, true);
@@ -886,6 +923,13 @@ function special(player, god, sneaking) {
         tell(player, `Tidal Sprint ${enabled ? 'ON' : 'OFF'}. Water and open rain grant Conduit Power and Dolphin’s Grace; rain protects you from falls.`);
         showFlair(player, god, true);
       } else tell(player, CONTROLS.poseidon);
+    } else if (god === 'hades') {
+      if (sneaking) {
+        const seconds=Math.ceil(remaining(player,'hadesHellfire')/1000);
+        tell(player,seconds ? `Hellfire: ${seconds}s remaining.` : 'Hellfire ready. Stand in fire or soul fire to launch.');
+        return;
+      }
+      hellfire(player);
     } else if (god === 'ares') {
       if (!ready(player, 'aresRage', 'War Rage')) return;
       player.setDynamicProperty(key('rageUntil'), now() + CONFIG.aresRageSeconds * 1000);
@@ -893,12 +937,10 @@ function special(player, god, sneaking) {
       effect(player, 'resistance', CONFIG.aresRageSeconds, 2);
       startCooldown(player, 'aresRage'); tell(player, 'War Rage: Strength V and Resistance III for 30 seconds.'); showFlair(player, god, true);
     } else if (god === 'apollo') {
-      if (!sunlight(player)) { tell(player, 'Sunstep requires direct daylight.'); return; }
-      if (!ready(player, 'apolloSunstep', 'Sunstep')) return;
-      startFlight(player, CONFIG.apolloSunstepSeconds, 'Sunflight');
-      startCooldown(player, 'apolloSunstep'); showFlair(player, god, true);
+      apolloAbilityMenu(player);
     } else if (god === 'dionysus') {
-      tell(player, 'Divine Madness triggers on melee hits. New foes trigger instantly; the same foe needs 3 seconds. Bone Meal refills automatically.');
+      replaceLostBoneMeal(player);
+      tell(player, 'Divine Madness triggers on melee hits. New foes trigger instantly; the same foe needs 3 seconds.');
       cosmeticFlair(player, god);
     } else {
       tell(player, `${nameOf(god)}'s powers are passive or equipment-based. Your relic can display your divine signature.`);
@@ -1090,15 +1132,32 @@ world.beforeEvents.explosion.subscribe((event) => {
     event.setImpactedBlocks(blocks.filter(block => !temporaryBlock(event.dimension.id,block.location)));
 });
 world.afterEvents.entityHurt.subscribe((event) => { try { onForgeHurt(event); } catch (e) { if (CONFIG.debug) fail(e); } });
+world.afterEvents.entitySpawn.subscribe((event) => { try { onDivineProjectileSpawn(event.entity); } catch (e) { if (CONFIG.debug) fail(e); } });
+world.afterEvents.projectileHitBlock.subscribe((event) => { try { onDivineProjectileHitBlock(event); } catch (e) { fail(e); } });
 world.afterEvents.projectileHitEntity.subscribe((event) => {
-  const shooter = event.source;
+  let kind='';
+  try { kind=onDivineProjectileHitEntity(event); } catch (e) { fail(e); }
+  if (kind==='hellfire' || kind==='duplicate') return;
+  const shooter = event.source || event.projectile.getComponent('minecraft:projectile')?.owner;
   if (event.projectile.typeId !== 'minecraft:arrow' || shooter?.typeId !== 'minecraft:player' || role(shooter) !== 'apollo') return;
-  if (heldItem(shooter)?.nameTag !== '§eApollo’s Solar Bow') return;
+  if (kind!=='flare' && heldItem(shooter)?.nameTag !== '§eApollo’s Solar Bow') return;
   const target = event.getEntityHit().entity;
   if (!target || (!CONFIG.friendlyFire && target.typeId === 'minecraft:player')) return;
   try {
     target.applyDamage(sunlight(shooter) ? 6 : 2, { cause: EntityDamageCause.projectile, damagingEntity: shooter });
     cosmeticFlair(shooter, 'apollo');
+  } catch (e) { if (CONFIG.debug) fail(e); }
+});
+world.afterEvents.playerInteractWithBlock.subscribe((event) => {
+  if (role(event.player)!=='dionysus' || event.beforeItemStack?.typeId!=='minecraft:bone_meal') return;
+  const before=event.beforeItemStack.amount, after=event.itemStack;
+  const remaining=after?.typeId==='minecraft:bone_meal'?after.amount:0;
+  if (before-remaining!==1) return; // Vanilla consumed exactly one on a valid growth target.
+  try {
+    const inventory=event.player.getComponent('minecraft:inventory')?.container;
+    const slot=event.player.selectedSlotIndex, current=inventory?.getItem(slot);
+    if (current?.typeId==='minecraft:bone_meal') { current.amount=Math.min(64,current.amount+1); inventory.setItem(slot,current); }
+    else if (!current) { const meal=new ItemStack('minecraft:bone_meal',1); meal.keepOnDeath=true; inventory.setItem(slot,meal); }
   } catch (e) { if (CONFIG.debug) fail(e); }
 });
 world.afterEvents.itemReleaseUse.subscribe((event) => {
@@ -1116,7 +1175,10 @@ world.afterEvents.itemReleaseUse.subscribe((event) => {
       } catch (e) { if (CONFIG.debug) fail(e); }
     }, 2);
   }
-  if (role(event.source) === 'apollo' && event.itemStack?.nameTag === '§eApollo’s Solar Bow') cosmeticFlair(event.source, 'apollo');
+  if (role(event.source) === 'apollo' && event.itemStack?.nameTag === '§eApollo’s Solar Bow') {
+    onDivineBowRelease(event.source,event.itemStack);
+    cosmeticFlair(event.source, 'apollo');
+  }
 });
 world.afterEvents.weatherChange.subscribe((event) => {
   if (!event.dimension.endsWith('overworld')) return;
@@ -1145,7 +1207,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     }
     if (event.id === 'olympus:status') {
       tell(player, `v${PACK_VERSION} script active. Your role: ${role(player) || 'none'}. Temple: ${temple() ? 'placed' : 'not placed'}. Mountain: ${mountain() ? 'built' : 'not built'}. Claimed: ${GODS.filter(g => owner(g)).map(nameOf).join(', ') || 'none'}.`);
-      if (role(player) === 'hermes') tell(player, `Your Slow Falling is ${hermesSlowfallEnabled(player) ? 'ON' : 'OFF'}. Sneak-use your relic to toggle it.`);
+      if (role(player) === 'hermes') tell(player, `Slow Falling ${hermesSlowfallEnabled(player) ? 'ON' : 'OFF'}; Divine Leap ${player.getDynamicProperty(key('hermesLeap'))===true?'ON':'OFF'}. Sneak-use your relic for the mobility menu.`);
       if (role(player) === 'poseidon') tell(player, `Your Tidal Sprint is ${poseidonSpeedEnabled(player) ? 'ON' : 'OFF'}. Sneak-use your relic to toggle it.`);
     }
     if (event.id === 'olympus:controls') tell(player, role(player) ? CONTROLS[role(player)] : 'Reserve a god at its temple altar, gather the offering, and return within 10 minutes.');
@@ -1202,7 +1264,6 @@ system.runInterval(() => {
 }, 1);
 system.runInterval(() => {
   for (const player of world.getAllPlayers()) {
-    if (role(player) === 'dionysus') refillDionysusBoneMeal(player);
     protectOwnedGear(player);
   }
 }, 5);
@@ -1216,5 +1277,7 @@ system.runInterval(() => { try { crownFlair(); } catch (e) { if (CONFIG.debug) f
 system.runInterval(() => { try { crownDominionTick(); } catch (e) { fail(e); } }, 10);
 system.runInterval(() => { try { dominionFlair(); } catch (e) { if (CONFIG.debug) fail(e); } }, 40);
 system.runInterval(() => { try { forgeEquipmentTick(); } catch (e) { if (CONFIG.debug) fail(e); } }, 10);
+system.runInterval(() => { for (const player of world.getAllPlayers()) if (role(player)==='hermes') hermesLeap(player); }, 5);
+system.runInterval(() => { try { divineTick(); } catch (e) { if (CONFIG.debug) fail(e); } }, 3);
 system.runInterval(() => { for (const player of world.getAllPlayers()) if (['hades','poseidon'].includes(role(player))) updatePlayer(player); }, 10);
 system.runInterval(() => { try { revealCrown(); } catch (e) { fail(e); } }, 6000);

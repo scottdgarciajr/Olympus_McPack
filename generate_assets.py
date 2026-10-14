@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-VERSION = [2, 2, 0]
+VERSION = [2, 3, 0]
 GODS = {
     'hermes': ('Hermes Winged Relic', '#f4cf58'),
     'zeus': ('Zeus Thunder Relic', '#f4eb7b'),
@@ -18,14 +18,14 @@ GODS = {
     'dionysus': ('Dionysus Goblet Relic', '#b06bd5'),
 }
 RELIC_BUTTONS = {
-    'hermes': 'Use: Pearl / Sneak: Glide Toggle',
+    'hermes': 'Use: Pearl / Sneak: Mobility Menu',
     'zeus': 'Use: Lightning / Sneak: Flight',
     'poseidon': 'Use: Powers / Sneak: Swim Toggle',
-    'hades': 'View Underworld powers',
+    'hades': 'Use: Hellfire from actual flames',
     'ares': 'Use: War Rage',
-    'apollo': 'Use: Sunflight',
+    'apollo': 'Use: Apollo ability menu',
     'hephaestus': 'View Forge powers',
-    'dionysus': 'Use: Madness Guide / Infinite Bone Meal',
+    'dionysus': 'Use: Madness Guide / Divine Harvest',
 }
 
 def relic_icon(god, color):

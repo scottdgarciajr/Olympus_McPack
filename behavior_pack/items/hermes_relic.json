@@ -13,7 +13,7 @@
       },
       "minecraft:icon": "olympus_hermes",
       "minecraft:max_stack_size": 1,
-      "minecraft:interact_button": "Use: Pearl / Sneak: Glide Toggle",
+      "minecraft:interact_button": "Use: Pearl / Sneak: Mobility Menu",
       "olympus:relic_use": {}
     }
   }
