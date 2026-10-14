@@ -1,0 +1,26 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "olympus:forge_firebolt",
+      "is_summonable": true,
+      "is_spawnable": false,
+      "is_experimental": false
+    },
+    "components": {
+      "minecraft:collision_box": {
+        "width": 0.25,
+        "height": 0.25
+      },
+      "minecraft:physics": {},
+      "minecraft:projectile": {
+        "gravity": 0,
+        "power": 1.5,
+        "catch_fire": false,
+        "on_hit": {
+          "remove_on_hit": {}
+        }
+      }
+    }
+  }
+}

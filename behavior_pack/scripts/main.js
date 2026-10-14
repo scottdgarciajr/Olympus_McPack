@@ -5,7 +5,7 @@ import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAm
 import { FLAIR, flairPoints } from './flair.js';
 import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl } from './crown.js';
 import { configureDominion, inUnderworldDominion, temporaryBlock, dominionFlair } from './dominion.js';
-import { configureForge, isForge, inHall, removePortableForge, placePortableForge, showForge, showForgeGuide, creativeForgeSamples, onForgeHurt, forgeEquipmentTick } from './forge.js';
+import { configureForge, isForge, inHall, removePortableForge, placePortableForge, showForge, showForgeGuide, creativeForgeSamples, useForgeItem, onForgeHurt, onForgeProjectileHitEntity, onForgeProjectileHitBlock, forgeProjectileTick, forgeEquipmentTick } from './forge.js';
 import { configureDivine, armSolarFlare, oracleSight, hellfire, onDivineProjectileSpawn, onDivineBowRelease, onDivineProjectileHitBlock, onDivineProjectileHitEntity, divineTick } from './divine_combat.js';
 import { findMadnessLanding } from './teleport.js';
 
@@ -39,7 +39,7 @@ const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigu
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '2.5.0';
+const PACK_VERSION = '2.6.0';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -1045,6 +1045,10 @@ system.beforeEvents.startup.subscribe((event) => {
   event.itemComponentRegistry.registerCustomComponent('olympus:forge_place', {
     onUseOn: (useEvent) => system.run(() => { try { placePortableForge(useEvent); } catch (e) { fail(e); } })
   });
+  event.itemComponentRegistry.registerCustomComponent('olympus:forge_item_use', {
+    onUse: (useEvent) => { const player=useEvent.source, id=useEvent.itemStack?.typeId; system.run(() => { try { useForgeItem(player,id); } catch (e) { fail(e); } }); },
+    onUseOn: (useEvent) => { const player=useEvent.source, id=useEvent.itemStack?.typeId; system.run(() => { try { useForgeItem(player,id); } catch (e) { fail(e); } }); }
+  });
   event.itemComponentRegistry.registerCustomComponent('olympus:relic_use', {
     onUse: (useEvent) => {
       const player = useEvent.source;
@@ -1061,7 +1065,7 @@ system.beforeEvents.startup.subscribe((event) => {
   });
 });
 world.afterEvents.itemUse.subscribe((event) => {
-  try { useRelic(event.source, event.itemStack?.typeId || ''); } catch (e) { fail(e); }
+  try { useRelic(event.source, event.itemStack?.typeId || ''); useForgeItem(event.source,event.itemStack?.typeId || ''); } catch (e) { fail(e); }
 });
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   if (!event.isFirstEvent) return;
@@ -1179,8 +1183,9 @@ world.beforeEvents.explosion.subscribe((event) => {
 });
 world.afterEvents.entityHurt.subscribe((event) => { try { onForgeHurt(event); } catch (e) { if (CONFIG.debug) fail(e); } });
 world.afterEvents.entitySpawn.subscribe((event) => { try { onDivineProjectileSpawn(event.entity); } catch (e) { if (CONFIG.debug) fail(e); } });
-world.afterEvents.projectileHitBlock.subscribe((event) => { try { onDivineProjectileHitBlock(event); } catch (e) { fail(e); } });
+world.afterEvents.projectileHitBlock.subscribe((event) => { try { onDivineProjectileHitBlock(event); onForgeProjectileHitBlock(event); } catch (e) { fail(e); } });
 world.afterEvents.projectileHitEntity.subscribe((event) => {
+  try { if (onForgeProjectileHitEntity(event)) return; } catch (e) { fail(e); }
   let kind='';
   try { kind=onDivineProjectileHitEntity(event); } catch (e) { fail(e); }
   if (kind==='hellfire' || kind==='duplicate') return;
@@ -1323,6 +1328,7 @@ system.runInterval(() => { try { crownFlair(); } catch (e) { if (CONFIG.debug) f
 system.runInterval(() => { try { crownDominionTick(); } catch (e) { fail(e); } }, 10);
 system.runInterval(() => { try { dominionFlair(); } catch (e) { if (CONFIG.debug) fail(e); } }, 40);
 system.runInterval(() => { try { forgeEquipmentTick(); } catch (e) { if (CONFIG.debug) fail(e); } }, 10);
+system.runInterval(() => { try { forgeProjectileTick(); } catch (e) { if (CONFIG.debug) fail(e); } }, 3);
 system.runInterval(() => { for (const player of world.getAllPlayers()) if (role(player)==='hermes') hermesLeap(player); }, 5);
 system.runInterval(() => { try { divineTick(); } catch (e) { if (CONFIG.debug) fail(e); } }, 3);
 system.runInterval(() => { for (const player of world.getAllPlayers()) if (['hades','poseidon'].includes(role(player))) updatePlayer(player); }, 10);

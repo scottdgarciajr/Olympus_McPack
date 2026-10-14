@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.6.0 — Distinct Divine Forge creations
+
+- Replaced the four new forge outputs with separate custom items using item and boot artwork from the supplied *Combine Anything V2.1* add-on: Forgecleaver Sword-Pickaxe, Cinderbolt Pickaxe, Undertow Boots, and Magnetwood Axe. Existing previously forged vanilla gear keeps its old powers.
+- Added an ore-finding pulse, a terrain-safe fire projectile, a short water surge, and bounded dropped-item gathering. Costs and power limits are configurable.
+- Updated the Forge Guide, item lore, Creative test kit, README, and in-game checklist with recipes, controls, cooldowns, and explicit outcomes.
+
+
 ## 2.5.0 — Creative Hephaestus kit and beginner guide
 
 - Added a Creative inventory test kit that grants Hephaestus's relic, Divine Fortune pickaxe, portable forge, and all four finished combination items. It works only in Creative mode; when available, it claims Hephaestus for an unassigned tester.

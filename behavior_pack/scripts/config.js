@@ -14,10 +14,11 @@ export const CONFIG = {
   zeusThunderLightningSeconds: 5,
   combinations: {
     sword_pickaxe: { xp: 30, diamond: 12, emerald: 16, lapis_lazuli: 24, netherite_ingot: 1 },
-    ember_axe: { xp: 35, diamond: 16, emerald: 20, lapis_lazuli: 24, netherite_ingot: 1 },
-    tide_boots: { xp: 28, diamond: 12, emerald: 16, lapis_lazuli: 24, netherite_ingot: 1 },
-    lantern_helm: { xp: 24, diamond: 10, emerald: 12, lapis_lazuli: 20, netherite_ingot: 0 }
+    fireball_pickaxe: { xp: 35, diamond: 16, emerald: 20, lapis_lazuli: 24, netherite_ingot: 1 },
+    water_boots: { xp: 28, diamond: 12, emerald: 16, lapis_lazuli: 24, netherite_ingot: 1 },
+    magnet_axe: { xp: 32, diamond: 14, emerald: 20, lapis_lazuli: 24, netherite_ingot: 1 }
   },
+  forgePowers: { orePulseRadius: 6, orePulseCooldownSeconds: 30, fireboltDamage: 5, fireboltIgniteSeconds: 2, fireboltCooldownSeconds: 15, waterSurgeCooldownSeconds: 25, magnetRadius: 8, magnetMaxItems: 12, magnetCooldownSeconds: 20 },
   dominion: { radius: 12, durationSeconds: 30, cooldownSeconds: 300, maxBlocks: 120 },
   dionysusSameTargetCooldownSeconds: 3,
   zeusFlightSeconds: 30,

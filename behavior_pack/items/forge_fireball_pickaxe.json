@@ -1,0 +1,133 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:forge_fireball_pickaxe",
+      "menu_category": {
+        "category": "equipment"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Cinderbolt - Use: Firebolt"
+      },
+      "minecraft:icon": "olympus_forge_fireball_pickaxe",
+      "minecraft:max_stack_size": 1,
+      "minecraft:glint": true,
+      "minecraft:durability": {
+        "max_durability": 1561
+      },
+      "minecraft:hand_equipped": true,
+      "minecraft:damage": 5,
+      "minecraft:enchantable": {
+        "slot": "pickaxe",
+        "value": 10
+      },
+      "minecraft:digger": {
+        "use_efficiency": true,
+        "destroy_speeds": [
+          {
+            "block": "minecraft:stone",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:cobblestone",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:deepslate",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:tuff",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:coal_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:iron_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:copper_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:gold_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:redstone_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:lapis_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:diamond_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:emerald_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:deepslate_coal_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:deepslate_iron_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:deepslate_copper_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:deepslate_gold_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:deepslate_redstone_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:deepslate_lapis_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:deepslate_diamond_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:deepslate_emerald_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:netherrack",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:nether_gold_ore",
+            "speed": 8
+          },
+          {
+            "block": "minecraft:nether_quartz_ore",
+            "speed": 8
+          }
+        ]
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:is_pickaxe",
+          "minecraft:is_tool"
+        ]
+      },
+      "minecraft:interact_button": "Use: Firebolt",
+      "olympus:forge_item_use": {}
+    }
+  }
+}

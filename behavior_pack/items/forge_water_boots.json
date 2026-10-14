@@ -1,0 +1,35 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:forge_water_boots",
+      "menu_category": {
+        "category": "equipment"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Undertow Boots - Sneak in Water"
+      },
+      "minecraft:icon": "olympus_forge_water_boots",
+      "minecraft:max_stack_size": 1,
+      "minecraft:glint": true,
+      "minecraft:durability": {
+        "max_durability": 429
+      },
+      "minecraft:wearable": {
+        "slot": "slot.armor.feet",
+        "protection": 3
+      },
+      "minecraft:enchantable": {
+        "slot": "armor_feet",
+        "value": 10
+      },
+      "minecraft:tags": {
+        "tags": [
+          "minecraft:is_armor"
+        ]
+      }
+    }
+  }
+}

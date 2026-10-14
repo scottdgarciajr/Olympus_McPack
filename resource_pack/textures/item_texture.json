@@ -8,6 +8,18 @@
     "olympus_hephaestus_test_kit": {
       "textures": "textures/items/hephaestus_relic"
     },
+    "olympus_forge_sword_pickaxe": {
+      "textures": "textures/items/forge/forgecleaver"
+    },
+    "olympus_forge_fireball_pickaxe": {
+      "textures": "textures/items/forge/cinderbolt"
+    },
+    "olympus_forge_water_boots": {
+      "textures": "textures/items/forge/undertow"
+    },
+    "olympus_forge_magnet_axe": {
+      "textures": "textures/items/forge/magnetwood"
+    },
     "olympus_hermes": {
       "textures": "textures/items/hermes_relic"
     },

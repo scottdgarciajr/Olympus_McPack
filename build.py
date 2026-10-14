@@ -73,6 +73,19 @@ check(test_kit['description']['menu_category']['category'] == 'items' and
       test_kit['components'].get('olympus:hephaestus_test_kit_use') == {}, 'Creative Hephaestus test kit missing')
 check(test_kit['components']['minecraft:icon'] in texture_index and
       'creativeForgeSamples()' in script and "toLowerCase()!=='creative'" in script, 'Test kit artwork or Creative-only guard missing')
+for item in ('forge_sword_pickaxe', 'forge_fireball_pickaxe', 'forge_water_boots', 'forge_magnet_axe'):
+    definition = read_json(BP / 'items' / f'{item}.json')['minecraft:item']
+    check(definition['description']['identifier'] == f'olympus:{item}' and
+          definition['description']['menu_category']['category'] == 'equipment', f'{item} custom item missing')
+    texture = texture_index[definition['components']['minecraft:icon']]['textures']
+    check((RP / f'{texture}.png').exists(), f'{item} artwork missing')
+    if item != 'forge_water_boots':
+        check(definition['components'].get('olympus:forge_item_use') == {}, f'{item} power hook missing')
+check((RP / 'attachables' / 'forge_water_boots.player.json').exists() and
+      (RP / 'models' / 'entity' / 'forge_water_boots.json').exists() and
+      (RP / 'textures' / 'entity' / 'forge_water_boots.png').exists(), 'Custom worn boots missing')
+forge_bolt = read_json(BP / 'entities' / 'forge_firebolt.json')['minecraft:entity']
+check('minecraft:explode' not in str(forge_bolt) and not forge_bolt['components']['minecraft:projectile'].get('catch_fire'), 'Forge firebolt may damage terrain')
 bolt = read_json(BP / 'entities' / 'hellfire_bolt.json')['minecraft:entity']
 check('minecraft:explode' not in str(bolt) and not bolt['components']['minecraft:projectile'].get('catch_fire'), 'Hellfire may damage terrain')
 check(read_json(RP / 'entity' / 'hellfire_bolt.entity.json')['minecraft:client_entity']['description']['textures']['default'] == 'textures/items/fireball', 'Fireball appearance missing')

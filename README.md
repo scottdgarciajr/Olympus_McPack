@@ -1,6 +1,6 @@
 # Olympus SMP
 
-A Minecraft **Bedrock Edition** add-on for eight Greek gods. This download contains a behavior pack (the game rules) and a resource pack (the art). Install **both**. Current version: **2.5.0**. It requires Minecraft Bedrock 1.21.90 or newer. It is not a Java Edition mod.
+A Minecraft **Bedrock Edition** add-on for eight Greek gods. This download contains a behavior pack (the game rules) and a resource pack (the art). Install **both**. Current version: **2.6.0**. It requires Minecraft Bedrock 1.21.90 or newer. It is not a Java Edition mod.
 
 ## Start here: add the pack to your world
 
@@ -9,7 +9,7 @@ A Minecraft **Bedrock Edition** add-on for eight Greek gods. This download conta
 3. For a **new world**, choose **Play → Create New → Create New World**. For an **existing world**, choose **Play**, then the pencil/edit button next to that world. In the world settings, open **Add-Ons → Behavior Packs → My Packs**, find **Olympus SMP Behavior**, and choose **Activate**. Check **Resource Packs → My Packs** and activate **Olympus SMP Resources** if it was not activated automatically. On a server or Realm, see the sections below.
 4. Turn on **Cheats** in the world settings so setup commands work. Cheats can disable achievements for that world. Enter the world as its owner or an operator.
 5. Open chat and run **`/function olympus/setup`**. This is the one-command setup for the Hall, all eight god altars, the Crown throne, and the Hall forge. The Hall is 33 × 15 × 33 blocks; keep that area clear. The script searches for a safe site near world spawn. If it cannot find one, it gives you a **Hall Placement Seal**. Stand where you want the Hall centered and use the seal. The seal replaces blocks in that whole area, so use it only on your backed-up world at the intended site.
-6. Run **`/function olympus/status`**. It should say `v2.5.0 script active`. If it reports an older version, leave the world, open its pack settings, deactivate the older Olympus packs, activate the newly imported packs, and rejoin.
+6. Run **`/function olympus/status`**. It should say `v2.6.0 script active`. If it reports an older version, leave the world, open its pack settings, deactivate the older Olympus packs, activate the newly imported packs, and rejoin.
 
 ### First steps in the Hall
 
@@ -20,13 +20,13 @@ A Minecraft **Bedrock Edition** add-on for eight Greek gods. This download conta
 
 ### Test Hephaestus quickly in Creative mode
 
-Open the Creative inventory and search **`Hephaestus Creative Test Kit`** in the Items tab. Put it in your hotbar and use it in the air. The kit works only while you are in Creative. If Hephaestus is unclaimed and you have no god yet, it claims him for you. It gives you his Forge Relic, the real Divine Fortune pickaxe, a portable Divine Forge, and all four finished combination items with their working item metadata. The kit does not change an existing god assignment or take Hephaestus from another player. If he is unavailable, the sample gear is still given, but forging and Divine Fortune require the Hephaestus role. You can also get the kit with `/give @s olympus:hephaestus_test_kit` in a cheats-enabled test world.
+Open the Creative inventory and search **`Hephaestus Creative Test Kit`** in the Items tab. Put it in your hotbar and use it in the air. The kit works only while you are in Creative. If Hephaestus is unclaimed and you have no god yet, it claims him for you. It gives you his Forge Relic, the real Divine Fortune pickaxe, a portable Divine Forge, and all four finished custom forge items with their working powers. The kit does not change an existing god assignment or take Hephaestus from another player. If he is unavailable, the sample gear is still given, but forging and Divine Fortune require the Hephaestus role. You can also get the kit with `/give @s olympus:hephaestus_test_kit` in a cheats-enabled test world.
 
-For a normal Survival world, claim Hephaestus at his altar and craft the portable forge using one crafting table surrounded by eight iron ingots. The expensive combination recipes are listed below and in the Forge Guide opened by his relic.
+For a normal Survival world, claim Hephaestus at his altar and craft the portable forge using one crafting table surrounded by eight iron ingots. The costly combination recipes and each item’s controls are listed below and in the Forge Guide opened by his relic.
 
 ## Updating an existing Olympus world
 
-Back up the world, close it, import the new `.mcaddon`, then edit that world's Behavior Packs and Resource Packs. Deactivate older Olympus versions and activate version 2.5.0 of both packs. Rejoin and check `/function olympus/status`. Existing god assignments, Crown ownership, cooldowns, Glory, and previously forged items are stored in the world; do not reset the world to upgrade.
+Back up the world, close it, import the new `.mcaddon`, then edit that world's Behavior Packs and Resource Packs. Deactivate older Olympus versions and activate version 2.6.0 of both packs. Rejoin and check `/function olympus/status`. Existing god assignments, Crown ownership, cooldowns, Glory, and previously forged items are stored in the world; do not reset the world to upgrade.
 
 ## World setup and Crown details
 
@@ -67,7 +67,7 @@ Choose by playstyle: **Hermes** travels fastest; **Zeus** controls storms and th
 | Hades | Fire Resistance and Night Vision always; Strength I/Haste I at Overworld night; Strength IV/Haste IV in Nether or End | Slowness III and Weakness III only in direct Overworld daylight | Covered caves and buildings protect him from daylight debuffs. Use the relic while standing in fire or lava to launch a visible Hellfire fireball (15 sec cooldown; 6 damage). |
 | Ares | Strength II and Resistance II | Slowness III | Strength V and Resistance III rage for **30 sec** on a **5 min** cooldown. |
 | Apollo | Solar Bow with Power V, Infinity I, Unbreaking III, plus **6 scripted arrow damage in direct sunlight** or 2 out of sunlight | Weakness III and Mining Fatigue II without direct sunlight | Relic menu: daylight flight for **30 sec** (3 min cooldown), arm one Solar Flare arrow (45 sec cooldown after impact), or use Oracle’s Sight (40-block radius, 8 sec reveal, 2 min cooldown). |
-| Hephaestus | Haste IV, Efficiency V and Divine Fortune IV pickaxe | Permanent Weakness III | The pickaxe has a **35% chance** for one bonus ore drop. Only Hephaestus can combine equipment at the Hall or a portable Divine Forge. |
+| Hephaestus | Haste IV, Efficiency V and Divine Fortune IV pickaxe | Permanent Weakness III | The pickaxe has a **35% chance** for one bonus ore drop. Only Hephaestus can create four visually distinct tools and gear pieces at the Hall or a portable Divine Forge; anyone can use the results. |
 | Dionysus | Each melee hit on a new target adds a random self buff. Strength, Speed, and Haste can reach IV for 180 sec; Resistance caps at III for 180 sec and Regeneration at II for 60 sec. Successfully used Bone Meal replenishes one-for-one. | Madness rises to 10 stacks: longer, stronger Nausea, random teleportation, and an increasing chance of Blindness | The same hit gives that target a debuff for 180 sec and teleports Dionysus 8–16 blocks when a raycast finds a clear, safe landing; otherwise he gets a brief explanation. **Different targets trigger instantly; the same target has a 3 sec cooldown.** Debuffs can coexist and strengthen up to level IV. Repeated hits can refresh Regeneration, but its level stays capped; external stronger effects remain intact. |
 
 **Hermes:** Speed VI is always active. Hold sprint to enter Speed XIV with additional directional momentum targeting 1.3 blocks per tick, designed to outrun a very fast horse. Left/right input now maps to the correct strafing directions; release sprint or sneak for a slower pace. A bright gold trail appears while sprinting. Slow Falling starts on. Sneak-use can switch the constant glide off; a dangerous fall automatically reactivates protection during descent.
@@ -82,16 +82,18 @@ Choose by playstyle: **Hermes** travels fastest; **Zeus** controls storms and th
 
 **Hades:** Use the relic while physically inside regular fire, soul fire, or lava to launch a visible fireball along the crosshair. The fireball uses the vanilla fireball artwork on a separate non-igniting projectile and deals one scripted 6-health-point impact. It has a 15-second cooldown, or 7.5 seconds when crowned. Nether residence, netherrack, lava merely nearby, and Underworld Dominion alone do not meet the requirement. The projectile cannot ignite or break terrain.
 
-**Hephaestus:** Use your Forge Relic to open the in-game Forge Guide. The Hall's vanilla smithing table beside your altar is ready after `/function olympus/setup`. For a portable Divine Forge, put **one crafting table in the center** of a 3×3 crafting grid and **eight iron ingots around it**. Only Hephaestus can place this item on an empty block. It becomes a vanilla smithing table; tap it anywhere to open the combination menu. Breaking a portable forge drops its item for reuse. Select any recipe to see the price. To combine, hold its diamond base item in your selected hotbar slot and carry the second ingredient, all listed materials, and the required XP levels; then confirm. A finished item retains the base enchantments and durability, can be traded or looted, and can only be combined once.
+**Hephaestus:** Use your Forge Relic to open the in-game Forge Guide. The Hall's smithing table beside your altar is ready after `/function olympus/setup`. For a portable Divine Forge, put **one crafting table in the center** of a 3×3 crafting grid and **eight iron ingots around it**. Only Hephaestus can place it on an empty block. It becomes a smithing table; tap it to open the combination menu. Breaking a portable forge drops its item for reuse. Hold a **fresh, unenchanted, undamaged** diamond base item in your selected hotbar slot, and carry the second ingredient, materials, and XP levels. Select the recipe, review its cost, then confirm. The forge consumes the two source items and creates a separate custom item. Source enchantments and durability do not transfer. Anyone can trade, drop, loot, and use the results, even when Hephaestus is offline. Existing gear forged in older versions keeps its original scripted effect.
 
-| Result | Held base + second ingredient | Additional cost | Effect |
+| New custom item | Held base + second ingredient | Additional cost | Power and controls |
 |---|---|---|---|
-| Sword-Pickaxe | Diamond pickaxe + diamond sword | 30 levels, 12 diamonds, 16 emeralds, 24 lapis, 1 netherite ingot | Mines as a pickaxe; +1 melee damage |
-| Ember Axe | Diamond axe + blaze rod | 35 levels, 16 diamonds, 20 emeralds, 24 lapis, 1 netherite ingot | Ignites hit target for 3 seconds |
-| Tide Boots | Diamond boots + Heart of the Sea | 28 levels, 12 diamonds, 16 emeralds, 24 lapis, 1 netherite ingot | Dolphin's Grace I in water |
-| Lantern Helm | Diamond helmet + lantern | 24 levels, 10 diamonds, 12 emeralds, 20 lapis | Night Vision while worn |
+| Forgecleaver Sword-Pickaxe | Diamond pickaxe + diamond sword | 30 levels, 12 diamonds, 16 emeralds, 24 lapis, 1 netherite ingot | A real combined mining and melee tool. Adds 6 attack damage (7 total with the player's base hit). **Use** to reveal nearby ore with blue rays (6-block radius, 30-second cooldown). |
+| Cinderbolt Pickaxe | Diamond pickaxe + blaze rod | 35 levels, 16 diamonds, 20 emeralds, 24 lapis, 1 netherite ingot | Mines stone and ore. **Use** to fire a visible, terrain-safe bolt for 5 damage and 2 seconds of fire (15-second cooldown). |
+| Undertow Boots | Diamond boots + Heart of the Sea | 28 levels, 12 diamonds, 16 emeralds, 24 lapis, 1 netherite ingot | Custom-looking boots grant Dolphin’s Grace I in water. **Sneak in water** to surge forward; release and sneak again after 25 seconds. |
+| Magnetwood Axe | Diamond axe + lodestone | 32 levels, 14 diamonds, 20 emeralds, 24 lapis, 1 netherite ingot | Cuts wood. **Use** to pull up to 12 dropped item stacks within 8 blocks to you (20-second cooldown). |
 
-Edit `CONFIG.combinations` in `behavior_pack/scripts/config.js` to adjust costs. The supplied *Combine Anything V2* pack inspired this mechanic; its 1.26.40/Script API 2.7.0 dependency prevents directly bundling it into this 1.21.90 pack. Its world-destroying TNT and high-damage weapons are not included.
+All four items have separate inventory artwork drawn from the supplied *Combine Anything V2.1* add-on by **StarkerYT**. Undertow Boots also use its worn boot model. Their effects are implemented by Olympus scripts to keep them within this pack's Bedrock 1.21.90 requirements. The destructive TNT and extreme-damage items from the source add-on are not bundled.
+
+Edit `CONFIG.combinations` and `CONFIG.forgePowers` in `behavior_pack/scripts/config.js` to adjust costs and powers. The item tooltip describes the power and control when forged; the Forge Guide shows it before purchase. The Creative Hephaestus Test Kit gives the same four finished items for testing.
 
 **Flight:** Zeus and Apollo rise while holding **jump**, descend while holding **sneak**, hover when both are released, and steer with normal movement. Apollo needs direct sunlight to activate and sustain flight.
 
@@ -102,7 +104,7 @@ Each god has a custom relic icon, colored particle emblem, sound, and ambient au
 - Stable Bedrock Script API 2.0.0 does not expose Creative flight to Survival players. Flight uses per-tick vertical control while players remain in Survival.
 - Stable Script API 2.0.0 has no cancellable fall-damage event. Hermes uses Slow Falling, which changes descent speed; Poseidon instead receives brief Resistance V while falling in rain or thunder. That may also briefly block other damage during the fall. Test extreme falls and server lag before relying on it.
 - Bedrock caps real enchantments at vanilla levels. Divine Fortune IV is Fortune III plus a scripted ore bonus. Apollo's enhanced bow damage is a scripted bonus on hit.
-- Combined items use standard Minecraft equipment with persistent per-item Script API metadata and lore. Their added effects are scripted; the four recipes do not raise vanilla enchantment limits. A missing or incompatible behavior pack removes those added effects. A scripted +1 hit follows the vanilla melee hit and may have slightly different armor interactions.
+- New forge results are custom Bedrock items with unique artwork and scripted powers; they do not raise vanilla enchantment limits. The old vanilla-equipment combinations remain supported for worlds that already own them. A missing or incompatible behavior pack removes scripted powers.
 - Hellfire uses a non-destructive custom projectile with vanilla fireball artwork. Oracle uses viewer-only target halos and a particle bearing ray; Bedrock Script API 2.0 does not offer a viewer-only through-wall outline, so solid walls may hide target halos. Solar Flare particles and sounds are cosmetic and do not create a world explosion.
 - Rain powers use the stable weather-change event. If installed during existing rain, a weather transition may be needed before the pack recognizes it. Covered areas and dry biomes do not count as open rain.
 
@@ -126,9 +128,9 @@ For player-specific functions from a command block, use `execute as <player> at 
 
 Stop the Bedrock Dedicated Server and back up the world. Extract the `.mcaddon` ZIP. Copy `behavior_pack` to `behavior_packs/OlympusSMP_BP` and `resource_pack` to `resource_packs/OlympusSMP_RP`. Preserve other entries and add these entries to the arrays in the world's pack files:
 
-`world_behavior_packs.json`: `{"pack_id":"a06ad1f9-8b44-4af1-995a-95dc9c684c25","version":[2,5,0]}`
+`world_behavior_packs.json`: `{"pack_id":"a06ad1f9-8b44-4af1-995a-95dc9c684c25","version":[2,6,0]}`
 
-`world_resource_packs.json`: `{"pack_id":"def06a91-6e05-457a-a359-714565d4c32c","version":[2,5,0]}`
+`world_resource_packs.json`: `{"pack_id":"def06a91-6e05-457a-a359-714565d4c32c","version":[2,6,0]}`
 
 Restart, join as operator, follow **Start here: add the pack to your world** above, and have clients accept the resource pack. For a Realm, activate the pack on a local world, verify it, then upload that world with Replace World.
 
