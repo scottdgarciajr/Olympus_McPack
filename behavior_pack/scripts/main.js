@@ -3,17 +3,18 @@ import { ActionFormData } from '@minecraft/server-ui';
 import { CONFIG } from './config.js';
 import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, dionysusBuffAmplifier, divineOreDrop, stockMissingRelics } from './rules.js';
 import { FLAIR, flairPoints } from './flair.js';
-import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl } from './crown.js';
+import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl, CROWN_OFFERINGS } from './crown.js';
+import { kratosStrike, kratosKill, kratosTick, kratosDeath, kratosStatus, kratosUsePower } from './kratos.js';
 import { configureDominion, inUnderworldDominion, temporaryBlock, dominionFlair } from './dominion.js';
 import { configureForge, isForge, inHall, removePortableForge, placePortableForge, showForge, showForgeGuide, creativeForgeSamples, useForgeItem, onForgeHurt, onForgeProjectileHitEntity, onForgeProjectileHitBlock, forgeProjectileTick, forgeEquipmentTick } from './forge.js';
 import { configureDivine, armSolarFlare, oracleSight, hellfire, onDivineProjectileSpawn, onDivineBowRelease, onDivineProjectileHitBlock, onDivineProjectileHitEntity, divineTick } from './divine_combat.js';
 import { findMadnessLanding } from './teleport.js';
 
-const GODS = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus'];
+const GODS = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus', 'kratos'];
 const TITLES = {
   hermes: 'God of Travelers', zeus: 'God of Thunder', poseidon: 'God of the Sea',
   hades: 'God of the Underworld', ares: 'God of War', apollo: 'God of the Sun',
-  hephaestus: 'God of Craftsmanship', dionysus: 'God of Wine and Madness'
+  hephaestus: 'God of Craftsmanship', dionysus: 'God of Wine and Madness', kratos: 'Forbidden God Slayer'
 };
 const DESCRIPTIONS = {
   hermes: 'Speed VI, Flash-fast sprint, fall protection, and toggleable Divine Leap; Weakness III. Divine Pearl every 5 minutes.',
@@ -23,7 +24,8 @@ const DESCRIPTIONS = {
   ares: 'Strength II and Resistance II; Slowness III. Strength V and Resistance III rage for 30 seconds every 5 minutes.',
   apollo: 'Infinite Solar Bow, Sunflight, Solar Flare arrow, and Oracle’s Sight; Weakness III and Mining Fatigue II without sunlight.',
   hephaestus: 'Haste IV, Divine Fortune IV pickaxe, and costly item combinations at the Hall or portable Divine Forge; permanent Weakness III.',
-  dionysus: 'Every new foe can be cursed immediately. Random buffs include Regeneration II and Resistance III at most; each hit adds Nausea, teleports you, and may blind you. Divine Harvest replenishes used Bone Meal.'
+  dionysus: 'Every new foe can be cursed immediately. Random buffs include Regeneration II and Resistance III at most; each hit adds Nausea, teleports you, and may blind you. Divine Harvest replenishes used Bone Meal.',
+  kratos: 'Each melee hit on a god steals a random divine gift or burden for 8 seconds. A god kill copies one random gift or burden until Kratos dies. A later kill replaces it.'
 };
 const CONTROLS = {
   hermes: 'Speed VI always; sprint for Speed XIV. Use relic: pearl (5m). Sneak-use: mobility menu for Slow Falling and Divine Leap toggles. Weakness III.',
@@ -33,29 +35,30 @@ const CONTROLS = {
   ares: 'Use relic: War Rage, Strength V and Resistance III for 30s (5m). Strength II, Resistance II, Slowness III are passive.',
   apollo: 'Use relic for Sunflight (3m), arm a Solar Flare arrow (45s after impact), or Oracle’s Sight (2m). One arrow fuels your infinite Solar Bow.',
   hephaestus: 'Haste IV and Weakness III. Use your relic for the Forge Guide. Craft a portable forge with eight iron ingots around a crafting table.',
-  dionysus: 'Melee-hit different foes for random buffs. Regeneration caps at II for 60s and Resistance at III; other buffs can reach IV. Same foe: 3s cooldown. Used Bone Meal replenishes.'
+  dionysus: 'Melee-hit different foes for random buffs. Regeneration caps at II for 60s and Resistance at III; other buffs can reach IV. Same foe: 3s cooldown. Used Bone Meal replenishes.',
+  kratos: 'Melee-hit a god to steal one random representative gift or burden for 8s. Kill a god to hold one random gift or burden until you die. Use relic for status.'
 };
 const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigue', 'conduit_power',
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '2.6.0';
+const PACK_VERSION = '2.7.0';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
-  ares: [5, 5, 20], apollo: [27, 5, 20], hephaestus: [5, 5, 27], dionysus: [27, 5, 27]
+  ares: [5, 5, 20], apollo: [27, 5, 20], hephaestus: [5, 5, 27], dionysus: [27, 5, 27], kratos: [16, -5, 23]
 };
 const OFFERINGS = {
   hermes: ['minecraft:feather', 8], zeus: ['minecraft:copper_ingot', 1],
   poseidon: ['minecraft:cod', 3], hades: ['minecraft:bone', 4],
   ares: ['minecraft:stone_sword', 1], apollo: ['minecraft:bow', 1],
-  hephaestus: ['minecraft:furnace', 1], dionysus: ['minecraft:sweet_berries', 3]
+  hephaestus: ['minecraft:furnace', 1], dionysus: ['minecraft:sweet_berries', 3], kratos: ['minecraft:nether_star',1]
 };
 const WEAKNESSES = {
   hermes: 'Weakness III', zeus: 'Mining Fatigue II', poseidon: 'Slowness III and Weakness III in Nether or desert',
   hades: 'Slowness III and Weakness III by day', ares: 'Slowness III',
   apollo: 'Weakness III and Mining Fatigue II outside direct sunlight',
-  hephaestus: 'Weakness III', dionysus: 'Rising Nausea and possible Blindness as madness stacks'
+  hephaestus: 'Weakness III', dionysus: 'Rising Nausea and possible Blindness as madness stacks', kratos: 'No innate combat buffs; stolen burdens can harm him'
 };
 const NEW_MOUNTAIN_HEIGHT = 24;
 const MOUNTAIN_RADIUS = 31;
@@ -78,7 +81,12 @@ const PERSONAL_TOOLS = {
 };
 let currentWeather;
 const key = (name) => `olympus:${name}`;
-const role = (p) => p.getDynamicProperty(key('role')) || '';
+const role = (p) => {
+  const god=p.getDynamicProperty(key('role')) || '';
+  if (god && revoked(god).includes(p.name)) return '';
+  return god;
+};
+function revoked(god) { try { return JSON.parse(world.getDynamicProperty(key(`revoked_${god}`))||'[]'); } catch { return []; } }
 const hermesSlowfallEnabled = (p) => p.getDynamicProperty(key('hermesSlowfall')) !== false;
 const poseidonSpeedEnabled = (p) => p.getDynamicProperty(key('poseidonSpeed')) !== false;
 function weather() {
@@ -120,6 +128,7 @@ function owners(god) {
   try { const parsed = JSON.parse(raw); return Array.isArray(parsed) ? parsed : [raw]; }
   catch { return [raw]; }
 }
+function sharedGod(god) { return world.getDynamicProperty(key(`shared_${god}`))===true; }
 const owner = (god) => owners(god)[0] || '';
 const now = () => Date.now();
 configureCrown({ role, temple: () => temple(), offeringCount: (p,id) => offeringCount(p,id), takeOffering: (p,id,n) => takeOffering(p,id,n), weather, setWeather: value => { currentWeather = value; world.setDynamicProperty(key('weather'), value); }, fail });
@@ -380,10 +389,11 @@ function onlineRoleCount() {
 }
 function claim(player, god) {
   const old = role(player);
-  const refusal = claimRejection(old, owner(god), onlineRoleCount(), CONFIG.maxPlayers, CONFIG.allowDuplicateGods);
+  const refusal = claimRejection(old, owner(god), onlineRoleCount(), CONFIG.maxPlayers, CONFIG.allowDuplicateGods || sharedGod(god));
   if (refusal === 'already_assigned') { tell(player, `You are already ${nameOf(old)}. An operator must reset your role.`); return; }
   if (refusal === 'god_taken') { tell(player, `${nameOf(god)} has already been claimed.`); return; }
   if (refusal === 'full') { tell(player, 'All god places are taken.'); return; }
+  world.setDynamicProperty(key(`revoked_${god}`),JSON.stringify(revoked(god).filter(name=>name!==player.name)));
   player.setDynamicProperty(key('role'), god);
   world.setDynamicProperty(key(`owner_${god}`), JSON.stringify([...owners(god), player.name]));
   tell(player, CONFIG.claimMessage.replace('{god}', nameOf(god)).replace('{title}', TITLES[god]));
@@ -452,14 +462,14 @@ function showTempleAltar(player, god) {
   const r = reservation(god);
   const claimed = owner(god);
   const offer = `${count} ${type.replace('minecraft:', '').replaceAll('_', ' ')}`;
-  const state = claimed ? `Claimed by ${claimed}` : r ? `Reserved by ${r.name} for ${Math.ceil((r.until-now())/60000)} more minute(s)` : 'Available';
+  const state = claimed ? `Claimed by ${owners(god).join(', ')}${sharedGod(god)?' (additional claims open)':''}` : r ? `Reserved by ${r.name} for ${Math.ceil((r.until-now())/60000)} more minute(s)` : 'Available';
   const form = new ActionFormData().title(`§6${nameOf(god)} — ${TITLES[god]}`)
     .body(`Abilities: ${DESCRIPTIONS[god]}\n\nWeakness: ${WEAKNESSES[god]}\nOffering: ${offer}\n${state}\n\nRelic: ${CONTROLS[god]}`);
-  if (!claimed && !role(player)) form.button(r?.name === player.name ? `Offer ${offer} and claim` : r ? 'Reserved' : 'Reserve for 10 minutes');
+  if ((!claimed || sharedGod(god)) && !role(player)) form.button(r?.name === player.name ? `Offer ${offer} and claim` : r ? 'Reserved' : 'Reserve for 10 minutes');
   else form.button('Close');
   form.show(player).then(result => {
     if (result.canceled || result.selection !== 0 || !atTempleAltar(player, god)) return;
-    if (owner(god) || role(player)) { tell(player, 'This god is unavailable.'); return; }
+    if ((owner(god) && !sharedGod(god)) || role(player)) { tell(player, 'This god is unavailable.'); return; }
     const active = reservation(god);
     if (!active) {
       const other = GODS.find(g => reservation(g)?.name === player.name);
@@ -515,7 +525,24 @@ function giveTempleSeal(player) {
 function placeTemple(dimension, site) {
   world.structureManager.place('olympus:hall_of_eight', dimension, site, { includeBlocks: true, includeEntities: false });
   world.setDynamicProperty(key('temple'), JSON.stringify({ ...site, dimension: dimension.id }));
+  ensureForbiddenVault();
   world.sendMessage(prefix + `Hall of Eight Gods placed in ${dimension.id} at ${site.x}, ${site.y}, ${site.z}.`);
+}
+function ensureForbiddenVault(player) {
+  const t=temple();
+  if (!t || world.getDynamicProperty(key('forbiddenVault'))===true) return;
+  try {
+    const dim=world.getDimension(t.dimension||'minecraft:overworld');
+    if (t.y-7<dim.heightRange.min) { if (player) tell(player,'The Hall is too low for the forbidden chamber.'); return; }
+    if (!world.structureManager.getPackStructureIds().includes('olympus:forbidden_vault')) throw new Error('Forbidden vault structure missing');
+    // Require the Hall itself to be loaded before cutting its entrance.
+    const entrance=dim.getBlock({x:t.x+16,y:t.y+2,z:t.z+27});
+    if (!entrance) throw new Error('Hall chunk is not loaded');
+    world.structureManager.place('olympus:forbidden_vault',dim,{x:t.x+10,y:t.y-7,z:t.z+19},{includeBlocks:true,includeEntities:false});
+    for (const y of [t.y+1,t.y+2]) dim.getBlock({x:t.x+16,y,z:t.z+27})?.setType('minecraft:scaffolding');
+    world.setDynamicProperty(key('forbiddenVault'),true);
+    if (player) tell(player,'The forbidden chamber is open beneath the Hall. Descend the scaffolding near the rear center.');
+  } catch(e) { fail(e); if (player) tell(player,'The lower chamber could not be added. Stand inside the loaded Hall and run setup again.'); }
 }
 function ensureForgeStation(player) {
   const t = temple();
@@ -535,7 +562,7 @@ function placeTempleWithSeal(player) {
   const site = { x: Math.floor(player.location.x) - 16, y: Math.floor(player.location.y), z: Math.floor(player.location.z) - 16 };
   system.runJob((function* () {
     try {
-      if (site.y < dimension.heightRange.min || site.y + TEMPLE_SIZE.y > dimension.heightRange.max) {
+      if (site.y-7 < dimension.heightRange.min || site.y + TEMPLE_SIZE.y > dimension.heightRange.max) {
         tell(player, 'This height cannot fit the 15-block-tall Hall. Move up or down and use the seal again.');
         return;
       }
@@ -547,7 +574,7 @@ function placeTempleWithSeal(player) {
   })());
 }
 function setupTemple(player) {
-  if (temple()) { ensureForgeStation(player); tell(player, 'The Hall of Eight Gods is already placed.'); return; }
+  if (temple()) { ensureForgeStation(player); ensureForbiddenVault(player); tell(player, 'The Hall of Eight Gods is already placed.'); return; }
   if (templeBuilding) { tell(player, 'Temple site search is already running.'); return; }
   if (player.dimension.id !== 'minecraft:overworld') { tell(player, 'Run setup in the Overworld.'); return; }
   templeBuilding = true;
@@ -642,6 +669,7 @@ function reset(player) {
   player.setDynamicProperty(key('flightUntil'), undefined);
   player.setDynamicProperty(key('madnessStacks'), undefined);
   player.setDynamicProperty(key('madnessLast'), undefined);
+  kratosDeath(player);
   lastFlairUse.delete(player.id);
   hermesTrailTick.delete(player.id);
   hermesFallTick.delete(player.id);
@@ -650,6 +678,23 @@ function reset(player) {
   poseidonFallGuardTick.delete(player.id);
   for (const targetKey of dionysusTargetCooldowns.keys()) if (targetKey.startsWith(`${player.id}:`)) dionysusTargetCooldowns.delete(targetKey);
   tell(player, `${nameOf(god)} has been released. Its place is available again.`);
+}
+function releaseGod(operator,god) {
+  if (!operator.isOp()) { tell(operator,'Only a world operator can release a claimed god.'); return; }
+  if (!GODS.includes(god)) { tell(operator,`Unknown god: ${god}.`); return; }
+  const previous=owners(god);
+  if (!previous.length) { tell(operator,`${nameOf(god)} is already available.`); return; }
+  for (const p of world.getAllPlayers()) if (previous.includes(p.name) && role(p)===god) reset(p);
+  world.setDynamicProperty(key(`revoked_${god}`),JSON.stringify([...new Set([...revoked(god),...previous])]));
+  world.setDynamicProperty(key(`owner_${god}`),undefined);
+  world.setDynamicProperty(key(`reservation_${god}`),undefined);
+  tell(operator,`${nameOf(god)} is free to claim again. Previous owners lose that role on return.`);
+}
+function openGod(operator,god) {
+  if (!operator.isOp()) { tell(operator,'Only a world operator can share a god.'); return; }
+  if (!GODS.includes(god)) { tell(operator,`Unknown god: ${god}.`); return; }
+  world.setDynamicProperty(key(`shared_${god}`),true);
+  tell(operator,`${nameOf(god)} now accepts additional claimants. Existing owners keep their powers.`);
 }
 function giveItem(player, item) {
   const inventory = player.getComponent('minecraft:inventory')?.container;
@@ -755,6 +800,32 @@ function giveHephaestusTestKit(player) {
   for (const item of creativeForgeSamples()) giveItem(player,item);
   tell(player,'Creative test gear granted: Forge Relic, Divine Fortune pickaxe, portable forge, and all four finished combinations. Search Creative for this kit to get another set.');
 }
+function creativeGod(player,god) {
+  if (role(player)) reset(player);
+  player.setDynamicProperty(key('role'),god);
+  world.setDynamicProperty(key(`revoked_${god}`),JSON.stringify(revoked(god).filter(name=>name!==player.name)));
+  world.setDynamicProperty(key(`owner_${god}`),JSON.stringify([...new Set([...owners(god),player.name])]));
+  giveEquipment(player,god);
+  giveItem(player,new ItemStack(`olympus:${god}_relic`,1));
+  updatePlayer(player);
+  tell(player,`Creative test role: ${nameOf(god)}. Use this kit again to change gods.`);
+}
+function creativeTestMenu(player) {
+  if (String(player.getGameMode()).toLowerCase()!=='creative') { tell(player,'Creative Test Kit requires Creative mode.'); return; }
+  const form=new ActionFormData().title('§6OLYMPUS CREATIVE TEST KIT')
+    .body('Pick a god instantly, or collect everything needed to claim or duplicate a Crown at the Hall throne.');
+  for (const god of GODS) form.button(`${nameOf(god)} — ${TITLES[god]}`);
+  form.button('Give Crown trial offerings + Dragon Egg').button('Release my god').button('Close');
+  form.show(player).then(r=>{
+    if (r.selection===undefined) return;
+    if (r.selection<GODS.length) creativeGod(player,GODS[r.selection]);
+    else if (r.selection===GODS.length) {
+      for (const o of CROWN_OFFERINGS) giveItem(player,new ItemStack(o.id,1));
+      giveItem(player,new ItemStack('minecraft:dragon_egg',1));
+      tell(player,'Bring these offerings to the Hall throne. Each additional Crown consumes a new set; the Dragon Egg remains yours.');
+    } else if (r.selection===GODS.length+1) reset(player);
+  }).catch(fail);
+}
 function replaceLostBoneMeal(player) {
   const inventory=player.getComponent('minecraft:inventory')?.container;
   if (!inventory || role(player)!=='dionysus') return;
@@ -853,6 +924,8 @@ function updatePlayer(player) {
         break;
       case 'hephaestus':
         effect(player, 'haste', 5, 3); godPenalty(player, 'weakness', 5, 2); break;
+      case 'kratos':
+        kratosTick(player); break;
     }
   } catch (e) { if (CONFIG.debug) fail(e); }
 }
@@ -954,6 +1027,8 @@ function special(player, god, sneaking) {
       replaceLostBoneMeal(player);
       tell(player, 'Divine Madness triggers on melee hits. New foes trigger instantly; the same foe needs 3 seconds.');
       cosmeticFlair(player, god);
+    } else if (god === 'kratos') {
+      if (!kratosUsePower(player,weather())) tell(player,kratosStatus(player));
     } else {
       tell(player, `${nameOf(god)}'s powers are passive or equipment-based. Your relic can display your divine signature.`);
       cosmeticFlair(player, god);
@@ -1038,6 +1113,10 @@ function summonMountain(player) {
 }
 
 system.beforeEvents.startup.subscribe((event) => {
+  event.itemComponentRegistry.registerCustomComponent('olympus:creative_test_kit_use', {
+    onUse: e=>system.run(()=>creativeTestMenu(e.source)),
+    onUseOn: e=>system.run(()=>creativeTestMenu(e.source))
+  });
   event.itemComponentRegistry.registerCustomComponent('olympus:hephaestus_test_kit_use', {
     onUse: (useEvent) => system.run(() => { try { giveHephaestusTestKit(useEvent.source); } catch (e) { fail(e); } }),
     onUseOn: (useEvent) => system.run(() => { try { giveHephaestusTestKit(useEvent.source); } catch (e) { fail(e); } })
@@ -1084,6 +1163,12 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     system.run(() => { try { showThrone(player); } catch (e) { fail(e); } });
     return;
   }
+  if (t && player.dimension.id === (t.dimension || 'minecraft:overworld') && event.block.typeId==='minecraft:netherite_block' &&
+      b.x===t.x+16 && b.y===t.y-5 && b.z===t.z+23) {
+    event.cancel=true;
+    system.run(()=>{ try { showTempleAltar(player,'kratos'); } catch(e) { fail(e); } });
+    return;
+  }
   if (t && player.dimension.id === (t.dimension || 'minecraft:overworld') && event.block.typeId === 'minecraft:enchanting_table') {
     const god = GODS.find(g => { const [dx, dy, dz] = TEMPLE_ALTARS[g]; return b.x === t.x+dx && b.y === t.y+dy && b.z === t.z+dz; });
     if (god) {
@@ -1100,7 +1185,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   }
   const itemId = event.itemStack?.typeId || '';
   if (itemId && inHall(player.dimension.id,b) &&
-      itemId !== 'olympus:crown_control' && itemId !== 'olympus:hephaestus_test_kit' && !GODS.some(god => itemId === `olympus:${god}_relic`)) {
+      itemId !== 'olympus:crown_control' && itemId !== 'olympus:hephaestus_test_kit' && itemId !== 'olympus:creative_test_kit' && !GODS.some(god => itemId === `olympus:${god}_relic`)) {
     event.cancel=true;
     return;
   }
@@ -1112,6 +1197,9 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
 world.afterEvents.entityHitEntity.subscribe((event) => {
   const player = event.damagingEntity;
   const target = event.hitEntity;
+  if (player.typeId==='minecraft:player' && target.typeId==='minecraft:player' && role(player)==='kratos') {
+    try { kratosStrike(player,target,role(target)); showFlair(player,'kratos',true); } catch(e) { fail(e); }
+  }
   if (player.typeId !== 'minecraft:player' || role(player) !== 'dionysus') return;
   if (!CONFIG.friendlyFire && target.typeId === 'minecraft:player') return;
   const targetKey = `${player.id}:${target.id}`;
@@ -1236,7 +1324,24 @@ world.afterEvents.weatherChange.subscribe((event) => {
   currentWeather = event.newWeather;
   world.setDynamicProperty(key('weather'), currentWeather);
 });
-world.afterEvents.entityDie.subscribe((event) => { try { transferOnDeath(event); } catch (e) { fail(e); } });
+world.afterEvents.entityDie.subscribe((event) => {
+  try { transferOnDeath(event); } catch(e) { fail(e); }
+  try {
+    const victim=event.deadEntity;
+    if (victim.typeId==='minecraft:player') {
+      kratosDeath(victim);
+      const source=event.damageSource;
+      const direct=source?.damagingEntity;
+      let projectileOwner;
+      try { projectileOwner=source?.damagingProjectile?.getComponent('minecraft:projectile')?.owner; } catch {}
+      const killer=direct?.typeId==='minecraft:player'?direct:projectileOwner;
+      if (killer?.typeId==='minecraft:player' && killer.id!==victim.id) {
+        giveItem(killer,new ItemStack('olympus:war_trophy',1));
+        if (role(killer)==='kratos' && role(victim)) kratosKill(killer,role(victim));
+      }
+    }
+  } catch (e) { fail(e); }
+});
 world.afterEvents.playerLeave.subscribe((event) => { try { crownOwnerLeft(event.playerId); } catch (e) { fail(e); } });
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (!event.id.startsWith('olympus:')) return;
@@ -1251,6 +1356,8 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
     if (event.id === 'olympus:crown_recover') recoverCrown(player);
     if (event.id === 'olympus:crown_glory') showLeaderboard(player);
     if (event.id === 'olympus:crown_help') crownHelp(player);
+    if (event.id === 'olympus:open_god') openGod(player,event.message.trim().toLowerCase());
+    if (event.id === 'olympus:release_god') releaseGod(player,event.message.trim().toLowerCase());
     if (event.id === 'olympus:assign') {
       const god = event.message.trim().toLowerCase();
       if (!GODS.includes(god)) { tell(player, `Unknown god: ${god}`); return; }

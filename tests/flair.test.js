@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { FLAIR, flairPoints } from '../behavior_pack/scripts/flair.js';
 
 test('every god has a distinct, bounded cosmetic signature', () => {
-  const gods = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus'];
+  const gods = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus', 'kratos'];
   assert.deepEqual(Object.keys(FLAIR), gods);
   const shapes = new Set();
   for (const god of gods) {

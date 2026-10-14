@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:creative_test_kit",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Olympus Creative Test Kit"
+      },
+      "minecraft:icon": "olympus_creative_test_kit",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Open God and Crown Test Menu",
+      "olympus:creative_test_kit_use": {}
+    }
+  }
+}

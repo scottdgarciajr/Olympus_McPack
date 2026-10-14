@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-VERSION = [2, 6, 0]
+VERSION = [2, 7, 0]
 GODS = {
     'hermes': ('Hermes Winged Relic', '#f4cf58'),
     'zeus': ('Zeus Thunder Relic', '#f4eb7b'),
@@ -16,6 +16,7 @@ GODS = {
     'apollo': ('Apollo Sun Relic', '#ffb94b'),
     'hephaestus': ('Hephaestus Forge Relic', '#da8e4d'),
     'dionysus': ('Dionysus Goblet Relic', '#b06bd5'),
+    'kratos': ('Kratos God Slayer Relic', '#6d2529'),
 }
 RELIC_BUTTONS = {
     'hermes': 'Use: Pearl / Sneak: Mobility Menu',
@@ -26,6 +27,7 @@ RELIC_BUTTONS = {
     'apollo': 'Use: Apollo ability menu',
     'hephaestus': 'Open Divine Forge Guide',
     'dionysus': 'Use: Madness Guide / Divine Harvest',
+    'kratos': 'Use: Stolen Power Status',
 }
 
 def relic_icon(god, color):
@@ -70,6 +72,10 @@ def relic_icon(god, color):
         d.polygon(pts([(9, 10), (23, 10), (20, 18), (17, 21), (15, 21), (12, 18)]), fill=color, outline=light)
         d.line(pts([(16, 21), (16, 24), (12, 24), (20, 24)]), fill=light, width=scale)
         d.ellipse(box((18, 11, 20, 13)), fill=light)
+    elif god == 'kratos':
+        d.line(pts([(10, 24), (22, 8)]), fill=light, width=3*scale)
+        d.line(pts([(9, 11), (21, 23)]), fill='#e4624d', width=3*scale)
+        d.ellipse(box((13, 13, 19, 19)), outline='#ffbb76', width=scale)
     return im.resize((32, 32), Image.Resampling.LANCZOS)
 
 def write_json(path, data):
@@ -80,7 +86,7 @@ bp_uuid = 'a06ad1f9-8b44-4af1-995a-95dc9c684c25'
 rp_uuid = 'def06a91-6e05-457a-a359-714565d4c32c'
 write_json(BP / 'manifest.json', {
     'format_version': 2,
-    'header': {'name': 'Olympus SMP Behavior', 'description': 'Eight Greek god roles and Mount Olympus', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 90]},
+    'header': {'name': 'Olympus SMP Behavior', 'description': 'Nine Greek god roles and Mount Olympus', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 90]},
     'modules': [
         {'type': 'data', 'uuid': '45604c22-4d55-478e-beb7-fca61db38eaf', 'version': VERSION},
         {'type': 'script', 'language': 'javascript', 'entry': 'scripts/main.js', 'uuid': 'c6515f3a-93dc-4971-987c-ad95b689d22f', 'version': VERSION}
@@ -98,6 +104,8 @@ write_json(RP / 'manifest.json', {
 texture_data = {}
 texture_data['olympus_divine_forge'] = {'textures': 'textures/items/hephaestus_relic'}
 texture_data['olympus_hephaestus_test_kit'] = {'textures': 'textures/items/hephaestus_relic'}
+texture_data['olympus_creative_test_kit'] = {'textures': 'textures/items/crown'}
+texture_data['olympus_war_trophy'] = {'textures': 'textures/items/ares_relic'}
 for item, source in {
     'forge_sword_pickaxe': 'forgecleaver',
     'forge_fireball_pickaxe': 'cinderbolt',
@@ -122,6 +130,16 @@ for god, (label, color) in GODS.items():
     })
     texture_data[f'olympus_{god}'] = {'textures': f'textures/items/{god}_relic'}
     relic_icon(god, color).save(RP / 'textures' / 'items' / f'{god}_relic.png')
+
+for name,label,button,hook,icon in [
+    ('creative_test_kit','Olympus Creative Test Kit','Open God and Crown Test Menu','olympus:creative_test_kit_use','olympus_creative_test_kit'),
+    ('war_trophy','War Trophy','An offering from a player victory',None,'olympus_war_trophy')]:
+    components={'minecraft:display_name':{'value':label},'minecraft:icon':icon,'minecraft:max_stack_size':1}
+    if hook:
+        components['minecraft:interact_button']=button
+        components[hook]={}
+    write_json(BP/'items'/f'{name}.json',{'format_version':'1.21.90','minecraft:item':{
+        'description':{'identifier':f'olympus:{name}','menu_category':{'category':'items'}},'components':components}})
 
 write_json(BP / 'items' / 'mountain_sigil.json', {
     'format_version': '1.21.90',
@@ -226,6 +244,7 @@ write_json(RP / 'textures' / 'item_texture.json', {'resource_pack_name': 'Olympu
 functions = BP / 'functions' / 'olympus'
 functions.mkdir(parents=True, exist_ok=True)
 (functions / 'give_all.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus relic kit for operators. Players claim gods at the Hall of Eight Gods altars with offerings. Overflow may drop at your feet."}]}\n' + '\n'.join(f'give @s olympus:{g}_relic 1' for g in GODS) + '\n', encoding='utf-8')
+(functions / 'creative_kit.mcfunction').write_text('give @s olympus:creative_test_kit 1\n',encoding='utf-8')
 (functions / 'summon_mountain.mcfunction').write_text('give @s olympus:mountain_sigil 1\ntellraw @s {"rawtext":[{"text":"Use the sigil in a large clear area in the Overworld. Mount Olympus rises 33 blocks east of you."}]}\n', encoding='utf-8')
 (functions / 'help.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus: /function olympus/setup searches near world spawn and places the Hall of Eight Gods. Interact with a god altar to reserve for 10 minutes, gather its offering, and return to claim. /function olympus/controls shows powers. /function olympus/status and /function olympus/reset are operator tools."}]}\n', encoding='utf-8')
 (functions / 'setup.mcfunction').write_text('scriptevent olympus:setup\n', encoding='utf-8')

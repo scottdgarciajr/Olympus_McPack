@@ -129,10 +129,8 @@ function hellfireImpact(event,target) {
     flame(event.dimension,{x:point.x+Math.cos(angle)*0.5,y:point.y+0.25,z:point.z+Math.sin(angle)*0.5});
   }
   sound(event.dimension,'mob.ghast.fireball',point);
-  if (owner && owner.dimension.id === event.dimension.id && eligible(target,owner))
-    try {
-      target.applyDamage(CONFIG.hellfire.damage,{cause:EntityDamageCause.projectile,damagingEntity:owner});
-    } catch (e) { api.fail(e); }
+  // The projectile's native impact and explosion components deliver damage.
+  // Do not add scripted damage here, even if Bedrock also reports a hit event.
   return true;
 }
 export function onDivineProjectileHitEntity(event) {

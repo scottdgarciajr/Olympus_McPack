@@ -1,5 +1,5 @@
 export const CONFIG = {
-  maxPlayers: 8,
+  maxPlayers: 64,
   allowDuplicateGods: false,
   claimMessage: 'You have become {god} — {title}. Your powers persist after death and rejoining.',
   hermesSpeedAmplifier: 5,
@@ -9,7 +9,7 @@ export const CONFIG = {
   cooldownSeconds: { hermesPearl: 300, zeusLightning: 180, zeusFlight: 180, aresRage: 300, apolloSunstep: 180, apolloSolarFlare: 45, apolloOracle: 120, hadesHellfire: 15 },
   solarFlare: { radius: 3, areaDamage: 4, blindnessSeconds: 3, arrowTimeoutSeconds: 12 },
   oracle: { radius: 40, durationSeconds: 8 },
-  hellfire: { damage: 6, projectileSpeed: 1.5, lifetimeTicks: 40 },
+  hellfire: { projectileSpeed: 1.5, lifetimeTicks: 40 },
   hermesLeapAmplifier: 1,
   zeusThunderLightningSeconds: 5,
   combinations: {
@@ -18,7 +18,7 @@ export const CONFIG = {
     water_boots: { xp: 28, diamond: 12, emerald: 16, lapis_lazuli: 24, netherite_ingot: 1 },
     magnet_axe: { xp: 32, diamond: 14, emerald: 20, lapis_lazuli: 24, netherite_ingot: 1 }
   },
-  forgePowers: { orePulseRadius: 6, orePulseCooldownSeconds: 30, fireboltDamage: 5, fireboltIgniteSeconds: 2, fireboltCooldownSeconds: 15, waterSurgeCooldownSeconds: 25, magnetRadius: 8, magnetMaxItems: 12, magnetCooldownSeconds: 20 },
+  forgePowers: { orePulseRadius: 6, orePulseCooldownSeconds: 30, fireboltCooldownSeconds: 15, waterSurgeCooldownSeconds: 25, magnetRadius: 8, magnetMaxItems: 12, magnetCooldownSeconds: 20 },
   dominion: { radius: 12, durationSeconds: 30, cooldownSeconds: 300, maxBlocks: 120 },
   dionysusSameTargetCooldownSeconds: 3,
   zeusFlightSeconds: 30,

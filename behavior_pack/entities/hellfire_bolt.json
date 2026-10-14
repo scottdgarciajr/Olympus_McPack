@@ -8,13 +8,54 @@
       "is_experimental": false
     },
     "components": {
-      "minecraft:collision_box": { "width": 0.25, "height": 0.25 },
+      "minecraft:collision_box": {
+        "width": 0.31,
+        "height": 0.31
+      },
       "minecraft:physics": {},
       "minecraft:projectile": {
         "gravity": 0,
         "power": 1.5,
-        "catch_fire": false,
-        "on_hit": { "remove_on_hit": {} }
+        "inertia": 1,
+        "liquid_inertia": 1,
+        "catch_fire": true,
+        "reflect_on_hurt": true,
+        "on_hit": {
+          "impact_damage": {
+            "damage": 4,
+            "knockback": false,
+            "semi_random_diff_damage": false
+          },
+          "definition_event": {
+            "affect_projectile": true,
+            "event_trigger": {
+              "event": "olympus:explode",
+              "target": "self"
+            }
+          }
+        }
+      }
+    },
+    "component_groups": {
+      "olympus:exploding": {
+        "minecraft:explode": {
+          "fuse_length": 0,
+          "fuse_lit": true,
+          "power": 1,
+          "causes_fire": true,
+          "fire_affected_by_griefing": true,
+          "destroy_affected_by_griefing": true,
+          "breaks_blocks": true
+        }
+      }
+    },
+    "events": {
+      "olympus:explode": {
+        "add": {
+          "component_groups": [
+            "olympus:exploding"
+          ]
+        }
       }
     }
   }

@@ -49,7 +49,7 @@ test('Solar Flare affects secondary targets once and never adds area damage to i
   assert.equal(nearby.damage.length,1);
 });
 
-test('Hellfire requires fire or lava and launches one non-destructive fireball', () => {
+test('Hellfire requires fire or lava and launches a native exploding fireball', () => {
   let block='minecraft:netherrack',shot,velocity;
   const dimension={id:'minecraft:the_nether',
     getBlock:()=>({typeId:block}),
@@ -72,9 +72,11 @@ test('Hellfire requires fire or lava and launches one non-destructive fireball',
   assert.deepEqual(cooldowns,['hadesHellfire']);
   const event={projectile:shot,source:player,dimension,location:{x:2,y:0,z:0},getEntityHit:()=>({entity:victim})};
   assert.equal(api.onDivineProjectileHitEntity(event),'hellfire');
-  assert.deepEqual(victim.damage.map(([n])=>n),[6]);
+  assert.deepEqual(victim.damage.map(([n])=>n),[]); // The projectile definition handles impact.
   assert.equal(api.onDivineProjectileHitEntity(event),'');
-  assert.equal(victim.damage.length,1);
+  const definition=JSON.parse(readFileSync(resolve(dirname(path),'../entities/hellfire_bolt.json'),'utf8'))['minecraft:entity'];
+  assert.equal(definition.component_groups['olympus:exploding']['minecraft:explode'].breaks_blocks,true);
+  assert.equal(definition.components['minecraft:projectile'].on_hit.impact_damage.damage,4);
   shot=undefined;
   block='minecraft:lava';
   api.hellfire(player);

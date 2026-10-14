@@ -26,51 +26,34 @@ export function temporaryBlock(dim,p) {
     return d === 0 || ((r.to === 'minecraft:water' || r.to === 'minecraft:lava') && d === 1);
   });
 }
-function safeFluid(block, dimension) {
-  const p = block.location;
-  // A single source in a stone basin cannot spread sideways or downward.
-  const neighbors = [[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[0,-1,0]];
-  try {
-    if (block.permutation.getState('liquid_depth') !== 0) return false;
-    if (!neighbors.every(([x,y,z]) => {
-      const n = dimension.getBlock({x:p.x+x,y:p.y+y,z:p.z+z});
-      return n && ['minecraft:stone','minecraft:deepslate','minecraft:tuff'].includes(n.typeId);
-    })) return false;
-    const above = dimension.getBlock({x:p.x,y:p.y+1,z:p.z});
-    return !!above?.isAir;
-  } catch { return false; }
-}
 function candidate(block,mode,dimension) {
   if (!block) return;
   const type = block.typeId;
   if (mode === 'underworld' && UNDER.has(type)) return 'minecraft:netherrack';
   if (mode === 'overworld' && OVER.has(type)) return dimension.id === 'minecraft:nether' ? 'minecraft:dirt' : 'minecraft:grass_block';
   if (dimension.id !== 'minecraft:overworld') return;
-  if (mode === 'underworld' && type === 'minecraft:water' && safeFluid(block,dimension)) return 'minecraft:lava';
-  if (mode === 'overworld' && type === 'minecraft:lava' && safeFluid(block,dimension)) return 'minecraft:water';
+  if (mode === 'underworld' && type === 'minecraft:water') return 'minecraft:lava';
+  if (mode === 'overworld' && type === 'minecraft:lava') return 'minecraft:water';
 }
 function plan(player,mode) {
   const dimension = player.dimension, center = player.location;
-  const radius = CONFIG.dominion.radius, records = [];
-  const y = Math.floor(center.y)-1;
+  const radius = CONFIG.dominion.radius, fluids = [], terrain=[];
+  const baseY=Math.floor(center.y);
   for (let dx=-radius; dx<=radius; dx++) for (let dz=-radius; dz<=radius; dz++) {
-    if (dx*dx+dz*dz>radius*radius || records.length>=CONFIG.dominion.maxBlocks) continue;
-    const location = {x:Math.floor(center.x)+dx,y,z:Math.floor(center.z)+dz};
-    let block;
-    try { block = dimension.getBlock(location); } catch { continue; }
-    let target = candidate(block,mode,dimension);
-    if (!target && dimension.id === 'minecraft:overworld') {
-      const waterLevel = {x:location.x,y:location.y+1,z:location.z};
+    if (dx*dx+dz*dz>radius*radius) continue;
+    for (const dy of [0,-1,1,-2,2,-3,3]) {
+      const location={x:Math.floor(center.x)+dx,y:baseY+dy,z:Math.floor(center.z)+dz};
       try {
-        const fluid = dimension.getBlock(waterLevel);
-        target = candidate(fluid,mode,dimension);
-        if (target) { block = fluid; location.y++; }
+        const block=dimension.getBlock(location), target=candidate(block,mode,dimension);
+        if (!target) continue;
+        const record={dimension:dimension.id,location,from:block.typeId,states:block.permutation.getAllStates(),to:target};
+        if (block.typeId==='minecraft:water'||block.typeId==='minecraft:lava') fluids.push(record);
+        else if (dy===-1||dy===-2||dy===0) terrain.push(record);
       } catch {}
     }
-    if (!target) continue;
-    records.push({dimension:dimension.id,location,from:block.typeId,states:block.permutation.getAllStates(),to:target});
   }
-  return records;
+  // Water and lava have priority so a full land transformation cannot starve them.
+  return [...fluids,...terrain].slice(0,CONFIG.dominion.maxBlocks);
 }
 function restore(s) {
   const remaining = [];
@@ -93,14 +76,14 @@ export function dismissDominion() {
   write(s);
   restore(s);
 }
-export function activateDominion(player,mode) {
+export function activateDominion(player,mode,serial) {
   const old = read();
-  if (old.corrupt || old.active || old.records?.length) return false;
-  if (!['underworld','overworld'].includes(mode) || !['minecraft:overworld','minecraft:nether'].includes(player.dimension.id)) return false;
-  if (mode === 'underworld' && player.dimension.id !== 'minecraft:overworld') return false;
+  if (old.corrupt || old.active || old.records?.length) return {ok:false,reason:'Another Dominion is active or still restoring.'};
+  if (!['underworld','overworld'].includes(mode) || !['minecraft:overworld','minecraft:nether'].includes(player.dimension.id)) return {ok:false,reason:'Dominion is unavailable in this dimension.'};
+  if (mode === 'underworld' && player.dimension.id !== 'minecraft:overworld') return {ok:false,reason:'Underworld Dominion requires the Overworld.'};
   const records = plan(player,mode);
-  if (!records.length) return false;
-  const s = {active:true,mode,ownerId:player.id,center:{...player.location},dimension:player.dimension.id,
+  if (!records.length) return {ok:false,reason:'No convertible terrain or fluid is within 3 blocks of your height. Move closer to water, lava, grass, dirt, or netherrack.'};
+  const s = {active:true,mode,ownerId:player.id,serial,center:{...player.location},dimension:player.dimension.id,
     until:now()+CONFIG.dominion.durationSeconds*1000,records};
   firstTick = false;
   // Write-ahead restoration record survives interruption during block edits.
@@ -112,11 +95,11 @@ export function activateDominion(player,mode) {
       if (block?.typeId === r.from) { block.setType(r.to); changed++; }
     } catch (e) { callback(e); }
   }
-  if (!changed) { dismissDominion(); return false; }
+  if (!changed) { dismissDominion(); return {ok:false,reason:'Nearby blocks could not be converted.'}; }
   try { player.dimension.playSound(mode === 'underworld' ? 'mob.ghast.fireball' : 'random.levelup',player.location); } catch {}
   for (const p of world.getAllPlayers()) if (p.dimension.id === player.dimension.id && Math.hypot(p.location.x-s.center.x,p.location.z-s.center.z) < radiusOf())
     p.onScreenDisplay.setActionBar(mode === 'underworld' ? '§4Underworld Dominion surrounds you' : '§aOverworld Dominion surrounds you');
-  return true;
+  return {ok:true,changed};
 }
 function radiusOf() { return CONFIG.dominion.radius + 8; }
 export function dominionTick(ownerId,ownerEquipped) {

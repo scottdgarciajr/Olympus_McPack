@@ -8,6 +8,12 @@
     "olympus_hephaestus_test_kit": {
       "textures": "textures/items/hephaestus_relic"
     },
+    "olympus_creative_test_kit": {
+      "textures": "textures/items/crown"
+    },
+    "olympus_war_trophy": {
+      "textures": "textures/items/ares_relic"
+    },
     "olympus_forge_sword_pickaxe": {
       "textures": "textures/items/forge/forgecleaver"
     },
@@ -43,6 +49,9 @@
     },
     "olympus_dionysus": {
       "textures": "textures/items/dionysus_relic"
+    },
+    "olympus_kratos": {
+      "textures": "textures/items/kratos_relic"
     },
     "olympus_mountain": {
       "textures": "textures/items/mountain_sigil"

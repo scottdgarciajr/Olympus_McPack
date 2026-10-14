@@ -6,7 +6,6 @@ import { CONFIG } from '../behavior_pack/scripts/config.js';
 test('new ability cooldowns and damage caps stay within the requested balance', () => {
   assert.deepEqual([CONFIG.cooldownSeconds.apolloSolarFlare,CONFIG.cooldownSeconds.apolloOracle,CONFIG.cooldownSeconds.hadesHellfire],[45,120,15]);
   assert.equal(CONFIG.solarFlare.areaDamage,4);
-  assert.equal(CONFIG.hellfire.damage,6);
   assert.equal(CONFIG.hermesLeapAmplifier,1);
 });
 

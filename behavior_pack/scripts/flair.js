@@ -7,7 +7,8 @@ export const FLAIR = {
   ares: { color: [0.95, 0.25, 0.22], sound: 'random.anvil_use' },
   apollo: { color: [1.00, 0.74, 0.23], sound: 'random.levelup' },
   hephaestus: { color: [1.00, 0.45, 0.13], sound: 'random.anvil_use' },
-  dionysus: { color: [0.72, 0.34, 0.91], sound: 'random.orb' }
+  dionysus: { color: [0.72, 0.34, 0.91], sound: 'random.orb' },
+  kratos: { color: [0.75, 0.12, 0.10], sound: 'random.anvil_use' }
 };
 
 function line(points, ax, ay, bx, by, steps = 5) {
@@ -78,6 +79,11 @@ export function flairPoints(god) {
       line(points, -0.22, -0.42, 0.22, -0.42, 4);
       line(points, 0, -0.42, 0, -0.78, 3);
       line(points, -0.42, -0.82, 0.42, -0.82, 5);
+      break;
+    case 'kratos':
+      line(points,-0.85,-0.85,0.85,0.85,12);
+      line(points,0.85,-0.85,-0.85,0.85,12);
+      ring(points,0,0,0.22,12);
       break;
   }
   return points;

@@ -7,3 +7,4 @@ give @s olympus:ares_relic 1
 give @s olympus:apollo_relic 1
 give @s olympus:hephaestus_relic 1
 give @s olympus:dionysus_relic 1
+give @s olympus:kratos_relic 1

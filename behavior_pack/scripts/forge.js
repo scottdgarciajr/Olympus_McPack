@@ -6,7 +6,7 @@ const KEY = 'olympus:combination';
 const MATERIALS = ['diamond', 'emerald', 'lapis_lazuli', 'netherite_ingot'];
 const RECIPES = [
   { id: 'sword_pickaxe', name: 'Forgecleaver Sword-Pickaxe', base: 'minecraft:diamond_pickaxe', ingredient: 'minecraft:diamond_sword', output: 'olympus:forge_sword_pickaxe', lore: 'Mines stone and ore; 6 bonus attack damage. Use: a six-block ore pulse every 30 seconds.' },
-  { id: 'fireball_pickaxe', name: 'Cinderbolt Pickaxe', base: 'minecraft:diamond_pickaxe', ingredient: 'minecraft:blaze_rod', output: 'olympus:forge_fireball_pickaxe', lore: 'Mines stone and ore. Use: a visible firebolt for 5 damage and 2 seconds of fire, every 15 seconds; never breaks blocks.' },
+  { id: 'fireball_pickaxe', name: 'Cinderbolt Pickaxe', base: 'minecraft:diamond_pickaxe', ingredient: 'minecraft:blaze_rod', output: 'olympus:forge_fireball_pickaxe', lore: 'Mines stone and ore. Use: a ghast-style fireball with a small terrain-breaking blast every 15 seconds.' },
   { id: 'water_boots', name: 'Undertow Boots', base: 'minecraft:diamond_boots', ingredient: 'minecraft:heart_of_the_sea', output: 'olympus:forge_water_boots', lore: 'Wear: Dolphin’s Grace I in water. Sneak in water: short forward surge every 25 seconds.' },
   { id: 'magnet_axe', name: 'Magnetwood Axe', base: 'minecraft:diamond_axe', ingredient: 'minecraft:lodestone', output: 'olympus:forge_magnet_axe', lore: 'Cuts wood. Use: pull up to 12 nearby dropped items to you every 20 seconds.' }
 ];
@@ -35,7 +35,7 @@ export function isForge(dimension,location) {
 export function inHall(dimension,location) {
   const t=api.temple();
   return !!t && dimension === (t.dimension || 'minecraft:overworld') &&
-    location.x>=t.x && location.x<t.x+33 && location.y>=t.y && location.y<t.y+15 &&
+    location.x>=t.x && location.x<t.x+33 && location.y>=t.y-7 && location.y<t.y+15 &&
     location.z>=t.z && location.z<t.z+33;
 }
 export function removePortableForge(dimension,location) {
@@ -226,7 +226,7 @@ function firebolt(player) {
   }
   startPower(player,'fire',CONFIG.forgePowers.fireboltCooldownSeconds);
   player.dimension.playSound('mob.ghast.fireball',p);
-  player.sendMessage('§6Cinderbolt fired. It cannot ignite or break terrain.');
+  player.sendMessage('§6Cinderbolt fired. Its small ghast-style blast can ignite and break blocks.');
 }
 function magnet(player) {
   if (!powerReady(player,'magnet')) return;
@@ -262,12 +262,7 @@ function fireImpact(event,target) {
     try { event.dimension.spawnParticle('minecraft:basic_flame_particle',{x:p.x+Math.cos(angle)*0.65,y:p.y+0.3,z:p.z+Math.sin(angle)*0.65}); } catch {}
   }
   event.dimension.playSound('mob.ghast.fireball',p);
-  if (owner && owner.dimension.id===event.dimension.id && target?.id!==owner.id && target?.getComponent('minecraft:health') && (CONFIG.friendlyFire || target.typeId!=='minecraft:player')) {
-    try {
-      target.applyDamage(CONFIG.forgePowers.fireboltDamage,{cause:EntityDamageCause.projectile,damagingEntity:owner});
-      target.setOnFire(CONFIG.forgePowers.fireboltIgniteSeconds,true);
-    } catch (e) { api.fail(e); }
-  }
+  // Native projectile impact and explosion components deliver the blast once.
   return true;
 }
 export function onForgeProjectileHitEntity(event) {

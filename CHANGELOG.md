@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.7.0 — Forbidden god and endgame Crowns
+
+- Added Kratos's darker chamber beneath the existing Hall, reached by the rear scaffolding, with a Nether Star claim. Hits on gods grant one random representative gift or burden for eight seconds; a god kill stores one copy until Kratos dies.
+- Reworked Crown state into separately numbered owners and cooldowns. The first Crown and every later one cost eight domain offerings, including a War Trophy earned from a player kill. A Dragon Egg is a reusable catalyst for later Crowns; there is no fixed Crown count cap. Existing single-Crown worlds migrate on load.
+- Improved Dimensional Dominion's terrain search around the player and prioritized water and lava conversion. Failed activations explain why and do not consume the cooldown.
+- Changed Hades's Hellfire and Hephaestus's Cinderbolt to native ghast-style fireball impacts with power-one, terrain-breaking, fire-starting explosions. Their direct damage is tuned below a vanilla ghast hit; the Hall remains explosion protected.
+- Reduced Undertow Boots' worn geometry to the boot area.
+- Added an Olympus Creative Test Kit for switching gods and obtaining Crown trial supplies. Operators can open a god to additional players without removing the current owner, or vacate an abandoned god slot and revoke former owners.
+- Updated the README, Forge Guide text, item lore, and in-game checklist. Offline validation passed; in-game behavior still requires a Bedrock playtest.
+
 ## 2.6.0 — Distinct Divine Forge creations
 
 - Replaced the four new forge outputs with separate custom items using item and boot artwork from the supplied *Combine Anything V2.1* add-on: Forgecleaver Sword-Pickaxe, Cinderbolt Pickaxe, Undertow Boots, and Magnetwood Axe. Existing previously forged vanilla gear keeps its old powers.
