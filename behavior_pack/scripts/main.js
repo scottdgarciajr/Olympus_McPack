@@ -1,7 +1,7 @@
 import { world, system, ItemStack, EnchantmentTypes, MolangVariableMap, InputButton, ButtonState, EntityDamageCause, EquipmentSlot } from '@minecraft/server';
 import { ActionFormData } from '@minecraft/server-ui';
 import { CONFIG } from './config.js';
-import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, divineOreDrop, stockMissingRelics } from './rules.js';
+import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, dionysusBuffAmplifier, divineOreDrop, stockMissingRelics } from './rules.js';
 import { FLAIR, flairPoints } from './flair.js';
 import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl } from './crown.js';
 import { configureDominion, inUnderworldDominion, temporaryBlock, dominionFlair } from './dominion.js';
@@ -22,7 +22,7 @@ const DESCRIPTIONS = {
   ares: 'Strength II and Resistance II; Slowness III. Strength V and Resistance III rage for 30 seconds every 5 minutes.',
   apollo: 'Infinite Solar Bow, Sunflight, Solar Flare arrow, and Oracle’s Sight; Weakness III and Mining Fatigue II without sunlight.',
   hephaestus: 'Haste IV, Divine Fortune IV pickaxe, and costly item combinations at the Hall or portable Divine Forge; permanent Weakness III.',
-  dionysus: 'Every new foe can be cursed immediately. Each hit stacks buffs and Nausea, teleports you, and may blind you as madness grows. Divine Harvest replenishes used Bone Meal.'
+  dionysus: 'Every new foe can be cursed immediately. Random buffs include Regeneration II and Resistance III at most; each hit adds Nausea, teleports you, and may blind you. Divine Harvest replenishes used Bone Meal.'
 };
 const CONTROLS = {
   hermes: 'Speed VI always; sprint for Speed XIV. Use relic: pearl (5m). Sneak-use: mobility menu for Slow Falling and Divine Leap toggles. Weakness III.',
@@ -32,13 +32,13 @@ const CONTROLS = {
   ares: 'Use relic: War Rage, Strength V and Resistance III for 30s (5m). Strength II, Resistance II, Slowness III are passive.',
   apollo: 'Use relic for Sunflight (3m), arm a Solar Flare arrow (45s after impact), or Oracle’s Sight (2m). One arrow fuels your infinite Solar Bow.',
   hephaestus: 'Haste IV and Weakness III. Use your relic for the Forge Guide. Craft a portable forge with eight iron ingots around a crafting table.',
-  dionysus: 'Melee-hit different foes to stack buffs instantly. The same foe has a 3s cooldown. Madness grows. Used Bone Meal replenishes; use relic for one if lost.'
+  dionysus: 'Melee-hit different foes for random buffs. Regeneration caps at II for 60s and Resistance at III; other buffs can reach IV. Same foe: 3s cooldown. Used Bone Meal replenishes.'
 };
 const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigue', 'conduit_power',
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '2.4.0';
+const PACK_VERSION = '2.4.1';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -1107,9 +1107,12 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
     const buff = buffPool[Math.floor(Math.random() * buffPool.length)];
     const stacks = nextMadnessStacks(player.getDynamicProperty(key('madnessStacks')), player.getDynamicProperty(key('madnessLast')), now());
     const debuffLevel = Math.min(3, (target.getEffect(debuff)?.amplifier || 0) + 1);
-    const buffLevel = Math.min(3, (player.getEffect(buff)?.amplifier || 0) + 1);
+    const existingBuff = player.getEffect(buff);
+    const buffLevel = dionysusBuffAmplifier(buff,existingBuff?.amplifier,CONFIG.dionysusBuffAmplifierCaps);
     effect(target, debuff, 180, debuffLevel);
-    effect(player, buff, 180, buffLevel);
+    // Preserve a stronger potion or beacon effect instead of replacing it with this god buff.
+    if (!existingBuff || existingBuff.amplifier <= buffLevel)
+      effect(player, buff, buff==='regeneration' ? CONFIG.dionysusRegenerationSeconds : 180, buffLevel);
     godPenalty(player, 'nausea', 25 + stacks * 8, Math.min(4, Math.floor(stacks / 2)));
     const blinded = Math.random() < dionysusBlindnessChance(stacks);
     if (blinded) godPenalty(player, 'blindness', 4 + Math.floor(stacks / 2));
@@ -1117,7 +1120,7 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
     player.setDynamicProperty(key('madnessLast'), now());
     safeTeleport(player);
     dionysusTargetCooldowns.set(targetKey, now() + CONFIG.dionysusSameTargetCooldownSeconds * 1000);
-    tell(player, `Divine Madness: ${debuff} ${debuffLevel + 1} on ${target.typeId}; ${buff} ${buffLevel + 1} on you. Madness ${stacks}/10${blinded ? ' — BLINDED' : ''}.`);
+    tell(player, `Divine Madness: ${debuff} ${debuffLevel + 1} on ${target.typeId}; ${buff} ${existingBuff?.amplifier > buffLevel ? 'from your stronger existing effect' : `${buffLevel + 1} on you`}. Madness ${stacks}/10${blinded ? ' — BLINDED' : ''}.`);
     showFlair(player, 'dionysus', true);
   } catch (e) { fail(e); }
 });

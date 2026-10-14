@@ -1,6 +1,6 @@
 # Olympus SMP
 
-A Minecraft Bedrock Survival add-on for eight friends. Import **`dist/Olympus_SMP_FINAL.mcaddon`** (version 2.4.0), activate **Olympus SMP Behavior** and its linked resource pack, and enable cheats for setup commands. Requires Bedrock 1.21.90+ and stable `@minecraft/server` and `@minecraft/server-ui` 2.0.0.
+A Minecraft Bedrock Survival add-on for eight friends. Import **`dist/Olympus_SMP_FINAL.mcaddon`** (version 2.4.1), activate **Olympus SMP Behavior** and its linked resource pack, and enable cheats for setup commands. Requires Bedrock 1.21.90+ and stable `@minecraft/server` and `@minecraft/server-ui` 2.0.0.
 
 ## Quick setup
 
@@ -45,7 +45,7 @@ The older Mount Olympus mountain remains available with `/function olympus/summo
 | Ares | Strength II and Resistance II | Slowness III | Strength V and Resistance III rage for **30 sec** on a **5 min** cooldown. |
 | Apollo | Solar Bow with Power V, Infinity I, Unbreaking III, plus **6 scripted arrow damage in direct sunlight** or 2 out of sunlight | Weakness III and Mining Fatigue II without direct sunlight | Relic menu: daylight flight for **30 sec** (3 min cooldown), arm one Solar Flare arrow (45 sec cooldown after impact), or use Oracle’s Sight (40-block radius, 8 sec reveal, 2 min cooldown). |
 | Hephaestus | Haste IV, Efficiency V and Divine Fortune IV pickaxe | Permanent Weakness III | The pickaxe has a **35% chance** for one bonus ore drop. Only Hephaestus can combine equipment at the Hall or a portable Divine Forge. |
-| Dionysus | Each melee hit on a new target adds a random level II self buff for 180 sec; further hits can raise existing buffs up to level IV. Successfully used Bone Meal replenishes one-for-one. | Madness rises to 10 stacks: longer, stronger Nausea, random teleportation, and an increasing chance of Blindness | The same hit gives that target a debuff for 180 sec and teleports Dionysus 8–16 blocks when a safe spot exists. **Different targets trigger instantly; the same target has a 3 sec cooldown.** Debuffs can coexist and strengthen up to level IV. |
+| Dionysus | Each melee hit on a new target adds a random self buff. Strength, Speed, and Haste can reach IV for 180 sec; Resistance caps at III for 180 sec and Regeneration at II for 60 sec. Successfully used Bone Meal replenishes one-for-one. | Madness rises to 10 stacks: longer, stronger Nausea, random teleportation, and an increasing chance of Blindness | The same hit gives that target a debuff for 180 sec and teleports Dionysus 8–16 blocks when a safe spot exists. **Different targets trigger instantly; the same target has a 3 sec cooldown.** Debuffs can coexist and strengthen up to level IV. Repeated hits can refresh Regeneration, but its level stays capped; external stronger effects remain intact. |
 
 **Hermes:** Speed VI is always active. Hold sprint to enter Speed XIV with additional directional momentum targeting 1.3 blocks per tick, designed to outrun a very fast horse. Left/right input now maps to the correct strafing directions; release sprint or sneak for a slower pace. A bright gold trail appears while sprinting. Slow Falling starts on. Sneak-use can switch the constant glide off; a dangerous fall automatically reactivates protection during descent.
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4.1 — Dionysus survival balance
+
+- Capped Dionysus's random Regeneration at II for 60 seconds and Resistance at III. His Strength, Speed, and Haste can still reach IV; random buff selection, curses, teleportation, and Madness remain intact.
+- Stronger unrelated potion or beacon buffs are no longer overwritten by a weaker Dionysus roll. The new caps and duration are configurable.
+
 ## 2.4.0 — Visible divine powers and portable forge
 
 - Apollo's Solar Flare now draws a gold trail during flight and a bright shaft and rings on impact. Oracle's Sight adds viewer-only colored target halos and local particle bearings for eight seconds.

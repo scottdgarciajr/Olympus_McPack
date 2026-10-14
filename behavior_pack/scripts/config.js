@@ -25,6 +25,8 @@ export const CONFIG = {
   apolloSunstepSeconds: 30,
   dionysusDebuffs: ['weakness', 'slowness', 'mining_fatigue', 'poison'],
   dionysusBuffs: ['strength', 'speed', 'resistance', 'regeneration', 'haste'],
+  dionysusBuffAmplifierCaps: { regeneration: 1, resistance: 2 },
+  dionysusRegenerationSeconds: 60,
   dionysusTeleportMin: 8,
   dionysusTeleportMax: 16,
   friendlyFire: true,

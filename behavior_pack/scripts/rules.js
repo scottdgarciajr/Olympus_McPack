@@ -44,6 +44,11 @@ export function dionysusBlindnessChance(stacks) {
   return Math.min(0.65, Math.max(0, (stacks - 2) * 0.09));
 }
 
+export function dionysusBuffAmplifier(id, currentAmplifier, caps) {
+  const next = (Number.isFinite(currentAmplifier) ? currentAmplifier : 0) + 1;
+  return Math.min(caps[id] ?? 3, next);
+}
+
 const BONUS_ORES = {
   coal_ore: 'minecraft:coal', diamond_ore: 'minecraft:diamond', emerald_ore: 'minecraft:emerald',
   iron_ore: 'minecraft:raw_iron', gold_ore: 'minecraft:raw_gold', copper_ore: 'minecraft:raw_copper',

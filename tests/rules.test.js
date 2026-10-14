@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, divineOreDrop, stockMissingRelics } from '../behavior_pack/scripts/rules.js';
+import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, dionysusBuffAmplifier, divineOreDrop, stockMissingRelics } from '../behavior_pack/scripts/rules.js';
 import { CONFIG } from '../behavior_pack/scripts/config.js';
 
 test('new ability cooldowns and damage caps stay within the requested balance', () => {
@@ -69,6 +69,16 @@ test('Dionysus madness builds to ten stacks and adds blindness risk', () => {
   assert.equal(dionysusBlindnessChance(2), 0);
   assert.ok(dionysusBlindnessChance(8) > dionysusBlindnessChance(4));
   assert.equal(dionysusBlindnessChance(10), 0.65);
+});
+
+test('Dionysus keeps strong random buffs without stacking healing and defense to IV', () => {
+  const caps=CONFIG.dionysusBuffAmplifierCaps;
+  assert.equal(dionysusBuffAmplifier('regeneration',undefined,caps),1);
+  assert.equal(dionysusBuffAmplifier('regeneration',1,caps),1);
+  assert.equal(dionysusBuffAmplifier('resistance',1,caps),2);
+  assert.equal(dionysusBuffAmplifier('resistance',2,caps),2);
+  assert.equal(dionysusBuffAmplifier('strength',3,caps),3);
+  assert.equal(CONFIG.dionysusRegenerationSeconds,60);
 });
 
 test('Divine Fortune bonus applies only to eligible ore drops', () => {
