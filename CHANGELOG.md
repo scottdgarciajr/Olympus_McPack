@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.0 — Creative Hephaestus kit and beginner guide
+
+- Added a Creative inventory test kit that grants Hephaestus's relic, Divine Fortune pickaxe, portable forge, and all four finished combination items. It works only in Creative mode; when available, it claims Hephaestus for an unassigned tester.
+- Test samples use the same persistent item metadata and gameplay effects as equipment produced at the Divine Forge. Survival crafting costs and Hephaestus-only forge access remain in place.
+- Reworked the README with first-time Bedrock import, world activation, one-command Hall setup, god claiming, Crown use, upgrade steps, and a guide to all eight gods.
+
 ## 2.4.2 — Dionysus teleport repair
 
 - Replaced an unsupported `Block.isSolid` landing check with a Script API 2.0 block raycast. Dionysus now teleports 8–16 blocks after a qualifying melee proc when a clear, safe landing exists.

@@ -1,4 +1,4 @@
-import { world, EquipmentSlot, EntityDamageCause } from '@minecraft/server';
+import { world, EquipmentSlot, EntityDamageCause, ItemStack } from '@minecraft/server';
 import { ActionFormData } from '@minecraft/server-ui';
 import { CONFIG } from './config.js';
 
@@ -10,6 +10,16 @@ const RECIPES = [
   { id: 'tide_boots', name: 'Tide Boots', base: 'minecraft:diamond_boots', ingredient: 'minecraft:heart_of_the_sea', lore: 'Dolphin’s Grace I while in water.' },
   { id: 'lantern_helm', name: 'Lantern Helm', base: 'minecraft:diamond_helmet', ingredient: 'minecraft:lantern', lore: 'Night Vision while worn.' }
 ];
+function combinedItem(base,recipe) {
+  const result=base.clone();
+  result.setDynamicProperty(KEY,recipe.id);
+  result.nameTag=`§6${recipe.name}`;
+  result.setLore([...base.getLore(),`§6Divine Combination: ${recipe.name}`,`§7${recipe.lore}`]);
+  return result;
+}
+export function creativeForgeSamples() {
+  return RECIPES.map(recipe=>combinedItem(new ItemStack(recipe.base,1),recipe));
+}
 const damageGuard = new Set();
 let api;
 const STATIONS = 'olympus:portableForges';
@@ -134,10 +144,7 @@ function combine(player,recipe,slot) {
   }
   const original = [];
   for (let i=0; i<container.size; i++) original.push(container.getItem(i));
-  const result = base.clone();
-  result.setDynamicProperty(KEY,recipe.id);
-  result.nameTag = `§6${recipe.name}`;
-  result.setLore([...base.getLore(),`§6Divine Combination: ${recipe.name}`,`§7${recipe.lore}`]);
+  const result = combinedItem(base,recipe);
   try {
     consume(container,recipe.ingredient,1,slot);
     for (const id of MATERIALS) if (cost[id]) consume(container,`minecraft:${id}`,cost[id],slot);

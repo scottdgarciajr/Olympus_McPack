@@ -5,6 +5,9 @@
     "olympus_divine_forge": {
       "textures": "textures/items/hephaestus_relic"
     },
+    "olympus_hephaestus_test_kit": {
+      "textures": "textures/items/hephaestus_relic"
+    },
     "olympus_hermes": {
       "textures": "textures/items/hermes_relic"
     },

@@ -68,6 +68,11 @@ forge_recipe = read_json(BP / 'recipes' / 'divine_forge.json')['minecraft:recipe
 check(forge_recipe['pattern'] == ['III', 'ICI', 'III'] and
       forge_recipe['result']['item'] == 'olympus:divine_forge', 'Portable forge recipe missing')
 check(read_json(BP / 'items' / 'divine_forge.json')['minecraft:item']['components'].get('olympus:forge_place') == {}, 'Portable forge placement hook missing')
+test_kit = read_json(BP / 'items' / 'hephaestus_test_kit.json')['minecraft:item']
+check(test_kit['description']['menu_category']['category'] == 'items' and
+      test_kit['components'].get('olympus:hephaestus_test_kit_use') == {}, 'Creative Hephaestus test kit missing')
+check(test_kit['components']['minecraft:icon'] in texture_index and
+      'creativeForgeSamples()' in script and "toLowerCase()!=='creative'" in script, 'Test kit artwork or Creative-only guard missing')
 bolt = read_json(BP / 'entities' / 'hellfire_bolt.json')['minecraft:entity']
 check('minecraft:explode' not in str(bolt) and not bolt['components']['minecraft:projectile'].get('catch_fire'), 'Hellfire may damage terrain')
 check(read_json(RP / 'entity' / 'hellfire_bolt.entity.json')['minecraft:client_entity']['description']['textures']['default'] == 'textures/items/fireball', 'Fireball appearance missing')

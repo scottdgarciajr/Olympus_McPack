@@ -5,7 +5,7 @@ import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAm
 import { FLAIR, flairPoints } from './flair.js';
 import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl } from './crown.js';
 import { configureDominion, inUnderworldDominion, temporaryBlock, dominionFlair } from './dominion.js';
-import { configureForge, isForge, inHall, removePortableForge, placePortableForge, showForge, showForgeGuide, onForgeHurt, forgeEquipmentTick } from './forge.js';
+import { configureForge, isForge, inHall, removePortableForge, placePortableForge, showForge, showForgeGuide, creativeForgeSamples, onForgeHurt, forgeEquipmentTick } from './forge.js';
 import { configureDivine, armSolarFlare, oracleSight, hellfire, onDivineProjectileSpawn, onDivineBowRelease, onDivineProjectileHitBlock, onDivineProjectileHitEntity, divineTick } from './divine_combat.js';
 import { findMadnessLanding } from './teleport.js';
 
@@ -39,7 +39,7 @@ const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigu
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '2.4.2';
+const PACK_VERSION = '2.5.0';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -60,6 +60,7 @@ const WEAKNESSES = {
 const NEW_MOUNTAIN_HEIGHT = 24;
 const MOUNTAIN_RADIUS = 31;
 const lastRelicUse = new Map();
+const lastTestKitUse = new Map();
 const lastFlairUse = new Map();
 const hermesTrailTick = new Map();
 const hermesFallTick = new Map();
@@ -713,6 +714,13 @@ function protectOwnedGear(player) {
     }
   } catch (e) { if (CONFIG.debug) fail(e); }
 }
+function divineFortunePickaxe() {
+  const pick=enchantedItem('minecraft:diamond_pickaxe','§6Hephaestus’s Divine Fortune IV',
+    [['fortune',3],['efficiency',5],['unbreaking',3]],
+    ['§6Divine Fortune IV: extra ore chance','§7Fortune III plus a scripted bonus.']);
+  pick.setDynamicProperty(key('divineFortune'),true);
+  return pick;
+}
 function giveEquipment(player, god) {
   try {
     if (god === 'poseidon') giveItem(player, enchantedItem('minecraft:trident', '§bPoseidon’s Tidecaller', [['riptide', 3], ['unbreaking', 3]], ['§bLaunch yourself in water or rain', '§7Riptide III is the game maximum.']));
@@ -721,9 +729,7 @@ function giveEquipment(player, god) {
       giveItem(player, new ItemStack('minecraft:arrow', 1));
     }
     if (god === 'hephaestus') {
-      const pick = enchantedItem('minecraft:diamond_pickaxe', '§6Hephaestus’s Divine Fortune IV', [['fortune', 3], ['efficiency', 5], ['unbreaking', 3]], ['§6Divine Fortune IV: extra ore chance', '§7Fortune III plus a scripted bonus.']);
-      pick.setDynamicProperty(key('divineFortune'), true);
-      giveItem(player, pick);
+      giveItem(player, divineFortunePickaxe());
     }
     if (god === 'dionysus') {
       const meal = new ItemStack('minecraft:bone_meal', 1);
@@ -731,6 +737,23 @@ function giveEquipment(player, god) {
       giveItem(player, meal);
     }
   } catch (e) { fail(e); tell(player, 'Equipment could not be created. Ask the operator to check the content log.'); }
+}
+function giveHephaestusTestKit(player) {
+  const current=now();
+  if (current-(lastTestKitUse.get(player.id)||0)<1500) return;
+  lastTestKitUse.set(player.id,current);
+  if (String(player.getGameMode()).toLowerCase()!=='creative') {
+    tell(player,'The Hephaestus Test Kit works only while you are in Creative mode.'); return;
+  }
+  const originalRole=role(player);
+  if (!originalRole && !owner('hephaestus')) claim(player,'hephaestus');
+  if (role(player)!=='hephaestus')
+    tell(player,'Hephaestus is unavailable to claim. The sample gear works for everyone, but forging and Divine Fortune require his role.');
+  if (originalRole || role(player)!=='hephaestus') giveItem(player,divineFortunePickaxe());
+  if (!hasOwnedRelic(player,'hephaestus')) giveItem(player,new ItemStack('olympus:hephaestus_relic',1));
+  giveItem(player,new ItemStack('olympus:divine_forge',1));
+  for (const item of creativeForgeSamples()) giveItem(player,item);
+  tell(player,'Creative test gear granted: Forge Relic, Divine Fortune pickaxe, portable forge, and all four finished combinations. Search Creative for this kit to get another set.');
 }
 function replaceLostBoneMeal(player) {
   const inventory=player.getComponent('minecraft:inventory')?.container;
@@ -1015,6 +1038,10 @@ function summonMountain(player) {
 }
 
 system.beforeEvents.startup.subscribe((event) => {
+  event.itemComponentRegistry.registerCustomComponent('olympus:hephaestus_test_kit_use', {
+    onUse: (useEvent) => system.run(() => { try { giveHephaestusTestKit(useEvent.source); } catch (e) { fail(e); } }),
+    onUseOn: (useEvent) => system.run(() => { try { giveHephaestusTestKit(useEvent.source); } catch (e) { fail(e); } })
+  });
   event.itemComponentRegistry.registerCustomComponent('olympus:forge_place', {
     onUseOn: (useEvent) => system.run(() => { try { placePortableForge(useEvent); } catch (e) { fail(e); } })
   });
@@ -1069,7 +1096,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   }
   const itemId = event.itemStack?.typeId || '';
   if (itemId && inHall(player.dimension.id,b) &&
-      itemId !== 'olympus:crown_control' && !GODS.some(god => itemId === `olympus:${god}_relic`)) {
+      itemId !== 'olympus:crown_control' && itemId !== 'olympus:hephaestus_test_kit' && !GODS.some(god => itemId === `olympus:${god}_relic`)) {
     event.cancel=true;
     return;
   }

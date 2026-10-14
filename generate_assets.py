@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-VERSION = [2, 4, 2]
+VERSION = [2, 5, 0]
 GODS = {
     'hermes': ('Hermes Winged Relic', '#f4cf58'),
     'zeus': ('Zeus Thunder Relic', '#f4eb7b'),
@@ -97,6 +97,7 @@ write_json(RP / 'manifest.json', {
 
 texture_data = {}
 texture_data['olympus_divine_forge'] = {'textures': 'textures/items/hephaestus_relic'}
+texture_data['olympus_hephaestus_test_kit'] = {'textures': 'textures/items/hephaestus_relic'}
 for god, (label, color) in GODS.items():
     identifier = f'olympus:{god}_relic'
     write_json(BP / 'items' / f'{god}_relic.json', {

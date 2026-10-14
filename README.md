@@ -1,13 +1,34 @@
 # Olympus SMP
 
-A Minecraft Bedrock Survival add-on for eight friends. Import **`dist/Olympus_SMP_FINAL.mcaddon`** (version 2.4.2), activate **Olympus SMP Behavior** and its linked resource pack, and enable cheats for setup commands. Requires Bedrock 1.21.90+ and stable `@minecraft/server` and `@minecraft/server-ui` 2.0.0.
+A Minecraft **Bedrock Edition** add-on for eight Greek gods. This download contains a behavior pack (the game rules) and a resource pack (the art). Install **both**. Current version: **2.5.0**. It requires Minecraft Bedrock 1.21.90 or newer. It is not a Java Edition mod.
 
-## Quick setup
+## Start here: add the pack to your world
 
-1. Back up your world and activate both packs. Have an operator stand near world spawn and run `/function olympus/setup` once. The script searches natural, unobstructed sites within roughly 144 blocks of spawn and places the bundled **33 × 15 × 33** Hall of Eight Gods. It refuses sites with an artificial surface, terrain height variation over three blocks, or occupied space above the surface. If no site qualifies, setup gives the operator a Hall Placement Seal. Stand where you want the Hall centered and use the seal. It overwrites the full 33 × 15 × 33 volume, including existing builds; only the world height limit and loaded chunks can prevent placement.
-2. Each player interacts with an enchanting-table altar to read that god's abilities, weakness, and offering, then reserves it for **10 minutes**. Gather the exact offering and return to the same altar to claim. A reservation belongs to one player; after it expires someone else can reserve the god. Each god can be claimed by one player only.
-3. Keep the granted relic for its special. Passives remain active while holding other equipment, after death, and after rejoining. Use `/function olympus/controls` to repeat your controls.
-4. The same setup command prepares the Crown trial at the Hall's existing gold and sea lantern center. After claiming a god, bring **1 gold ingot, 1 iron ingot, 1 emerald, and 1 lapis lazuli** and interact with the center sea lantern. The first claim consumes the offerings. Wear the Crown and use its Seal of Divine Authority to open the menu. If Dimensional Dominion says the Crown is not worn, open `/function olympus/crown_status` to see the recorded owner and equipped state; a reconnect now reconciles a changed player ID by owner name and god. `/function olympus/crown_status` opens the same menu.
+1. [Open `Olympus_SMP_FINAL.mcaddon` in this repository](dist/Olympus_SMP_FINAL.mcaddon), then choose **Download raw file** to save it. Save a backup of the world you plan to use. The setup command places a large structure and can overwrite the area you choose with a placement seal.
+2. Open the `.mcaddon` file with **Minecraft Bedrock** (on Windows, double-click it). Wait for Minecraft to report that the import succeeded. If your device asks which app should open the file, choose Minecraft.
+3. For a **new world**, choose **Play → Create New → Create New World**. For an **existing world**, choose **Play**, then the pencil/edit button next to that world. In the world settings, open **Add-Ons → Behavior Packs → My Packs**, find **Olympus SMP Behavior**, and choose **Activate**. Check **Resource Packs → My Packs** and activate **Olympus SMP Resources** if it was not activated automatically. On a server or Realm, see the sections below.
+4. Turn on **Cheats** in the world settings so setup commands work. Cheats can disable achievements for that world. Enter the world as its owner or an operator.
+5. Open chat and run **`/function olympus/setup`**. This is the one-command setup for the Hall, all eight god altars, the Crown throne, and the Hall forge. The Hall is 33 × 15 × 33 blocks; keep that area clear. The script searches for a safe site near world spawn. If it cannot find one, it gives you a **Hall Placement Seal**. Stand where you want the Hall centered and use the seal. The seal replaces blocks in that whole area, so use it only on your backed-up world at the intended site.
+6. Run **`/function olympus/status`**. It should say `v2.5.0 script active`. If it reports an older version, leave the world, open its pack settings, deactivate the older Olympus packs, activate the newly imported packs, and rejoin.
+
+### First steps in the Hall
+
+- Each of the eight enchanting tables is a god altar. Use/interact with one (right-click on mouse, or your device's Use button) to read that god's abilities and required offering. Choose **Reserve**; the reservation lasts **10 minutes**. Bring the offering back and use the same altar again to claim the god. Each god belongs to one player.
+- The relic you receive activates that god's special power. **Use** means press your normal item Use button. **Sneak-use** means crouch while using it. The god's passive abilities work without holding the relic. Run **`/function olympus/controls`** whenever you need a reminder.
+- The **Crown of Olympus** sits at the Hall's gold and sea-lantern center. Claim a god first, then bring one each of gold ingot, iron ingot, emerald, and lapis lazuli and use the center sea lantern. Wear the Crown in your helmet slot. Use the Seal of Divine Authority it grants to open Crown controls. The Crown is unique and transfers on a PvP kill.
+- Roman numerals in the guide are Minecraft effect levels: **I** is level 1, **II** is level 2, and so on. A **cooldown** is the wait before an ability can be used again.
+
+### Test Hephaestus quickly in Creative mode
+
+Open the Creative inventory and search **`Hephaestus Creative Test Kit`** in the Items tab. Put it in your hotbar and use it in the air. The kit works only while you are in Creative. If Hephaestus is unclaimed and you have no god yet, it claims him for you. It gives you his Forge Relic, the real Divine Fortune pickaxe, a portable Divine Forge, and all four finished combination items with their working item metadata. The kit does not change an existing god assignment or take Hephaestus from another player. If he is unavailable, the sample gear is still given, but forging and Divine Fortune require the Hephaestus role. You can also get the kit with `/give @s olympus:hephaestus_test_kit` in a cheats-enabled test world.
+
+For a normal Survival world, claim Hephaestus at his altar and craft the portable forge using one crafting table surrounded by eight iron ingots. The expensive combination recipes are listed below and in the Forge Guide opened by his relic.
+
+## Updating an existing Olympus world
+
+Back up the world, close it, import the new `.mcaddon`, then edit that world's Behavior Packs and Resource Packs. Deactivate older Olympus versions and activate version 2.5.0 of both packs. Rejoin and check `/function olympus/status`. Existing god assignments, Crown ownership, cooldowns, Glory, and previously forged items are stored in the world; do not reset the world to upgrade.
+
+## World setup and Crown details
 
 The Hall blocks player mining and building and filters explosion damage inside its 33 × 15 × 33 footprint. The Crown transfers to the player who kills its owner, even if the owner took it off. A crowned non-Zeus god suppresses their own god penalties and gets half cooldowns on existing active abilities. Zeus gets time/weather control and the universal Dominion ability, with no god-specific cooldown or weakness benefits. Divine Authority changes day/night or weather with a shared five-minute cooldown. Crown weather lasts two minutes, then restores the previous weather type. The wearer is revealed approximately every five minutes; fifteen minutes of online, equipped possession outside the Hall's 20-block safe zone earns one Glory. The Crown menu includes the leaderboard.
 
@@ -35,6 +56,8 @@ The older Mount Olympus mountain remains available with `/function olympus/summo
 `/function olympus/give_all` is an operator relic kit. Unclaimed players cannot use it to skip the altar offering. Each god belongs to one player. An operator can release a role with `execute as <player> run function olympus/reset`.
 
 ## Gods
+
+Choose by playstyle: **Hermes** travels fastest; **Zeus** controls storms and the air; **Poseidon** rules water and rain; **Hades** thrives at night and in other dimensions; **Ares** wins direct fights; **Apollo** uses sunlight, archery, and short-lived target tracking; **Hephaestus** makes powerful tradeable gear; **Dionysus** gains random combat buffs at the cost of confusion and risky teleports. Read the altar before claiming, since each god also has a weakness.
 
 | God | Passive buffs | Passive debuff | Ability or equipment |
 | --- | --- | --- | --- |
@@ -103,11 +126,11 @@ For player-specific functions from a command block, use `execute as <player> at 
 
 Stop the Bedrock Dedicated Server and back up the world. Extract the `.mcaddon` ZIP. Copy `behavior_pack` to `behavior_packs/OlympusSMP_BP` and `resource_pack` to `resource_packs/OlympusSMP_RP`. Preserve other entries and add these entries to the arrays in the world's pack files:
 
-`world_behavior_packs.json`: `{"pack_id":"a06ad1f9-8b44-4af1-995a-95dc9c684c25","version":[2,3,0]}`
+`world_behavior_packs.json`: `{"pack_id":"a06ad1f9-8b44-4af1-995a-95dc9c684c25","version":[2,5,0]}`
 
-`world_resource_packs.json`: `{"pack_id":"def06a91-6e05-457a-a359-714565d4c32c","version":[2,3,0]}`
+`world_resource_packs.json`: `{"pack_id":"def06a91-6e05-457a-a359-714565d4c32c","version":[2,5,0]}`
 
-Restart, join as operator, follow Quick setup, and have clients accept the resource pack. For a Realm, activate the pack on a local world, verify it, then upload that world with Replace World.
+Restart, join as operator, follow **Start here: add the pack to your world** above, and have clients accept the resource pack. For a Realm, activate the pack on a local world, verify it, then upload that world with Replace World.
 
 ## Rebuild and verification
 
