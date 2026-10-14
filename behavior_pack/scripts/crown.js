@@ -190,6 +190,7 @@ function dominionMenu(player) {
 function commandDominion(player,mode) {
   const s = state();
   if (!owns(s,player) || !crowned(player)) { player.sendMessage('§cClaim the Crown at the Hall throne, then wear it to command Dominion. Check Crown Status for ownership.'); return; }
+  if (s.ownerId!==player.id) { s.ownerId=player.id; save(s); }
   if (s.dominionUntil > time()) { player.sendMessage(`§eDominion returns in ${format(s.dominionUntil-time())}.`); return; }
   if (dominionState().active || dominionState().records?.length) { player.sendMessage('§cA Dominion is active or its terrain is still recovering.'); return; }
   if (!activateDominion(player,mode)) { player.sendMessage('§cNo safe natural terrain was available here. No cooldown was spent.'); return; }
@@ -210,6 +211,7 @@ function submenu(player, kind) {
 function command(player, kind, choice) {
   const s = state();
   if (!owns(s,player) || !crowned(player) || player.dimension.id !== 'minecraft:overworld') { player.sendMessage('§cWear your own crown in the Overworld. Check Crown Status for ownership.'); return; }
+  if (s.ownerId!==player.id) { s.ownerId=player.id; save(s); }
   if ((s.authorityUntil || 0) > time()) { player.sendMessage(`§eDivine Authority returns in ${format(s.authorityUntil-time())}.`); return; }
   try {
     if (kind === 'time') world.setTimeOfDay(choice === 0 ? 1000 : 13000);
