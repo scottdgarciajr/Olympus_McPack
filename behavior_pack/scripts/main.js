@@ -5,7 +5,7 @@ import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAm
 import { FLAIR, flairPoints } from './flair.js';
 import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl } from './crown.js';
 import { configureDominion, inUnderworldDominion, temporaryBlock, dominionFlair } from './dominion.js';
-import { configureForge, forgeBlock, showForge, onForgeHurt, forgeEquipmentTick } from './forge.js';
+import { configureForge, isForge, inHall, removePortableForge, placePortableForge, showForge, showForgeGuide, onForgeHurt, forgeEquipmentTick } from './forge.js';
 import { configureDivine, armSolarFlare, oracleSight, hellfire, onDivineProjectileSpawn, onDivineBowRelease, onDivineProjectileHitBlock, onDivineProjectileHitEntity, divineTick } from './divine_combat.js';
 
 const GODS = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus'];
@@ -18,27 +18,27 @@ const DESCRIPTIONS = {
   hermes: 'Speed VI, Flash-fast sprint, fall protection, and toggleable Divine Leap; Weakness III. Divine Pearl every 5 minutes.',
   zeus: 'Mining Fatigue II always. Lightning has a 5-second interval in thunder; 30-second flight remains unrestricted in rain or thunder.',
   poseidon: 'Conduit Power, Dolphin’s Grace III, and toggled fast movement in water or open rain; rain-only fall protection. Slowness III and Weakness III in Nether/desert.',
-  hades: 'Fire Resistance and Night Vision; sheltered from daylight weakness. Nether/End power and Hellfire from actual flames.',
+  hades: 'Fire Resistance and Night Vision; sheltered from daylight weakness. Nether/End power and Hellfire from fire or lava.',
   ares: 'Strength II and Resistance II; Slowness III. Strength V and Resistance III rage for 30 seconds every 5 minutes.',
   apollo: 'Infinite Solar Bow, Sunflight, Solar Flare arrow, and Oracle’s Sight; Weakness III and Mining Fatigue II without sunlight.',
-  hephaestus: 'Haste IV, Divine Fortune IV pickaxe, and exclusive costly item combinations at the Hall forge; permanent Weakness III.',
+  hephaestus: 'Haste IV, Divine Fortune IV pickaxe, and costly item combinations at the Hall or portable Divine Forge; permanent Weakness III.',
   dionysus: 'Every new foe can be cursed immediately. Each hit stacks buffs and Nausea, teleports you, and may blind you as madness grows. Divine Harvest replenishes used Bone Meal.'
 };
 const CONTROLS = {
   hermes: 'Speed VI always; sprint for Speed XIV. Use relic: pearl (5m). Sneak-use: mobility menu for Slow Falling and Divine Leap toggles. Weakness III.',
   zeus: 'Aim at a block or enemy, use relic: lightning. Sneak-use: 30s flight. Each has a 3m cooldown in clear weather; thunder lightning has a 5s interval. Flight stays unrestricted in rain/thunder.',
   poseidon: 'Sneak-use relic: Tidal Sprint on/off in water or open rain. Conduit Power and Dolphin’s Grace III; no fall damage during rain. Tidecaller uses Riptide.',
-  hades: 'Use relic while physically in fire or soul fire: Hellfire projectile (15s). Sneak-use checks readiness. Fire Resistance/Night Vision always; night and otherworld buffs remain.',
+  hades: 'Use relic while physically in fire, soul fire, or lava: Hellfire fireball (15s). Sneak-use checks readiness. Fire Resistance/Night Vision always; night and otherworld buffs remain.',
   ares: 'Use relic: War Rage, Strength V and Resistance III for 30s (5m). Strength II, Resistance II, Slowness III are passive.',
   apollo: 'Use relic for Sunflight (3m), arm a Solar Flare arrow (45s after impact), or Oracle’s Sight (2m). One arrow fuels your infinite Solar Bow.',
-  hephaestus: 'Haste IV and permanent Weakness III. Your pickaxe has Divine Fortune IV bonus drops. Combine equipment at the Hall forge.',
+  hephaestus: 'Haste IV and Weakness III. Use your relic for the Forge Guide. Craft a portable forge with eight iron ingots around a crafting table.',
   dionysus: 'Melee-hit different foes to stack buffs instantly. The same foe has a 3s cooldown. Madness grows. Used Bone Meal replenishes; use relic for one if lost.'
 };
 const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigue', 'conduit_power',
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '2.3.0';
+const PACK_VERSION = '2.4.0';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -926,7 +926,7 @@ function special(player, god, sneaking) {
     } else if (god === 'hades') {
       if (sneaking) {
         const seconds=Math.ceil(remaining(player,'hadesHellfire')/1000);
-        tell(player,seconds ? `Hellfire: ${seconds}s remaining.` : 'Hellfire ready. Stand in fire or soul fire to launch.');
+        tell(player,seconds ? `Hellfire: ${seconds}s remaining.` : 'Hellfire ready. Stand in fire or lava to launch.');
         return;
       }
       hellfire(player);
@@ -938,6 +938,8 @@ function special(player, god, sneaking) {
       startCooldown(player, 'aresRage'); tell(player, 'War Rage: Strength V and Resistance III for 30 seconds.'); showFlair(player, god, true);
     } else if (god === 'apollo') {
       apolloAbilityMenu(player);
+    } else if (god === 'hephaestus') {
+      showForgeGuide(player);
     } else if (god === 'dionysus') {
       replaceLostBoneMeal(player);
       tell(player, 'Divine Madness triggers on melee hits. New foes trigger instantly; the same foe needs 3 seconds.');
@@ -1026,6 +1028,9 @@ function summonMountain(player) {
 }
 
 system.beforeEvents.startup.subscribe((event) => {
+  event.itemComponentRegistry.registerCustomComponent('olympus:forge_place', {
+    onUseOn: (useEvent) => system.run(() => { try { placePortableForge(useEvent); } catch (e) { fail(e); } })
+  });
   event.itemComponentRegistry.registerCustomComponent('olympus:relic_use', {
     onUse: (useEvent) => {
       const player = useEvent.source;
@@ -1051,7 +1056,7 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   const player = event.player;
   if (event.itemStack && temporaryBlock(player.dimension.id,b)) { event.cancel = true; return; }
   const t = temple();
-  if (t && player.dimension.id === (t.dimension || 'minecraft:overworld') && forgeBlock(b) && event.block.typeId === 'minecraft:smithing_table') {
+  if (isForge(player.dimension.id,b) && event.block.typeId === 'minecraft:smithing_table') {
     event.cancel = true;
     system.run(() => { try { showForge(player); } catch (e) { fail(e); } });
     return;
@@ -1076,6 +1081,11 @@ world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
     return;
   }
   const itemId = event.itemStack?.typeId || '';
+  if (itemId && inHall(player.dimension.id,b) &&
+      itemId !== 'olympus:crown_control' && !GODS.some(god => itemId === `olympus:${god}_relic`)) {
+    event.cancel=true;
+    return;
+  }
   if (itemId !== 'olympus:mountain_sigil' && itemId !== 'olympus:temple_seal' && itemId !== 'olympus:crown_control' && !GODS.some(god => itemId === `olympus:${god}_relic`)) return;
   event.cancel = true;
   const sneaking = player.isSneaking;
@@ -1123,13 +1133,31 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
     }
   } catch (e) { fail(e); }
 });
+world.afterEvents.playerPlaceBlock.subscribe((event) => {
+  if (!inHall(event.player.dimension.id,event.block.location)) return;
+  try { event.block.setType('minecraft:air'); tell(event.player,'The Hall of Eight Gods resists alteration.'); }
+  catch(e) { fail(e); }
+});
 world.beforeEvents.playerBreakBlock.subscribe((event) => {
-  if (temporaryBlock(event.player.dimension.id,event.block.location)) event.cancel = true;
+  const dimension=event.player.dimension.id, location=event.block.location;
+  if (inHall(dimension,location) || temporaryBlock(dimension,location)) { event.cancel = true; return; }
+  if (event.block.typeId==='minecraft:smithing_table' && isForge(dimension,location)) {
+    event.cancel=true;
+    system.run(()=>{
+      try {
+        if (!removePortableForge(dimension,location)) return;
+        const block=event.player.dimension.getBlock(location);
+        if (block?.typeId!=='minecraft:smithing_table') return;
+        block.setType('minecraft:air');
+        event.player.dimension.spawnItem(new ItemStack('olympus:divine_forge',1),{x:location.x+0.5,y:location.y+0.5,z:location.z+0.5});
+      } catch(e) { fail(e); }
+    });
+  }
 });
 world.beforeEvents.explosion.subscribe((event) => {
   const blocks = event.getImpactedBlocks();
-  if (blocks.some(block => temporaryBlock(event.dimension.id,block.location)))
-    event.setImpactedBlocks(blocks.filter(block => !temporaryBlock(event.dimension.id,block.location)));
+  if (blocks.some(block => inHall(event.dimension.id,block.location) || temporaryBlock(event.dimension.id,block.location) || isForge(event.dimension.id,block.location)))
+    event.setImpactedBlocks(blocks.filter(block => !inHall(event.dimension.id,block.location) && !temporaryBlock(event.dimension.id,block.location) && !isForge(event.dimension.id,block.location)));
 });
 world.afterEvents.entityHurt.subscribe((event) => { try { onForgeHurt(event); } catch (e) { if (CONFIG.debug) fail(e); } });
 world.afterEvents.entitySpawn.subscribe((event) => { try { onDivineProjectileSpawn(event.entity); } catch (e) { if (CONFIG.debug) fail(e); } });

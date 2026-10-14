@@ -49,11 +49,11 @@ test('Solar Flare affects secondary targets once and never adds area damage to i
   assert.equal(nearby.damage.length,1);
 });
 
-test('Hellfire requires a real fire block and launches one non-destructive shot', () => {
+test('Hellfire requires fire or lava and launches one non-destructive fireball', () => {
   let block='minecraft:netherrack',shot,velocity;
   const dimension={id:'minecraft:the_nether',
     getBlock:()=>({typeId:block}),
-    spawnEntity:(id)=>{assert.equal(id,'minecraft:snowball');shot={id:'snow-1',typeId:id,
+    spawnEntity:(id)=>{assert.equal(id,'olympus:hellfire_bolt');shot={id:'fire-1',typeId:id,
       getComponent:()=>({set owner(value){this._owner=value;},shoot:v=>{velocity=v;}})};return shot;},
     spawnParticle(){},playSound(){}};
   const player={id:'hades',typeId:'minecraft:player',location:{x:0,y:0,z:0},dimension,
@@ -75,13 +75,17 @@ test('Hellfire requires a real fire block and launches one non-destructive shot'
   assert.deepEqual(victim.damage.map(([n])=>n),[6]);
   assert.equal(api.onDivineProjectileHitEntity(event),'');
   assert.equal(victim.damage.length,1);
+  shot=undefined;
+  block='minecraft:lava';
+  api.hellfire(player);
+  assert.equal(shot?.typeId,'olympus:hellfire_bolt');
 });
 
 test('Oracle prioritizes nearby players over a crowd of mobs and reveals no coordinates', () => {
   const action=[];
   const dimension={id:'minecraft:overworld',spawnParticle(){},playSound(){}};
   const apollo={id:'apollo',typeId:'minecraft:player',location:{x:0,y:0,z:0},dimension,
-    onScreenDisplay:{setActionBar:value=>action.push(value)}};
+    onScreenDisplay:{setActionBar:value=>action.push(value)},spawnParticle(){}};
   const other={...target('other','minecraft:player'),name:'OtherGod',location:{x:30,y:0,z:0},dimension,
     getGameMode:()=> 'Survival'};
   const mobs=Array.from({length:30},(_,i)=>({...target(`mob-${i}`),dimension}));

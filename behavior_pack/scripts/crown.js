@@ -20,7 +20,9 @@ function state() {
   try { return JSON.parse(world.getDynamicProperty(STATE) || '{}'); } catch { return { corrupt: true }; }
 }
 function save(value) { world.setDynamicProperty(STATE, JSON.stringify(value)); }
-function ownerPlayer(value = state()) { return world.getAllPlayers().find(p => p.id === value.ownerId); }
+function owns(value,player) { return !!player && (value.ownerId===player.id ||
+  (!!value.ownerName && value.ownerName===player.name && value.ownerGod===api.role(player))); }
+function ownerPlayer(value = state()) { return world.getAllPlayers().find(p => owns(value,p)); }
 function inventory(player) { return player.getComponent('minecraft:inventory')?.container; }
 function equipment(player) { return player.getComponent('minecraft:equippable'); }
 function isCrown(item) { return item?.typeId === CROWN; }
@@ -69,8 +71,8 @@ function grant(player) {
   if (!bag) return false;
   if (!hasItem(player, CROWN)) {
     const head = equipment(player)?.getEquipment(EquipmentSlot.Head);
-    if (!head && equipment(player)?.setEquipment(EquipmentSlot.Head, makeCrown())) {}
-    else if (bag.addItem(makeCrown())) return false;
+    if (!head) equipment(player)?.setEquipment(EquipmentSlot.Head, makeCrown());
+    if (!isCrown(equipment(player)?.getEquipment(EquipmentSlot.Head)) && bag.addItem(makeCrown())) return false;
   }
   if (!hasItem(player, CONTROL) && bag.addItem(makeControl())) return false;
   return true;
@@ -86,9 +88,9 @@ function cleanDrops() {
 export function configureCrown(callbacks) { api = callbacks; }
 export function crowned(player) {
   const s = state();
-  return s.ownerId === player.id && !!api.role(player) && api.role(player) === s.ownerGod && isCrown(equipment(player)?.getEquipment(EquipmentSlot.Head));
+  return owns(s,player) && !!api.role(player) && api.role(player) === s.ownerGod && isCrown(equipment(player)?.getEquipment(EquipmentSlot.Head));
 }
-export function crownOwner(player) { return state().ownerId === player.id; }
+export function crownOwner(player) { return owns(state(),player); }
 export function crownCooldownSeconds(player, seconds) {
   return crowned(player) && api.role(player) !== 'zeus' ? Math.ceil(seconds / 2) : seconds;
 }
@@ -159,7 +161,7 @@ export function showThrone(player) {
 }
 export function showStatus(player) {
   const s = state();
-  const own = s.ownerId === player.id;
+  const own = owns(s,player);
   const active = own && crowned(player);
   const cd = format((s.authorityUntil || 0) - time());
   const g = glory(s, player.id);
@@ -187,7 +189,7 @@ function dominionMenu(player) {
 }
 function commandDominion(player,mode) {
   const s = state();
-  if (s.ownerId !== player.id || !crowned(player)) { player.sendMessage('§cWear your own Crown to command Dominion.'); return; }
+  if (!owns(s,player) || !crowned(player)) { player.sendMessage('§cClaim the Crown at the Hall throne, then wear it to command Dominion. Check Crown Status for ownership.'); return; }
   if (s.dominionUntil > time()) { player.sendMessage(`§eDominion returns in ${format(s.dominionUntil-time())}.`); return; }
   if (dominionState().active || dominionState().records?.length) { player.sendMessage('§cA Dominion is active or its terrain is still recovering.'); return; }
   if (!activateDominion(player,mode)) { player.sendMessage('§cNo safe natural terrain was available here. No cooldown was spent.'); return; }
@@ -207,7 +209,7 @@ function submenu(player, kind) {
 }
 function command(player, kind, choice) {
   const s = state();
-  if (s.ownerId !== player.id || !crowned(player) || player.dimension.id !== 'minecraft:overworld') { player.sendMessage('§cWear your own crown in the Overworld.'); return; }
+  if (!owns(s,player) || !crowned(player) || player.dimension.id !== 'minecraft:overworld') { player.sendMessage('§cWear your own crown in the Overworld. Check Crown Status for ownership.'); return; }
   if ((s.authorityUntil || 0) > time()) { player.sendMessage(`§eDivine Authority returns in ${format(s.authorityUntil-time())}.`); return; }
   try {
     if (kind === 'time') world.setTimeOfDay(choice === 0 ? 1000 : 13000);
@@ -236,7 +238,7 @@ export function recoverCrown(player) {
   const s = state();
   if (s.corrupt) { player.sendMessage('§cCrown record is corrupt. Restore a world backup or use /function olympus/crown_reset for a new trial.'); return; }
   if (!s.ownerId) { player.sendMessage('§eCrown unclaimed. Visit the Hall throne.'); return; }
-  for (const p of world.getAllPlayers()) if (p.id !== s.ownerId) { removeItems(p,CROWN); removeItems(p,CONTROL); }
+  for (const p of world.getAllPlayers()) if (!owns(s,p)) { removeItems(p,CROWN); removeItems(p,CONTROL); }
   cleanDrops();
   const holder = ownerPlayer(s);
   if (holder) { grant(holder); player.sendMessage(`§aCrown reconciled for ${holder.name}.`); }
@@ -245,7 +247,7 @@ export function recoverCrown(player) {
 export function transferOnDeath(event) {
   const victim = event.deadEntity;
   const s = state();
-  if (victim.typeId !== 'minecraft:player' || s.ownerId !== victim.id) return;
+  if (victim.typeId !== 'minecraft:player' || !owns(s,victim)) return;
   dismissDominion();
   const source = event.damageSource;
   const direct = source?.damagingEntity;
@@ -277,8 +279,9 @@ export function crownTick() {
     delete s.weatherOverride; save(s);
   }
   const holder = ownerPlayer(s);
+  if (holder && s.ownerId!==holder.id) { s.ownerId=holder.id; save(s); }
   for (const p of world.getAllPlayers()) {
-    if (p.id === s.ownerId) {
+    if (owns(s,p)) {
       if ((p.getComponent('minecraft:health')?.currentValue || 0) > 0) { pruneOwner(p,CROWN); pruneOwner(p,CONTROL); grant(p); }
     }
     else { removeItems(p,CROWN); removeItems(p,CONTROL); }

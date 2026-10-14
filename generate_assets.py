@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-VERSION = [2, 3, 0]
+VERSION = [2, 4, 0]
 GODS = {
     'hermes': ('Hermes Winged Relic', '#f4cf58'),
     'zeus': ('Zeus Thunder Relic', '#f4eb7b'),
@@ -21,10 +21,10 @@ RELIC_BUTTONS = {
     'hermes': 'Use: Pearl / Sneak: Mobility Menu',
     'zeus': 'Use: Lightning / Sneak: Flight',
     'poseidon': 'Use: Powers / Sneak: Swim Toggle',
-    'hades': 'Use: Hellfire from actual flames',
+    'hades': 'Use: Hellfire from fire or lava',
     'ares': 'Use: War Rage',
     'apollo': 'Use: Apollo ability menu',
-    'hephaestus': 'View Forge powers',
+    'hephaestus': 'Open Divine Forge Guide',
     'dionysus': 'Use: Madness Guide / Divine Harvest',
 }
 
@@ -96,6 +96,7 @@ write_json(RP / 'manifest.json', {
 })
 
 texture_data = {}
+texture_data['olympus_divine_forge'] = {'textures': 'textures/items/hephaestus_relic'}
 for god, (label, color) in GODS.items():
     identifier = f'olympus:{god}_relic'
     write_json(BP / 'items' / f'{god}_relic.json', {

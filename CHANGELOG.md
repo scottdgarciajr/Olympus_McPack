@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.4.0 — Visible divine powers and portable forge
+
+- Apollo's Solar Flare now draws a gold trail during flight and a bright shaft and rings on impact. Oracle's Sight adds viewer-only colored target halos and local particle bearings for eight seconds.
+- Hades can launch Hellfire while occupying lava as well as fire. The projectile uses vanilla fireball artwork on a separate non-igniting entity.
+- Hephaestus's relic opens a full Forge Guide with all four recipes and exact costs. The forge menu lists all recipes regardless of the held item. Eight iron ingots around a crafting table craft a portable Divine Forge; only Hephaestus can place and use it, and a mined forge returns its item.
+- Protected the Hall footprint from player mining/building and explosion block damage. Crown ownership now reconciles a returning owner's changed player ID, and Crown grant no longer creates an extra item when the head slot is empty.
+- Offline tests and package validation updated. In-game behavior still needs a Bedrock test world.
+
 ## 2.3.0 — Divine archer, Hellfire, Leap, and Harvest
 
 - Apollo's relic now opens an ability menu for existing Sunflight, an armed Solar Flare arrow, and Oracle's Sight. Flare blinds within three blocks and damages nearby secondary targets without adding another full bonus to the direct hit. Oracle provides an eight-second directional HUD for nearby players, animals, and mobs.

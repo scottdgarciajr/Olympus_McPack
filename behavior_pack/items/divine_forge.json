@@ -1,0 +1,13 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": { "identifier": "olympus:divine_forge", "menu_category": { "category": "items" } },
+    "components": {
+      "minecraft:display_name": { "value": "Divine Forge" },
+      "minecraft:icon": "olympus_divine_forge",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Place Divine Forge",
+      "olympus:forge_place": {}
+    }
+  }
+}

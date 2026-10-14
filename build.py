@@ -64,6 +64,14 @@ check((BP / 'functions' / 'olympus' / 'setup.mcfunction').read_text().strip() ==
 check(read_json(BP / 'items' / 'crown.json')['minecraft:item']['components']['minecraft:wearable']['slot'] == 'slot.armor.head', 'Crown is not wearable')
 check((RP / 'attachables' / 'crown.player.json').exists(), 'Crown worn model missing')
 check((BP / 'scripts' / 'crown.js').exists(), 'Crown manager missing')
+forge_recipe = read_json(BP / 'recipes' / 'divine_forge.json')['minecraft:recipe_shaped']
+check(forge_recipe['pattern'] == ['III', 'ICI', 'III'] and
+      forge_recipe['result']['item'] == 'olympus:divine_forge', 'Portable forge recipe missing')
+check(read_json(BP / 'items' / 'divine_forge.json')['minecraft:item']['components'].get('olympus:forge_place') == {}, 'Portable forge placement hook missing')
+bolt = read_json(BP / 'entities' / 'hellfire_bolt.json')['minecraft:entity']
+check('minecraft:explode' not in str(bolt) and not bolt['components']['minecraft:projectile'].get('catch_fire'), 'Hellfire may damage terrain')
+check(read_json(RP / 'entity' / 'hellfire_bolt.entity.json')['minecraft:client_entity']['description']['textures']['default'] == 'textures/items/fireball', 'Fireball appearance missing')
+check('world.beforeEvents.playerBreakBlock.subscribe' in script and 'inHall(dimension,location)' in script, 'Hall break protection missing')
 structure_path = BP / 'structures' / 'olympus' / 'hall_of_eight.mcstructure'
 check(structure_path.is_file() and structure_path.stat().st_size > 10000, 'Bedrock temple structure missing')
 check((BP / 'functions' / 'olympus' / 'give_all.mcfunction').read_text().count('give @s ') == 8, 'Kit must contain eight relics')

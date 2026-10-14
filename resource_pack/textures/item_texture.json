@@ -2,6 +2,9 @@
   "resource_pack_name": "Olympus SMP",
   "texture_name": "atlas.items",
   "texture_data": {
+    "olympus_divine_forge": {
+      "textures": "textures/items/hephaestus_relic"
+    },
     "olympus_hermes": {
       "textures": "textures/items/hermes_relic"
     },
