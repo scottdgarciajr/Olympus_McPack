@@ -1,6 +1,6 @@
 # Olympus SMP
 
-A Minecraft **Bedrock Edition** add-on for the eight Olympian gods and the forbidden ninth god, Kratos. This download contains a behavior pack (the game rules) and a resource pack (the art). Install **both**. Current version: **2.7.1**. It requires Minecraft Bedrock 1.21.90 or newer. It is not a Java Edition mod.
+A Minecraft **Bedrock Edition** add-on for the eight Olympian gods and the forbidden ninth god, Kratos. This download contains a behavior pack (the game rules) and a resource pack (the art). Install **both**. Current version: **2.7.2**. It requires Minecraft Bedrock 1.21.90 or newer. It is not a Java Edition mod.
 
 ## Start here: add the pack to your world
 
@@ -9,13 +9,13 @@ A Minecraft **Bedrock Edition** add-on for the eight Olympian gods and the forbi
 3. For a **new world**, choose **Play → Create New → Create New World**. For an **existing world**, choose **Play**, then the pencil/edit button next to that world. In the world settings, open **Add-Ons → Behavior Packs → My Packs**, find **Olympus SMP Behavior**, and choose **Activate**. Check **Resource Packs → My Packs** and activate **Olympus SMP Resources** if it was not activated automatically. On a server or Realm, see the sections below.
 4. Turn on **Cheats** in the world settings so setup commands work. Cheats can disable achievements for that world. Enter the world as its owner or an operator.
 5. Open chat and run **`/function olympus/setup`**. This one command places the Hall, all god altars, the Crown throne, the forge, and Kratos's chamber beneath the Hall. The Hall is 33 × 15 × 33 blocks, with the lower chamber extending seven blocks underground; keep the area clear. The script searches for a safe site near world spawn. If it cannot find one, it gives you a **Hall Placement Seal**. Stand where you want the Hall centered and use the seal.
-6. Run **`/function olympus/status`**. It should say `v2.7.1 script active`. If it reports an older version, leave the world, open its pack settings, deactivate the older Olympus packs, activate the newly imported packs, and rejoin.
+6. Run **`/function olympus/status`**. It should say `v2.7.2 script active`. If it reports an older version, leave the world, open its pack settings, deactivate the older Olympus packs, activate the newly imported packs, and rejoin.
 
 ### First steps in the Hall
 
 - Each of the eight enchanting tables is an Olympian altar. Kratos's forbidden altar is the netherite block in the darker chamber downstairs: descend the scaffolding near the rear center of the Hall. Use an altar to read that god's powers and offering. Choose **Reserve**; the reservation lasts **10 minutes**. Bring the offering back and use the same altar again to claim. Gods are exclusive until an operator opens one to additional players.
 - The relic you receive activates that god's special power. **Use** means press your normal item Use button. **Sneak-use** means crouch while using it. The god's passive abilities work without holding the relic. Run **`/function olympus/controls`** whenever you need a reminder.
-- The **Crown of Olympus** is claimed at the gold and sea-lantern center. Claim a god first, then bring all eight offerings listed below and use the center sea lantern. Wear your Crown in the helmet slot and use its Seal of Divine Authority. A crowned player can forge additional fully powered Crowns for other claimed players at the throne: **each new Crown consumes eight fresh offerings, one Dragon Egg, and one recorded Ender Dragon victory**. Defeat or respawn and defeat the dragon again for each additional Crown. Every Crown has its own owner and cooldowns. Crown ownership transfers on a PvP kill.
+- The **Crown of Olympus** is claimed at the gold and sea-lantern center. Claim a god first, then bring all eight offerings listed below and use the center sea lantern. Wear your Crown in the helmet slot and use its Seal of Divine Authority. Only a current Crown owner wearing their own Crown at the throne can choose to forge another fully powered Crown for a claimed player. **The existing owner keeps their Crown**; eight fresh offerings, one Dragon Egg, and one recorded Ender Dragon victory are consumed. Defeat or respawn and defeat the dragon again for each additional Crown. Every Crown has its own owner and cooldowns. Crown ownership transfers on a PvP kill.
 - Roman numerals in the guide are Minecraft effect levels: **I** is level 1, **II** is level 2, and so on. A **cooldown** is the wait before an ability can be used again.
 
 ### Test Hephaestus quickly in Creative mode
@@ -28,7 +28,7 @@ For a normal Survival world, claim Hephaestus at his altar and craft the portabl
 
 ## Updating an existing Olympus world
 
-Back up the world, close it, import the new `.mcaddon`, then edit that world's Behavior Packs and Resource Packs. Deactivate older Olympus versions and activate version 2.7.1 of both packs. Rejoin and check `/function olympus/status`. Existing god assignments, Crown ownership, cooldowns, Glory, and previously forged items are stored in the world. If the Hall was placed by an earlier pack, stand in the loaded Hall and run `/function olympus/setup` again to add the lower chamber. It leaves the existing upper Hall in place and opens a scaffolding entrance in its floor.
+Back up the world, close it, import the new `.mcaddon`, then edit that world's Behavior Packs and Resource Packs. Deactivate older Olympus versions and activate version 2.7.2 of both packs. Rejoin and check `/function olympus/status`. Existing god assignments, Crown ownership, cooldowns, Glory, and previously forged items are stored in the world. If the Hall was placed by an earlier pack, stand in the loaded Hall and run `/function olympus/setup` again to add the lower chamber. It leaves the existing upper Hall in place and opens a scaffolding entrance in its floor.
 
 ## World setup and Crown details
 
@@ -40,16 +40,16 @@ The Crown menu also offers **Dimensional Dominion**: 30 seconds of temporary Und
 
 | God domain | Required item | How to find it |
 | --- | --- | --- |
-| Hermes: travel | Ender Pearl | Endermen, barter, or trade |
-| Zeus: storms | Lightning Rod | Craft from copper |
-| Poseidon: sea | Heart of the Sea | Buried treasure |
+| Hermes: travel | Ender Pearl | Hermes generates a Divine Ender Pearl with his relic every five minutes. |
+| Zeus: lightning hunt | Creeper Head | Zeus can call lightning to charge a creeper; arrange for the charged creeper to kill another creeper. |
+| Poseidon: underwater combat | Prismarine Crystals | Fight guardians underwater, where Poseidon's powers are strongest. |
 | Hades: Nether | Blaze Rod | Blazes in a Nether fortress |
 | Ares: PvP | War Trophy | Kill another player; the killer receives the custom trophy |
-| Apollo: sunlight | Daylight Detector | Craft from quartz, glass, and wood |
-| Hephaestus: mining | Netherite Ingot | Ancient debris and gold |
-| Dionysus: harvest | Glistering Melon Slice | Craft from melon and gold nuggets |
+| Apollo: daylight raids | Ominous Bottle | Defeat an outpost raid captain; Apollo's sunlit flight, bow, and Oracle help hunt from range. |
+| Hephaestus: mining | Netherite Ingot | Mine ancient debris faster with Haste IV, then combine scraps with gold. |
+| Dionysus: harvest | Poisonous Potato | Grow and harvest potatoes repeatedly; his replenished Bone Meal speeds the search for this rare crop drop. |
 
-The first Crown consumes one of every offering. Each extra Crown consumes those eight items **and one Dragon Egg**. The pack records one victory each time the Ender Dragon is killed in the End and awards an egg to the killer or another player there. One victory funds one duplicate Crown; extra vanilla eggs alone cannot fund another. Respawn the dragon with End Crystals and defeat it again for each further Crown. Victories earned before installing version 2.7.1 are not recorded, so an existing world needs a new dragon kill for its next duplicate. The recipient must be online, have a god, and not already own a Crown. Kratos is the forbidden ninth god; the trial still represents the original eight domains.
+The first Crown consumes one of every offering. Each extra Crown requires its current owner to wear it at the throne and select the recipient; that Crown stays with the owner. The forge consumes those eight items **and one Dragon Egg**. The pack records one victory each time the Ender Dragon is killed in the End and awards an egg to the killer or another player there. One victory funds one duplicate Crown; extra vanilla eggs alone cannot fund another. Respawn the dragon with End Crystals and defeat it again for each further Crown. Victories earned before installing version 2.7.1 are not recorded, so an existing world needs a new dragon kill for its next duplicate. The recipient must be online, have a god, and not already own a Crown. Kratos is the forbidden ninth god; the trial still represents the original eight domains.
 
 Operator tools: `/function olympus/crown_setup`, `/function olympus/crown_status`, `/function olympus/crown_reset`, `/function olympus/crown_recover`, `/function olympus/crown_glory`, and `/function olympus/crown_help`. Reset preserves Glory. `/function olympus/setup` prepares the Hall, all nine altars, the Crown throne, and forge. The older mountain uses a separate command because it replaces a large area at the operator's chosen location.
 
@@ -65,7 +65,7 @@ Operator tools: `/function olympus/crown_setup`, `/function olympus/crown_status
 | Apollo | 1 bow |
 | Hephaestus | 1 furnace |
 | Dionysus | 3 sweet berries |
-| Kratos, downstairs | 1 Nether Star |
+| Kratos, downstairs | 1 Iron Sword |
 
 Claimed relics stay in their owners' inventory on death. Poseidon's Tidecaller, Apollo's Solar Bow, and Hephaestus's Divine Fortune pickaxe also stay on death and automatically repair while in their owner's inventory. Existing copies receive this protection when their owner has the new pack active.
 
@@ -87,7 +87,7 @@ Choose by playstyle: **Hermes** travels fastest; **Zeus** controls storms and th
 | Apollo | Solar Bow with Power V, Infinity I, Unbreaking III, plus **6 scripted arrow damage in direct sunlight** or 2 out of sunlight | Weakness III and Mining Fatigue II without direct sunlight | Relic menu: daylight flight for **30 sec** (3 min cooldown), arm one Solar Flare arrow (45 sec cooldown after impact), or use Oracle’s Sight (40-block radius, 8 sec reveal, 2 min cooldown). |
 | Hephaestus | Haste IV, Efficiency V and Divine Fortune IV pickaxe | Permanent Weakness III | The pickaxe has a **35% chance** for one bonus ore drop. Only Hephaestus can create four visually distinct tools and gear pieces at the Hall or a portable Divine Forge; anyone can use the results. |
 | Dionysus | Each melee hit on a new target adds a random self buff. Strength, Speed, and Haste can reach IV for 180 sec; Resistance caps at III for 180 sec and Regeneration at II for 60 sec. Successfully used Bone Meal replenishes one-for-one. | Madness rises to 10 stacks: longer, stronger Nausea, random teleportation, and an increasing chance of Blindness | The same hit gives that target a debuff for 180 sec and teleports Dionysus 8–16 blocks when a raycast finds a clear, safe landing; otherwise he gets a brief explanation. **Different targets trigger instantly; the same target has a 3 sec cooldown.** Debuffs can coexist and strengthen up to level IV. Repeated hits can refresh Regeneration, but its level stays capped; external stronger effects remain intact. |
-| Kratos | No automatic combat buff | Stolen burdens may apply Weakness, Slowness, Mining Fatigue, or Nausea | Melee hits on gods steal one random representative gift or burden for **8 sec**. Killing a god copies one random gift or burden until Kratos dies; a later kill replaces it. Stolen Zeus lightning can be fired with Kratos's relic, using Zeus's 5 sec thunder/3 min clear cooldown. Otherwise the relic shows status. |
+| Kratos | No automatic combat buff | Stolen burdens may apply Weakness, Slowness, Mining Fatigue, or Nausea | Melee hits on gods steal one random representative gift or burden for **8 sec**. Each god kill adds exactly one random lasting gift or burden, with no gameplay cap; he holds them together until death, including weaknesses. Repeated copies of one effect do not add their levels together. Stolen Zeus lightning can be fired with Kratos's relic, using Zeus's 5 sec thunder/3 min clear cooldown. Otherwise the relic shows status. |
 
 **Hermes:** Speed VI is always active. Hold sprint to enter Speed XIV with additional directional momentum targeting 1.3 blocks per tick, designed to outrun a very fast horse. Left/right input now maps to the correct strafing directions; release sprint or sneak for a slower pace. A bright gold trail appears while sprinting. Slow Falling starts on. Sneak-use can switch the constant glide off; a dangerous fall automatically reactivates protection during descent.
 

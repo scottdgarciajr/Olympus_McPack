@@ -1,11 +1,11 @@
 {
   "name": "olympus-smp",
-  "version": "2.6.0",
+  "version": "2.7.2",
   "private": true,
   "type": "module",
   "scripts": {
     "check:syntax": "node --check behavior_pack/scripts/main.js && node --check behavior_pack/scripts/config.js && node --check behavior_pack/scripts/rules.js && node --check behavior_pack/scripts/flair.js",
-    "test": "node --test tests/rules.test.js tests/flair.test.js tests/divine_combat.test.js tests/teleport.test.js",
+    "test": "node --test tests/rules.test.js tests/flair.test.js tests/divine_combat.test.js tests/teleport.test.js tests/kratos.test.js tests/crown.test.js",
     "build": "python generate_assets.py && python generate_temple.py && python build.py"
   }
 }

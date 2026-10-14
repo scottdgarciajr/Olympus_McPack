@@ -11,13 +11,13 @@ const SERIAL = 'olympus:crownSerial';
 const DRAGON_VICTORIES = 'olympus:dragonVictories';
 export const CROWN_OFFERINGS = [
   { id:'minecraft:ender_pearl', domain:'Hermes — travel' },
-  { id:'minecraft:lightning_rod', domain:'Zeus — storms' },
-  { id:'minecraft:heart_of_the_sea', domain:'Poseidon — sea' },
+  { id:'minecraft:creeper_head', domain:'Zeus — lightning hunt' },
+  { id:'minecraft:prismarine_crystals', domain:'Poseidon — underwater combat' },
   { id:'minecraft:blaze_rod', domain:'Hades — Nether' },
   { id:'olympus:war_trophy', domain:'Ares — PvP victory' },
-  { id:'minecraft:daylight_detector', domain:'Apollo — sunlight' },
+  { id:'minecraft:ominous_bottle', domain:'Apollo — daylight raids' },
   { id:'minecraft:netherite_ingot', domain:'Hephaestus — mining and forge' },
-  { id:'minecraft:glistering_melon_slice', domain:'Dionysus — harvest and brewing' }
+  { id:'minecraft:poisonous_potato', domain:'Dionysus — divine harvest' }
 ];
 const AUTHORITY_MS = 300000;
 const WEATHER_MS = 120000;
@@ -203,7 +203,8 @@ function claim(player) {
 }
 function duplicate(player,recipient) {
   const s=state();
-  if (busy || s.corrupt || !s.crowns.length || !nearThrone(player) || !crowned(player) || !recipient || !api.role(recipient) || owns(s,recipient)) {
+  const source=wornRecord(s,player);
+  if (busy || s.corrupt || !s.crowns.length || !nearThrone(player) || !source || source.ownerGod!==api.role(player) || !recipient || !api.role(recipient) || owns(s,recipient)) {
     player.sendMessage('§cA crowned owner at the throne must choose another claimed god without a Crown.'); return;
   }
   if (!availableDragonVictories(s)) {
@@ -225,7 +226,7 @@ function duplicate(player,recipient) {
     save(s);
     saved=true;
     if (!grant(recipient)) recipient.sendMessage('§eClear an inventory slot and use /function olympus/crown_recover.');
-    announce(`${player.name} forged Crown #${n} for ${recipient.name}, consuming a Dragon Egg and one dragon victory!`);
+    announce(`${player.name} kept Crown #${source.serial} and forged Crown #${n} for ${recipient.name}, consuming a Dragon Egg and one dragon victory!`);
   } catch (e) {
     if (!saved) { if (offeringsTaken) refundOfferings(player); if (eggTaken) refundItem(player,'minecraft:dragon_egg'); }
     api.fail(e); player.sendMessage('§cCrown duplication failed. Uncommitted offerings and egg were returned.');
@@ -237,7 +238,7 @@ function duplicateMenu(player) {
   const s=state(), candidates=world.getAllPlayers().filter(p=>p.id!==player.id && api.role(p) && !owns(s,p));
   if (!candidates.length) { player.sendMessage('§eAnother claimed god without a Crown must be online to receive the new one.'); return; }
   const form=new ActionFormData().title('§6FORGE ANOTHER CROWN')
-    .body(`Each new Crown consumes one Dragon Egg, one recorded dragon victory, and all eight domain offerings. Choose its new owner.\nAvailable dragon victories: ${availableDragonVictories(s)}\n\n${offeringsText(player)}\n${api.offeringCount(player,'minecraft:dragon_egg')?'§a✓':'§c✗'} Dragon Egg (consumed)`);
+    .body(`You must wear your own Crown to forge another. Your Crown stays yours; the selected god receives a new fully powered Crown. Each new Crown consumes one Dragon Egg, one recorded dragon victory, and all eight domain offerings.\nAvailable dragon victories: ${availableDragonVictories(s)}\n\n${offeringsText(player)}\n${api.offeringCount(player,'minecraft:dragon_egg')?'§a✓':'§c✗'} Dragon Egg (consumed)`);
   for (const p of candidates) form.button(`${p.name} — ${api.role(p)}`);
   form.button('Cancel').show(player).then(r=>{ if (r.selection!==undefined && r.selection<candidates.length) duplicate(player,candidates[r.selection]); }).catch(api.fail);
 }

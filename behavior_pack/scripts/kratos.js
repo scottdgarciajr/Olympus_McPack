@@ -1,5 +1,5 @@
-// Kratos copies one representative divine gift or burden per strike. A kill
-// replaces his single lasting copy; neither copy is tied to the victim being online.
+// Each god kill adds one gift or burden until Kratos dies. Copies persist on Kratos,
+// independently of the victim's connection, and repeated effects do not stack.
 const POWERS = {
   hermes: [['Traveler speed','speed',2],['Traveler burden','weakness',1]],
   zeus: [['Stolen lightning','olympus:lightning',0],['Thunder burden','mining_fatigue',1]],
@@ -20,6 +20,15 @@ function apply(player,power,seconds) {
   if (!active || active.amplifier<=power[2]) player.addEffect(power[1],seconds*20,{amplifier:power[2],showParticles:false});
 }
 function read(player,key) { try { return JSON.parse(player.getDynamicProperty(key)||'null'); } catch { return null; } }
+function lastingEntries(player) {
+  const saved=read(player,LASTING);
+  // Previous releases stored one power, or an uncompressed list of powers.
+  const old=Array.isArray(saved) ? (typeof saved[0]==='string' ? [saved] : saved) : [];
+  const entries=Array.isArray(saved?.entries) ? saved.entries : old.map(power=>[power,1]);
+  return entries.filter(([power,count])=>Array.isArray(power) && typeof power[0]==='string' &&
+    typeof power[1]==='string' && Number.isInteger(power[2]) && Number.isSafeInteger(count) && count>0);
+}
+function lastingCopies(player) { return lastingEntries(player).map(([power])=>power); }
 export function kratosStrike(attacker,victim,god) {
   if (!god || god==='kratos') return;
   const power=choose(god);
@@ -32,13 +41,21 @@ export function kratosStrike(attacker,victim,god) {
 export function kratosKill(attacker,god) {
   const power=choose(god);
   if (!power) return;
-  attacker.setDynamicProperty(LASTING,JSON.stringify(power));
+  const entries=lastingEntries(attacker);
+  const existing=entries.find(([copy])=>copy[0]===power[0] && copy[1]===power[1] && copy[2]===power[2]);
+  if (existing) existing[1]++;
+  else entries.push([power,1]);
+  attacker.setDynamicProperty(LASTING,JSON.stringify({entries}));
   apply(attacker,power,5);
-  attacker.sendMessage(`§4God Slayer: ${power[0]} is yours until death. A later god kill replaces it.`);
+  const total=entries.reduce((sum,[,count])=>sum+count,0);
+  attacker.sendMessage(`§4God Slayer: gained ${power[0]} until death. ${total} kill ${total===1?'copy':'copies'} held.`);
 }
 export function kratosTick(player) {
-  const lasting=read(player,LASTING);
-  if (lasting) apply(player,lasting,5);
+  const strongest=new Map();
+  for (const power of lastingCopies(player)) {
+    if (!strongest.has(power[1]) || strongest.get(power[1])[2]<power[2]) strongest.set(power[1],power);
+  }
+  for (const power of strongest.values()) apply(player,power,5);
   const until=Number(player.getDynamicProperty(UNTIL)||0);
   if (until>Date.now()) {
     const temporary=read(player,TEMP);
@@ -52,12 +69,16 @@ export function kratosDeath(player) {
   for (const key of [TEMP,UNTIL,LASTING]) player.setDynamicProperty(key,undefined);
 }
 export function kratosStatus(player) {
-  const lasting=read(player,LASTING),temp=read(player,TEMP),seconds=Math.ceil((Number(player.getDynamicProperty(UNTIL)||0)-Date.now())/1000);
-  return `Lasting: ${lasting?.[0]||'none'}; temporary: ${seconds>0?`${temp?.[0]} (${seconds}s)`:'none'}`;
+  const entries=lastingEntries(player),temp=read(player,TEMP),seconds=Math.ceil((Number(player.getDynamicProperty(UNTIL)||0)-Date.now())/1000);
+  const counts=new Map();
+  for (const [power,count] of entries) counts.set(power[0],(counts.get(power[0])||0)+count);
+  const names=[...counts].map(([name,count])=>count>1?`${name} ×${count}`:name);
+  const total=entries.reduce((sum,[,count])=>sum+count,0);
+  return `Lasting (${total}): ${names.join(', ')||'none'}; temporary: ${seconds>0?`${temp?.[0]} (${seconds}s)`:'none'}`;
 }
 export function kratosUsePower(player,weather) {
-  const lasting=read(player,LASTING),temp=read(player,TEMP);
-  if (lasting?.[1]!=='olympus:lightning' && !(Number(player.getDynamicProperty(UNTIL)||0)>Date.now() && temp?.[1]==='olympus:lightning')) return false;
+  const temp=read(player,TEMP);
+  if (!lastingCopies(player).some(power=>power[1]==='olympus:lightning') && !(Number(player.getDynamicProperty(UNTIL)||0)>Date.now() && temp?.[1]==='olympus:lightning')) return false;
   const thunder=player.dimension.id==='minecraft:overworld' && weather==='Thunder';
   const remaining=Number(player.getDynamicProperty('olympus:kratosLightningUntil')||0)-Date.now();
   if (remaining>0) { player.sendMessage(`§eStolen lightning returns in ${Math.ceil(remaining/1000)}s.`); return true; }

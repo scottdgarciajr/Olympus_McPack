@@ -25,7 +25,7 @@ const DESCRIPTIONS = {
   apollo: 'Infinite Solar Bow, Sunflight, Solar Flare arrow, and Oracle’s Sight; Weakness III and Mining Fatigue II without sunlight.',
   hephaestus: 'Haste IV, Divine Fortune IV pickaxe, and costly item combinations at the Hall or portable Divine Forge; permanent Weakness III.',
   dionysus: 'Every new foe can be cursed immediately. Random buffs include Regeneration II and Resistance III at most; each hit adds Nausea, teleports you, and may blind you. Divine Harvest replenishes used Bone Meal.',
-  kratos: 'Each melee hit on a god steals a random divine gift or burden for 8 seconds. A god kill copies one random gift or burden until Kratos dies. A later kill replaces it.'
+  kratos: 'Each melee hit on a god steals a random divine gift or burden for 8 seconds. Each god kill adds one random gift or burden until Kratos dies; there is no copy limit, and burdens accumulate too.'
 };
 const CONTROLS = {
   hermes: 'Speed VI always; sprint for Speed XIV. Use relic: pearl (5m). Sneak-use: mobility menu for Slow Falling and Divine Leap toggles. Weakness III.',
@@ -36,13 +36,13 @@ const CONTROLS = {
   apollo: 'Use relic for Sunflight (3m), arm a Solar Flare arrow (45s after impact), or Oracle’s Sight (2m). One arrow fuels your infinite Solar Bow.',
   hephaestus: 'Haste IV and Weakness III. Use your relic for the Forge Guide. Craft a portable forge with eight iron ingots around a crafting table.',
   dionysus: 'Melee-hit different foes for random buffs. Regeneration caps at II for 60s and Resistance at III; other buffs can reach IV. Same foe: 3s cooldown. Used Bone Meal replenishes.',
-  kratos: 'Melee-hit a god to steal one random representative gift or burden for 8s. Kill a god to hold one random gift or burden until you die. Use relic for status.'
+  kratos: 'Melee-hit a god to steal one random representative gift or burden for 8s. Each god kill adds one random lasting gift or burden until death, with no copy limit. Use relic for status.'
 };
 const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigue', 'conduit_power',
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '2.7.1';
+const PACK_VERSION = '2.7.2';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -52,7 +52,7 @@ const OFFERINGS = {
   hermes: ['minecraft:feather', 8], zeus: ['minecraft:copper_ingot', 1],
   poseidon: ['minecraft:cod', 3], hades: ['minecraft:bone', 4],
   ares: ['minecraft:stone_sword', 1], apollo: ['minecraft:bow', 1],
-  hephaestus: ['minecraft:furnace', 1], dionysus: ['minecraft:sweet_berries', 3], kratos: ['minecraft:nether_star',1]
+  hephaestus: ['minecraft:furnace', 1], dionysus: ['minecraft:sweet_berries', 3], kratos: ['minecraft:iron_sword',1]
 };
 const WEAKNESSES = {
   hermes: 'Weakness III', zeus: 'Mining Fatigue II', poseidon: 'Slowness III and Weakness III in Nether or desert',

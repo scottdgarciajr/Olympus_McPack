@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.7.2 — Ability-earned Crown offerings and God Slayer progression
+
+- Replaced the crafted Crown offerings with resources each god is especially equipped to obtain: Creeper Head, Prismarine Crystals, Ominous Bottle, and Poisonous Potato. Hermes, Hades, Ares, and Hephaestus retain their ability-earned offerings.
+- A Crown owner must wear their own Crown at the throne to choose a recipient for a duplicate. The original Crown and owner record remain with them; the new fully powered Crown has a separate owner. Added an offline regression test for this consent and ownership flow.
+- Kratos now claims with an Iron Sword. Each god kill adds one random lasting gift or burden until he dies, without a gameplay copy cap. Duplicate effects are stored compactly and do not multiply effect levels; existing single lasting copies migrate on the next kill.
+- Updated the guide and testing checklist. Bedrock gameplay still needs an in-game verification pass.
+
 ## 2.7.1 — Dragon victories for every extra Crown
 
 - Each duplicate Crown now consumes its Dragon Egg and one recorded Ender Dragon victory, as well as the eight domain offerings. A single kill cannot fund multiple Crowns even when Bedrock generates an extra vanilla egg.
