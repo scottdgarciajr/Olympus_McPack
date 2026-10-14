@@ -3,6 +3,10 @@ export function cooldownRemaining(expiryMs, currentMs) {
   return Math.max(0, Number(expiryMs || 0) - currentMs);
 }
 
+export function dragonVictoriesAvailable(victories, spent) {
+  return Math.max(0, Math.floor(Number(victories) || 0) - Math.floor(Number(spent) || 0));
+}
+
 export function abilityNeedsCooldown(ability, storm) {
   return !(storm && ability === 'zeusFlight');
 }

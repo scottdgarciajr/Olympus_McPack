@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.7.1 — Dragon victories for every extra Crown
+
+- Each duplicate Crown now consumes its Dragon Egg and one recorded Ender Dragon victory, as well as the eight domain offerings. A single kill cannot fund multiple Crowns even when Bedrock generates an extra vanilla egg.
+- Each Ender Dragon killed in the End adds one persistent victory and awards one Dragon Egg to a player in the End. Respawning and killing the dragon again makes further Crowns possible.
+- Updated the Creative test kit to provide one test victory with its egg and offerings, plus the README and in-game checklist. Existing Crown ownership remains intact.
+
 ## 2.7.0 — Forbidden god and endgame Crowns
 
 - Added Kratos's darker chamber beneath the existing Hall, reached by the rear scaffolding, with a Nether Star claim. Hits on gods grant one random representative gift or burden for eight seconds; a god kill stores one copy until Kratos dies.

@@ -2,11 +2,13 @@ import { world, system, ItemStack, EquipmentSlot, WeatherType, MolangVariableMap
 import { ActionFormData } from '@minecraft/server-ui';
 import { activateDominion, dismissDominion, dominionState, dominionTick } from './dominion.js';
 import { CONFIG } from './config.js';
+import { dragonVictoriesAvailable } from './rules.js';
 
 const CROWN = 'olympus:crown';
 const CONTROL = 'olympus:crown_control';
 const STATE = 'olympus:crown_state';
 const SERIAL = 'olympus:crownSerial';
+const DRAGON_VICTORIES = 'olympus:dragonVictories';
 export const CROWN_OFFERINGS = [
   { id:'minecraft:ender_pearl', domain:'Hermes — travel' },
   { id:'minecraft:lightning_rod', domain:'Zeus — storms' },
@@ -140,6 +142,19 @@ function format(ms) {
   return `${Math.floor(n/60)}m ${n%60}s`;
 }
 function glory(value, id) { return value.glory?.[id] || { name: '', god: '', points: 0, progress: 0 }; }
+function dragonVictories() { return Math.max(0,Number(world.getDynamicProperty(DRAGON_VICTORIES)||0)); }
+function availableDragonVictories(value) { return dragonVictoriesAvailable(dragonVictories(),value.dragonUses); }
+export function recordDragonVictory() {
+  const victories=dragonVictories()+1;
+  world.setDynamicProperty(DRAGON_VICTORIES,victories);
+  return victories;
+}
+function refundItem(player,id) {
+  const item=new ItemStack(id,1);
+  const bag=inventory(player);
+  const leftover=bag ? bag.addItem(item) : item;
+  if (leftover) player.dimension.spawnItem(leftover,player.location);
+}
 function offeringsText(player) { return CROWN_OFFERINGS.map(o=>`${api.offeringCount(player,o.id)?'§a✓':'§c✗'} §r${o.domain}: ${o.id.replace(/^(minecraft|olympus):/,'').replaceAll('_',' ')}`).join('\n'); }
 function hasOfferings(player) { return CROWN_OFFERINGS.every(o=>api.offeringCount(player,o.id)>=1); }
 function takeOfferings(player) {
@@ -151,11 +166,11 @@ function takeOfferings(player) {
     }
     return true;
   } catch (e) {
-    for (const id of taken) inventory(player)?.addItem(new ItemStack(id,1));
+    for (const id of taken) refundItem(player,id);
     api.fail(e); return false;
   }
 }
-function refundOfferings(player) { for (const o of CROWN_OFFERINGS) inventory(player)?.addItem(new ItemStack(o.id,1)); }
+function refundOfferings(player) { for (const o of CROWN_OFFERINGS) refundItem(player,o.id); }
 export function showLeaderboard(player) {
   const s = state();
   const rows = Object.entries(s.glory || {}).sort((a,b) => b[1].points-a[1].points)
@@ -191,21 +206,30 @@ function duplicate(player,recipient) {
   if (busy || s.corrupt || !s.crowns.length || !nearThrone(player) || !crowned(player) || !recipient || !api.role(recipient) || owns(s,recipient)) {
     player.sendMessage('§cA crowned owner at the throne must choose another claimed god without a Crown.'); return;
   }
+  if (!availableDragonVictories(s)) {
+    player.sendMessage('§cA new Crown requires an unused Ender Dragon victory. Defeat or respawn and defeat the dragon again.'); return;
+  }
   if (api.offeringCount(player,'minecraft:dragon_egg')<1 || !hasOfferings(player)) {
-    player.sendMessage('§cBring a Dragon Egg catalyst and all eight domain offerings. The egg is not consumed.'); return;
+    player.sendMessage('§cBring one Dragon Egg and all eight domain offerings. All nine items are consumed.'); return;
   }
   busy=true;
-  let charged=false,saved=false;
+  let offeringsTaken=false,eggTaken=false,saved=false;
   try {
     if (!takeOfferings(player)) return;
-    charged=true;
+    offeringsTaken=true;
+    if (!api.takeOffering(player,'minecraft:dragon_egg',1)) throw new Error('Dragon Egg vanished before forging');
+    eggTaken=true;
     const n=Math.max(0,...s.crowns.map(c=>c.serial))+1;
     s.crowns.push({serial:n,ownerId:recipient.id,ownerName:recipient.name,ownerGod:api.role(recipient),authorityUntil:0,dominionUntil:0,lastTransfer:time()});
+    s.dragonUses=Number(s.dragonUses||0)+1;
     save(s);
     saved=true;
     if (!grant(recipient)) recipient.sendMessage('§eClear an inventory slot and use /function olympus/crown_recover.');
-    announce(`${player.name} forged Crown #${n} for ${recipient.name} with the Dragon Egg catalyst!`);
-  } catch (e) { if (charged && !saved) refundOfferings(player); api.fail(e); player.sendMessage('§cCrown duplication failed. Check Crown Status.'); }
+    announce(`${player.name} forged Crown #${n} for ${recipient.name}, consuming a Dragon Egg and one dragon victory!`);
+  } catch (e) {
+    if (!saved) { if (offeringsTaken) refundOfferings(player); if (eggTaken) refundItem(player,'minecraft:dragon_egg'); }
+    api.fail(e); player.sendMessage('§cCrown duplication failed. Uncommitted offerings and egg were returned.');
+  }
   finally { busy=false; }
 }
 function duplicateMenu(player) {
@@ -213,7 +237,7 @@ function duplicateMenu(player) {
   const s=state(), candidates=world.getAllPlayers().filter(p=>p.id!==player.id && api.role(p) && !owns(s,p));
   if (!candidates.length) { player.sendMessage('§eAnother claimed god without a Crown must be online to receive the new one.'); return; }
   const form=new ActionFormData().title('§6FORGE ANOTHER CROWN')
-    .body(`The Dragon Egg is a reusable catalyst. Each new Crown consumes all eight domain offerings. Choose its new owner.\n\n${offeringsText(player)}\n${api.offeringCount(player,'minecraft:dragon_egg')?'§a✓':'§c✗'} Dragon Egg catalyst`);
+    .body(`Each new Crown consumes one Dragon Egg, one recorded dragon victory, and all eight domain offerings. Choose its new owner.\nAvailable dragon victories: ${availableDragonVictories(s)}\n\n${offeringsText(player)}\n${api.offeringCount(player,'minecraft:dragon_egg')?'§a✓':'§c✗'} Dragon Egg (consumed)`);
   for (const p of candidates) form.button(`${p.name} — ${api.role(p)}`);
   form.button('Cancel').show(player).then(r=>{ if (r.selection!==undefined && r.selection<candidates.length) duplicate(player,candidates[r.selection]); }).catch(api.fail);
 }
@@ -222,7 +246,7 @@ export function showThrone(player) {
   if (s.corrupt) { player.sendMessage('§cCrown record needs operator recovery.'); return; }
   if (s.crowns.length) {
     new ActionFormData().title('§6THE THRONE OF OLYMPUS')
-      .body(`${s.crowns.length} Crown${s.crowns.length===1?'':'s'} forged. Defeat a holder in PvP or forge another with the Dragon Egg and eight fresh offerings.`)
+      .body(`${s.crowns.length} Crown${s.crowns.length===1?'':'s'} forged. Defeat a holder in PvP or forge another with a fresh dragon victory, one consumed Dragon Egg, and eight fresh offerings.`)
       .button('Forge another Crown').button('Crown status').button('Glory leaderboard').button('Close').show(player)
       .then(r => { if (r.selection === 0) duplicateMenu(player); if (r.selection === 1) showStatus(player); if (r.selection === 2) showLeaderboard(player); }).catch(api.fail);
     return;
@@ -308,7 +332,7 @@ export function resetCrown(player) {
   for (const p of world.getAllPlayers()) { removeItems(p, CROWN); removeItems(p, CONTROL); }
   cleanDrops();
   const s = state();
-  save({ glory: s.glory || {}, claimed: false, crowns:[] });
+  save({ glory: s.glory || {}, claimed: false, crowns:[], dragonUses:dragonVictories() });
   lastSeen.clear();
   player.sendMessage('§6Crown reset. The Trial of Ascension is available again. Glory was preserved.');
 }
@@ -408,6 +432,6 @@ export function crownFlair() {
   color.setColorRGB('variable.color', { red: 1, green: 0.72, blue: 0.15 });
   world.getDimension(p.dimension).spawnParticle('minecraft:colored_flame_particle', { x: p.x+0.5, y: p.y+1.5, z: p.z+0.5 }, color);
 }
-export function crownHelp(player) { player.sendMessage('§6Crown: claim at the Hall throne with eight domain offerings. Each extra Crown needs another eight offerings and a reusable Dragon Egg catalyst. Wear your Crown and use its control seal. /function olympus/crown_status opens the menu.'); }
+export function crownHelp(player) { player.sendMessage('§6Crown: claim at the Hall throne with eight domain offerings. Each extra Crown consumes another eight offerings, a Dragon Egg, and one recorded Ender Dragon victory. Wear your Crown and use its control seal. /function olympus/crown_status opens the menu.'); }
 export function crownSetup(player) { player.sendMessage('§6The Crown throne is the existing gold and sea lantern center of the Hall. /function olympus/setup places the Hall and prepares the Trial.'); }
 export function crownControl(player) { showStatus(player); }

@@ -1,6 +1,6 @@
 # Olympus SMP
 
-A Minecraft **Bedrock Edition** add-on for the eight Olympian gods and the forbidden ninth god, Kratos. This download contains a behavior pack (the game rules) and a resource pack (the art). Install **both**. Current version: **2.7.0**. It requires Minecraft Bedrock 1.21.90 or newer. It is not a Java Edition mod.
+A Minecraft **Bedrock Edition** add-on for the eight Olympian gods and the forbidden ninth god, Kratos. This download contains a behavior pack (the game rules) and a resource pack (the art). Install **both**. Current version: **2.7.1**. It requires Minecraft Bedrock 1.21.90 or newer. It is not a Java Edition mod.
 
 ## Start here: add the pack to your world
 
@@ -9,18 +9,18 @@ A Minecraft **Bedrock Edition** add-on for the eight Olympian gods and the forbi
 3. For a **new world**, choose **Play → Create New → Create New World**. For an **existing world**, choose **Play**, then the pencil/edit button next to that world. In the world settings, open **Add-Ons → Behavior Packs → My Packs**, find **Olympus SMP Behavior**, and choose **Activate**. Check **Resource Packs → My Packs** and activate **Olympus SMP Resources** if it was not activated automatically. On a server or Realm, see the sections below.
 4. Turn on **Cheats** in the world settings so setup commands work. Cheats can disable achievements for that world. Enter the world as its owner or an operator.
 5. Open chat and run **`/function olympus/setup`**. This one command places the Hall, all god altars, the Crown throne, the forge, and Kratos's chamber beneath the Hall. The Hall is 33 × 15 × 33 blocks, with the lower chamber extending seven blocks underground; keep the area clear. The script searches for a safe site near world spawn. If it cannot find one, it gives you a **Hall Placement Seal**. Stand where you want the Hall centered and use the seal.
-6. Run **`/function olympus/status`**. It should say `v2.7.0 script active`. If it reports an older version, leave the world, open its pack settings, deactivate the older Olympus packs, activate the newly imported packs, and rejoin.
+6. Run **`/function olympus/status`**. It should say `v2.7.1 script active`. If it reports an older version, leave the world, open its pack settings, deactivate the older Olympus packs, activate the newly imported packs, and rejoin.
 
 ### First steps in the Hall
 
 - Each of the eight enchanting tables is an Olympian altar. Kratos's forbidden altar is the netherite block in the darker chamber downstairs: descend the scaffolding near the rear center of the Hall. Use an altar to read that god's powers and offering. Choose **Reserve**; the reservation lasts **10 minutes**. Bring the offering back and use the same altar again to claim. Gods are exclusive until an operator opens one to additional players.
 - The relic you receive activates that god's special power. **Use** means press your normal item Use button. **Sneak-use** means crouch while using it. The god's passive abilities work without holding the relic. Run **`/function olympus/controls`** whenever you need a reminder.
-- The **Crown of Olympus** is claimed at the gold and sea-lantern center. Claim a god first, then bring all eight offerings listed below and use the center sea lantern. Wear your Crown in the helmet slot and use its Seal of Divine Authority. A crowned player can forge additional fully powered Crowns for other claimed players at the throne: each costs another full set of eight offerings and requires a **Dragon Egg catalyst**, which is retained. Every Crown has its own owner and cooldowns. Crown ownership transfers on a PvP kill.
+- The **Crown of Olympus** is claimed at the gold and sea-lantern center. Claim a god first, then bring all eight offerings listed below and use the center sea lantern. Wear your Crown in the helmet slot and use its Seal of Divine Authority. A crowned player can forge additional fully powered Crowns for other claimed players at the throne: **each new Crown consumes eight fresh offerings, one Dragon Egg, and one recorded Ender Dragon victory**. Defeat or respawn and defeat the dragon again for each additional Crown. Every Crown has its own owner and cooldowns. Crown ownership transfers on a PvP kill.
 - Roman numerals in the guide are Minecraft effect levels: **I** is level 1, **II** is level 2, and so on. A **cooldown** is the wait before an ability can be used again.
 
 ### Test Hephaestus quickly in Creative mode
 
-To test **any god or the Crown**, search the Creative Items tab for **Olympus Creative Test Kit**, or run `/function olympus/creative_kit`. Use the kit to switch your god role or receive all eight Crown offerings plus a Dragon Egg. Bring them to the Hall throne to test a claim or duplication. The kit works only while you are in Creative. This is intended for a backed-up test world because god claims and Crown records persist.
+To test **any god or the Crown**, search the Creative Items tab for **Olympus Creative Test Kit**, or run `/function olympus/creative_kit`. Use the kit to switch your god role or receive all eight Crown offerings, one Dragon Egg, and one test victory credit. Bring the items to the Hall throne to test a claim or duplication. The kit works only while you are in Creative. This is intended for a backed-up test world because god claims and Crown records persist.
 
 Open the Creative inventory and search **`Hephaestus Creative Test Kit`** in the Items tab. Put it in your hotbar and use it in the air. The kit works only while you are in Creative. If Hephaestus is unclaimed and you have no god yet, it claims him for you. It gives you his Forge Relic, the real Divine Fortune pickaxe, a portable Divine Forge, and all four finished custom forge items with their working powers. The kit does not change an existing god assignment or take Hephaestus from another player. If he is unavailable, the sample gear is still given, but forging and Divine Fortune require the Hephaestus role. You can also get the kit with `/give @s olympus:hephaestus_test_kit` in a cheats-enabled test world.
 
@@ -28,7 +28,7 @@ For a normal Survival world, claim Hephaestus at his altar and craft the portabl
 
 ## Updating an existing Olympus world
 
-Back up the world, close it, import the new `.mcaddon`, then edit that world's Behavior Packs and Resource Packs. Deactivate older Olympus versions and activate version 2.7.0 of both packs. Rejoin and check `/function olympus/status`. Existing god assignments, Crown ownership, cooldowns, Glory, and previously forged items are stored in the world. If the Hall was placed by an earlier pack, stand in the loaded Hall and run `/function olympus/setup` again to add the lower chamber. It leaves the existing upper Hall in place and opens a scaffolding entrance in its floor.
+Back up the world, close it, import the new `.mcaddon`, then edit that world's Behavior Packs and Resource Packs. Deactivate older Olympus versions and activate version 2.7.1 of both packs. Rejoin and check `/function olympus/status`. Existing god assignments, Crown ownership, cooldowns, Glory, and previously forged items are stored in the world. If the Hall was placed by an earlier pack, stand in the loaded Hall and run `/function olympus/setup` again to add the lower chamber. It leaves the existing upper Hall in place and opens a scaffolding entrance in its floor.
 
 ## World setup and Crown details
 
@@ -49,7 +49,7 @@ The Crown menu also offers **Dimensional Dominion**: 30 seconds of temporary Und
 | Hephaestus: mining | Netherite Ingot | Ancient debris and gold |
 | Dionysus: harvest | Glistering Melon Slice | Craft from melon and gold nuggets |
 
-The first Crown consumes one of every offering. Each extra Crown consumes the same eight items and requires a Dragon Egg in the crowned forger's inventory. The egg is reusable, so a long-running world can forge Crowns for every player who has a god. The recipient must be online, have a god, and not already own a Crown. Kratos is the forbidden ninth god; the trial still represents the original eight domains.
+The first Crown consumes one of every offering. Each extra Crown consumes those eight items **and one Dragon Egg**. The pack records one victory each time the Ender Dragon is killed in the End and awards an egg to the killer or another player there. One victory funds one duplicate Crown; extra vanilla eggs alone cannot fund another. Respawn the dragon with End Crystals and defeat it again for each further Crown. Victories earned before installing version 2.7.1 are not recorded, so an existing world needs a new dragon kill for its next duplicate. The recipient must be online, have a god, and not already own a Crown. Kratos is the forbidden ninth god; the trial still represents the original eight domains.
 
 Operator tools: `/function olympus/crown_setup`, `/function olympus/crown_status`, `/function olympus/crown_reset`, `/function olympus/crown_recover`, `/function olympus/crown_glory`, and `/function olympus/crown_help`. Reset preserves Glory. `/function olympus/setup` prepares the Hall, all nine altars, the Crown throne, and forge. The older mountain uses a separate command because it replaces a large area at the operator's chosen location.
 

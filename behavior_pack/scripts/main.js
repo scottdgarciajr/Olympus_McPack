@@ -3,7 +3,7 @@ import { ActionFormData } from '@minecraft/server-ui';
 import { CONFIG } from './config.js';
 import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, dionysusBuffAmplifier, divineOreDrop, stockMissingRelics } from './rules.js';
 import { FLAIR, flairPoints } from './flair.js';
-import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl, CROWN_OFFERINGS } from './crown.js';
+import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl, CROWN_OFFERINGS, recordDragonVictory } from './crown.js';
 import { kratosStrike, kratosKill, kratosTick, kratosDeath, kratosStatus, kratosUsePower } from './kratos.js';
 import { configureDominion, inUnderworldDominion, temporaryBlock, dominionFlair } from './dominion.js';
 import { configureForge, isForge, inHall, removePortableForge, placePortableForge, showForge, showForgeGuide, creativeForgeSamples, useForgeItem, onForgeHurt, onForgeProjectileHitEntity, onForgeProjectileHitBlock, forgeProjectileTick, forgeEquipmentTick } from './forge.js';
@@ -42,7 +42,7 @@ const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigu
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '2.7.0';
+const PACK_VERSION = '2.7.1';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -815,14 +815,15 @@ function creativeTestMenu(player) {
   const form=new ActionFormData().title('§6OLYMPUS CREATIVE TEST KIT')
     .body('Pick a god instantly, or collect everything needed to claim or duplicate a Crown at the Hall throne.');
   for (const god of GODS) form.button(`${nameOf(god)} — ${TITLES[god]}`);
-  form.button('Give Crown trial offerings + Dragon Egg').button('Release my god').button('Close');
+  form.button('Give Crown supplies + test dragon victory').button('Release my god').button('Close');
   form.show(player).then(r=>{
     if (r.selection===undefined) return;
     if (r.selection<GODS.length) creativeGod(player,GODS[r.selection]);
     else if (r.selection===GODS.length) {
       for (const o of CROWN_OFFERINGS) giveItem(player,new ItemStack(o.id,1));
       giveItem(player,new ItemStack('minecraft:dragon_egg',1));
-      tell(player,'Bring these offerings to the Hall throne. Each additional Crown consumes a new set; the Dragon Egg remains yours.');
+      recordDragonVictory();
+      tell(player,'Creative test: one dragon victory recorded. Bring these supplies to the Hall throne; duplication consumes the Dragon Egg and all eight offerings.');
     } else if (r.selection===GODS.length+1) reset(player);
   }).catch(fail);
 }
@@ -1328,6 +1329,17 @@ world.afterEvents.entityDie.subscribe((event) => {
   try { transferOnDeath(event); } catch(e) { fail(e); }
   try {
     const victim=event.deadEntity;
+    if (victim.typeId==='minecraft:ender_dragon' && victim.dimension.id==='minecraft:the_end') {
+      const count=recordDragonVictory();
+      const direct=event.damageSource?.damagingEntity;
+      let projectileOwner;
+      try { projectileOwner=event.damageSource?.damagingProjectile?.getComponent('minecraft:projectile')?.owner; } catch {}
+      const killer=direct?.typeId==='minecraft:player'?direct:projectileOwner;
+      const winner=killer?.typeId==='minecraft:player' && killer.dimension.id==='minecraft:the_end' ? killer : victim.dimension.getPlayers()[0];
+      if (winner) giveItem(winner,new ItemStack('minecraft:dragon_egg',1));
+      else victim.dimension.spawnItem(new ItemStack('minecraft:dragon_egg',1),{x:0,y:75,z:0});
+      world.sendMessage(`${prefix}Ender Dragon victory #${count}: one Dragon Egg has been awarded. Each new Crown consumes an egg and a victory.`);
+    }
     if (victim.typeId==='minecraft:player') {
       kratosDeath(victim);
       const source=event.damageSource;

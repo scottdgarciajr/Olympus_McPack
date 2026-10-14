@@ -69,7 +69,8 @@ check((RP / 'attachables' / 'crown.player.json').exists(), 'Crown worn model mis
 check((BP / 'scripts' / 'crown.js').exists(), 'Crown manager missing')
 crown_script=(BP/'scripts'/'crown.js').read_text(encoding='utf-8')
 check(crown_script.count('domain:')==8 and 'olympus:war_trophy' in crown_script, 'Eight-domain Crown trial missing')
-check('s.crowns.push' in crown_script and 'minecraft:dragon_egg' in crown_script and 'crownSerial' in crown_script, 'Multiple Crown ownership missing')
+check('s.crowns.push' in crown_script and 'crownSerial' in crown_script, 'Multiple Crown ownership missing')
+check("api.takeOffering(player,'minecraft:dragon_egg',1)" in crown_script and 's.dragonUses=' in crown_script and 'recordDragonVictory' in script, 'Consumable Dragon Egg or victory gate missing')
 forge_recipe = read_json(BP / 'recipes' / 'divine_forge.json')['minecraft:recipe_shaped']
 check(forge_recipe['pattern'] == ['III', 'ICI', 'III'] and
       forge_recipe['result']['item'] == 'olympus:divine_forge', 'Portable forge recipe missing')

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, dionysusBuffAmplifier, divineOreDrop, stockMissingRelics } from '../behavior_pack/scripts/rules.js';
+import { cooldownRemaining, dragonVictoriesAvailable, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, dionysusBuffAmplifier, divineOreDrop, stockMissingRelics } from '../behavior_pack/scripts/rules.js';
 import { CONFIG } from '../behavior_pack/scripts/config.js';
 
 test('new ability cooldowns and damage caps stay within the requested balance', () => {
@@ -14,6 +14,13 @@ test('cooldowns expire and stay independent by stored expiry', () => {
   assert.equal(cooldownRemaining(now + 300_000, now), 300_000);
   assert.equal(cooldownRemaining(now + 180_000, now), 180_000);
   assert.equal(cooldownRemaining(now - 1, now), 0);
+});
+
+test('one recorded dragon kill funds only one extra Crown', () => {
+  assert.equal(dragonVictoriesAvailable(1,0),1);
+  assert.equal(dragonVictoriesAvailable(1,1),0);
+  assert.equal(dragonVictoriesAvailable(2,1),1);
+  assert.equal(dragonVictoriesAvailable(2,2),0);
 });
 
 test('Zeus flight bypasses cooldown in wet weather, while lightning has its own weather rule', () => {
