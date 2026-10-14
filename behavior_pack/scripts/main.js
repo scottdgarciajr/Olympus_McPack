@@ -7,6 +7,7 @@ import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, sh
 import { configureDominion, inUnderworldDominion, temporaryBlock, dominionFlair } from './dominion.js';
 import { configureForge, isForge, inHall, removePortableForge, placePortableForge, showForge, showForgeGuide, onForgeHurt, forgeEquipmentTick } from './forge.js';
 import { configureDivine, armSolarFlare, oracleSight, hellfire, onDivineProjectileSpawn, onDivineBowRelease, onDivineProjectileHitBlock, onDivineProjectileHitEntity, divineTick } from './divine_combat.js';
+import { findMadnessLanding } from './teleport.js';
 
 const GODS = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus'];
 const TITLES = {
@@ -38,7 +39,7 @@ const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigu
   'dolphins_grace', 'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '2.4.1';
+const PACK_VERSION = '2.4.2';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -833,26 +834,12 @@ function updatePlayer(player) {
   } catch (e) { if (CONFIG.debug) fail(e); }
 }
 function safeTeleport(player) {
-  const origin = player.location;
-  for (let i = 0; i < 24; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const radius = CONFIG.dionysusTeleportMin + Math.random() * (CONFIG.dionysusTeleportMax - CONFIG.dionysusTeleportMin);
-    const x = Math.floor(origin.x + Math.cos(angle) * radius), z = Math.floor(origin.z + Math.sin(angle) * radius);
-    for (let dy = 3; dy >= -4; dy--) {
-      const y = Math.floor(origin.y) + dy;
-      try {
-        const floor = player.dimension.getBlock({ x, y: y - 1, z });
-        const feet = player.dimension.getBlock({ x, y, z });
-        const head = player.dimension.getBlock({ x, y: y + 1, z });
-        const hazardous = ['minecraft:magma', 'minecraft:cactus', 'minecraft:campfire', 'minecraft:soul_campfire'];
-        if (floor?.isSolid && !hazardous.includes(floor.typeId) && feet?.isAir && head?.isAir) {
-          player.teleport({ x: x + 0.5, y, z: z + 0.5 });
-          return true;
-        }
-      } catch {}
-    }
-  }
-  return false;
+  const landing=findMadnessLanding(player.dimension,player.location,
+    CONFIG.dionysusTeleportMin,CONFIG.dionysusTeleportMax);
+  if (!landing) return false;
+  try { player.teleport(landing); } catch (e) { if (CONFIG.debug) fail(e); return false; }
+  try { player.dimension.playSound('mob.endermen.portal',landing); } catch {}
+  return true;
 }
 function hermesMobilityMenu(player) {
   new ActionFormData().title('§6HERMES MOBILITY')
@@ -1118,9 +1105,10 @@ world.afterEvents.entityHitEntity.subscribe((event) => {
     if (blinded) godPenalty(player, 'blindness', 4 + Math.floor(stacks / 2));
     player.setDynamicProperty(key('madnessStacks'), stacks);
     player.setDynamicProperty(key('madnessLast'), now());
-    safeTeleport(player);
+    const teleported=safeTeleport(player);
     dionysusTargetCooldowns.set(targetKey, now() + CONFIG.dionysusSameTargetCooldownSeconds * 1000);
     tell(player, `Divine Madness: ${debuff} ${debuffLevel + 1} on ${target.typeId}; ${buff} ${existingBuff?.amplifier > buffLevel ? 'from your stronger existing effect' : `${buffLevel + 1} on you`}. Madness ${stacks}/10${blinded ? ' — BLINDED' : ''}.`);
+    if (!teleported) tell(player,'Madness found no safe landing nearby; its other effects still activated.');
     showFlair(player, 'dionysus', true);
   } catch (e) { fail(e); }
 });

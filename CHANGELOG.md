@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4.2 — Dionysus teleport repair
+
+- Replaced an unsupported `Block.isSolid` landing check with a Script API 2.0 block raycast. Dionysus now teleports 8–16 blocks after a qualifying melee proc when a clear, safe landing exists.
+- Hazardous or blocked destinations remain excluded. If no safe location is found, the player receives explicit feedback while the other Madness effects still activate.
+- Added landing selection regression tests and included them in the package build.
+
 ## 2.4.1 — Dionysus survival balance
 
 - Capped Dionysus's random Regeneration at II for 60 seconds and Resistance at III. His Strength, Speed, and Haste can still reach IV; random buff selection, curses, teleportation, and Madness remain intact.
