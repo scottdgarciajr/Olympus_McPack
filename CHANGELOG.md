@@ -1,5 +1,65 @@
 # Changelog
 
+## 3.3.3 — Water-only clutch for fast landings, corners and gaps
+
+- Removed all Poseidon fall-immunity properties, damage-sensor rules and brief clutch grace; safety is physical water only.
+- Four-tick swept landing prediction uses body corners and nearby ledges. Wide water cushions cover block corners and fill air gaps between blocks.
+- Rechecks every tick and can place new water after a second airborne trident launch; no one-placement-per-fall latch.
+- Every generated source still expires after 30 seconds. Compact spatial cleanup shards support many simultaneous cushions and clean up legacy v3.3.2 timers.
+
+## 3.3.2 — Rain clutch and gentle swim cruise
+
+- Rain clutch activates only in exposed Overworld rain and no longer needs/consumes a water bucket. Removes the unconditional rain fall guard.
+- Clutch water sources expire after 30 seconds; world-persistent cleanup retries unloaded chunks and preserves replacement building blocks.
+- Mild horizontal swimming assistance targets ordinary walking speed even without Tidal Sprint, preserving vertical controls and faster movement.
+- Tidecaller remains a native trident; the reported block-breaking issue was Creative-only, where vanilla prohibits trident block destruction.
+
+## 3.3.1 — Hermes single-block ramping
+
+- Hermes automatically steps up single-block ledges while sprinting, retaining momentum.
+- Requires grounded movement, a supported landing and clear standing space across the step. Two-block walls, ceilings, hazards, unloaded space and airborne movement stop stepping; no wall-climbing impulse.
+- Pack descriptions, controls and status identify v3.3.1.
+
+## 3.3.0 — Oracle compass, private tool vault and sprint control
+
+- Gold ground compass with cyan player, red mob, green animal and orange chest bearings/trails; matching target accents. Particle feedback continues if native outlines fail.
+- Prophetic Bow: stronger native-arrow steering, golden flight trail, target-lock feedback, delayed-owner/release detection; no damage/status bonuses.
+- Personal Tool Vault: sneak + look straight down + use own relic. Stores exact tool durability, enchantments and binding; persistent token/journal recovery prevents replayed withdrawal duplicates. Stored tools cannot be recovered as new copies.
+- Tidal Sprint requires sprinting; releasing sprint stops its extra thrust.
+- Pack names, descriptions, status, tool lore and controls identify v3.3.0.
+
+## 3.2.1 — Modest sea mining and fall-only protection
+
+- Keep underwater Haste at I to preserve readable trident/melee swings. Adaptive Conduit mining compensation accounts for submersion, floating and Aqua Affinity, targeting roughly 6–24% faster mining than unbuffed land mining; rain Haste remains II.
+- Replace rain/clutch Resistance V with a native damage sensor that cancels only fall damage. Combat, fire, projectile and explosion damage still apply while falling.
+- Update versioned descriptions and regression coverage. In-game mining timing, damage and animation checks remain pending.
+
+## 3.2.0 — Visible sea buffs, native curving bow, animated Oracle
+
+- Inventory-lock personal god relics/tools/Crown gear, with death protection and persistent reserved delivery when inventory is full. Hephaestus's forged products remain tradeable/storable; personal Divine Fortune and his relic are locked. Existing carried gear migrates on rejoin.
+
+- Removed unsupported Dolphin's Grace from Poseidon's passive path, which aborted Strength/Haste. Added Haste XX underwater and Haste II in rain, alongside Strength II. Native wet-environment sensing handles rain on reload.
+- Replaced the clutch's unavailable `isSolid` check with stable collidable-floor raycasts. Clutch is always automatic with a main-inventory water bucket, confirms placement, and cushions fast landings.
+- Replaced the relic-fired projectile with a separate named vanilla Prophetic Bow: normal draw/release and arrows, target-locked gentle steering every tick, no damage/status buffs.
+- Replaced camera-projected Oracle mob boxes with per-viewer animated gold mesh edges derived from vanilla bones; retained golden particle accents. Added world-positioned chest markers and one-block HUD distance accuracy.
+- Sunflight steers at walking speed normally and uses the old fast speed only while sprinting.
+- Zeus receives cooldown-free flight activation and five-second storm lightning at Y220+ in the Overworld.
+- Pack names/descriptions, role menus, welcome and status display v3.2.0. Added strict stable-API regression coverage. Minecraft acceptance remains pending.
+
+## 3.1.1 — Poseidon water exits
+
+- Tidal Sprint now respects jump input even without forward movement or while looking down. Holding jump eases horizontal thrust and lifts Poseidon toward the bank.
+- Level swimming no longer cancels upward vanilla momentum, making water exits possible without the trident. Added a movement regression test; in-game verification remains pending.
+
+## 3.1.0 — Water, light, and Oracle ESP
+
+- Based directly on GitHub main 0b1436d (2.7.3); unstable local overhaul archived separately.
+- Poseidon: Strength II in water/rain, underwater Haste II and clear blue-tinted vision, no swimming hunger, inventory water-bucket clutch, rain fall protection through the landing tick.
+- Dionysus: Regeneration I cap; other buffs and durations unchanged.
+- Apollo: faster unlimited sunflight, five-second lightflight each minute, night/darkness Weakness III, no Mining Fatigue, stronger Solar Bow, separate plain assisted projectile, viewer-only golden box ESP on creatures/players/chests.
+- Bundled MIT Fluoroscopy outline texture and pinned source provenance. Requires stable API 2.3.0 and Bedrock 1.21.120+.
+- Added offline regression tests; Minecraft visual/gameplay acceptance remains pending.
+
 ## 2.7.3 — Clear Crown throne checklist
 
 - The throne now lists the eight required item names with possession checkmarks, without tying items to gods or domains. The first-claim prompt and Crown help use the same neutral wording.

@@ -1,0 +1,48 @@
+{
+  "format_version": "1.8.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:mooshroom",
+      "materials": {
+        "default": "mooshroom",
+        "oracle": "olympus_oracle_glow"
+      },
+      "textures": {
+        "default": "textures/entity/cow/mooshroom",
+        "brown": "textures/entity/cow/brown_mooshroom",
+        "oracle": "textures/entity/oracle_gold"
+      },
+      "geometry": {
+        "default": "geometry.mooshroom",
+        "oracle_default": "geometry.olympus.oracle.mooshroom"
+      },
+      "animations": {
+        "setup": "animation.mooshroom.setup.v1.0",
+        "walk": "animation.quadruped.walk",
+        "look_at_target": "animation.common.look_at_target",
+        "baby_transform": "animation.mooshroom.baby_transform"
+      },
+      "animation_controllers": [
+        {
+          "setup": "controller.animation.mooshroom.setup"
+        },
+        {
+          "move": "controller.animation.mooshroom.move"
+        },
+        {
+          "baby": "controller.animation.mooshroom.baby"
+        }
+      ],
+      "render_controllers": [
+        "controller.render.mooshroom",
+        {
+          "controller.render.olympus.oracle.mooshroom.v1.0.entity": "query.property('olympus:oracle_visible')"
+        }
+      ],
+      "spawn_egg": {
+        "texture": "spawn_egg",
+        "texture_index": 5
+      }
+    }
+  }
+}

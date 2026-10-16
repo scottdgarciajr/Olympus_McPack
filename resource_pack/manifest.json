@@ -1,18 +1,18 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Olympus SMP Resources",
-    "description": "Relic icons for Olympus SMP",
+    "name": "Olympus SMP Resources v3.3.3",
+    "description": "v3.3.3 | Gold Oracle compass and colored direction trails, clear Poseidon water. Pair with Olympus Behavior v3.3.3.",
     "uuid": "def06a91-6e05-457a-a359-714565d4c32c",
     "version": [
-      2,
-      7,
+      3,
+      3,
       3
     ],
     "min_engine_version": [
       1,
       21,
-      90
+      120
     ]
   },
   "modules": [
@@ -20,8 +20,8 @@
       "type": "resources",
       "uuid": "148f6c15-a3b3-4f02-9c59-ff3af25c3e40",
       "version": [
-        2,
-        7,
+        3,
+        3,
         3
       ]
     }

@@ -3,6 +3,7 @@ import { ActionFormData } from '@minecraft/server-ui';
 import { activateDominion, dismissDominion, dominionState, dominionTick } from './dominion.js';
 import { CONFIG } from './config.js';
 import { dragonVictoriesAvailable } from './rules.js';
+import { lockGodItem } from './god_items.js';
 
 const CROWN = 'olympus:crown';
 const CONTROL = 'olympus:crown_control';
@@ -50,6 +51,7 @@ function equipment(player) { return player.getComponent('minecraft:equippable');
 function isCrown(item) { return item?.typeId === CROWN; }
 function makeCrown(n) {
   const item = new ItemStack(CROWN, 1);
+  lockGodItem(item);
   item.keepOnDeath = true;
   item.setDynamicProperty(SERIAL,n);
   item.setLore([`§6Crown of Olympus #${n}`, '§7Wear to gain Divine Authority.', '§7Use its control seal to command the world.']);
@@ -57,6 +59,7 @@ function makeCrown(n) {
 }
 function makeControl() {
   const item = new ItemStack(CONTROL, 1);
+  lockGodItem(item);
   item.keepOnDeath = true;
   return item;
 }

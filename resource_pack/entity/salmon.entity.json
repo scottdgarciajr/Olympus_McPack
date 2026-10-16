@@ -1,0 +1,44 @@
+{
+  "format_version": "1.8.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:salmon",
+      "materials": {
+        "default": "salmon",
+        "oracle": "olympus_oracle_glow"
+      },
+      "textures": {
+        "default": "textures/entity/fish/salmon",
+        "oracle": "textures/entity/oracle_gold"
+      },
+      "geometry": {
+        "default": "geometry.salmon",
+        "oracle_default": "geometry.olympus.oracle.salmon"
+      },
+      "scripts": {
+        "pre_animation": [
+          "variable.ZRot = !query.is_in_water ? Math.cos((query.time_stamp + query.frame_alpha) * 14.32) * 90 : 0.0;",
+          "variable.AnimationAmountBlend = Math.lerp(variable.AnimationAmountPrev, variable.AnimationAmount, query.frame_alpha);"
+        ]
+      },
+      "animations": {
+        "flop": "animation.salmon.flop",
+        "swim": "animation.salmon.swim"
+      },
+      "animation_controllers": [
+        {
+          "general": "controller.animation.fish.general"
+        }
+      ],
+      "render_controllers": [
+        "controller.render.salmon",
+        {
+          "controller.render.olympus.oracle.salmon.entity": "query.property('olympus:oracle_visible')"
+        }
+      ],
+      "spawn_egg": {
+        "texture": "spawn_egg_salmon"
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "format_version": "1.8.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:witch",
+      "materials": {
+        "default": "witch",
+        "oracle": "olympus_oracle_glow"
+      },
+      "textures": {
+        "default": "textures/entity/witch",
+        "oracle": "textures/entity/oracle_gold"
+      },
+      "geometry": {
+        "default": "geometry.villager.witch",
+        "oracle_default": "geometry.olympus.oracle.villager.witch"
+      },
+      "scripts": {
+        "scale": "0.9375"
+      },
+      "animations": {
+        "villager_general": "animation.villager.general.v1.0",
+        "look_at_target": "animation.common.look_at_target",
+        "move": "animation.villager.move",
+        "general": "animation.witch.general"
+      },
+      "animation_controllers": [
+        {
+          "general": "controller.animation.witch.general"
+        },
+        {
+          "move": "controller.animation.villager.move"
+        }
+      ],
+      "render_controllers": [
+        "controller.render.witch.v1.0",
+        {
+          "controller.render.olympus.oracle.witch.v1.0.entity": "query.property('olympus:oracle_visible')"
+        }
+      ],
+      "spawn_egg": {
+        "texture": "spawn_egg",
+        "texture_index": 17
+      }
+    }
+  }
+}

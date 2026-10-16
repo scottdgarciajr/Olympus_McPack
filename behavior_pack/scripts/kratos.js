@@ -3,7 +3,7 @@
 const POWERS = {
   hermes: [['Traveler speed','speed',2],['Traveler burden','weakness',1]],
   zeus: [['Stolen lightning','olympus:lightning',0],['Thunder burden','mining_fatigue',1]],
-  poseidon: [['Sea blessing','conduit_power',0],['Tidal grace','dolphins_grace',1],['Dryland burden','slowness',1]],
+  poseidon: [['Sea blessing','conduit_power',0],['Tidal haste','haste',1],['Dryland burden','slowness',1]],
   hades: [['Underworld ward','fire_resistance',0],['Night sight','night_vision',0],['Sun burden','weakness',1]],
   ares: [['War strength','strength',0],['War guard','resistance',0],['War burden','slowness',1]],
   apollo: [['Solar focus','haste',0],['Oracle sight','night_vision',0],['Shadow burden','weakness',1]],

@@ -4,6 +4,7 @@ import json
 import subprocess
 import uuid
 import zipfile
+import runpy
 
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
@@ -21,6 +22,10 @@ def read_json(path):
 
 bp = read_json(BP / 'manifest.json')
 rp = read_json(RP / 'manifest.json')
+runpy.run_path(str(ROOT / 'validate_oracle_assets.py'))
+for pack in (bp,rp):
+    version='.'.join(map(str,pack['header']['version']))
+    check(f'v{version}' in pack['header']['name'] and f'v{version}' in pack['header']['description'], 'Pack name/description must identify the exact build')
 all_uuids = [bp['header']['uuid'], rp['header']['uuid']]
 for pack in (bp, rp):
     check(pack['format_version'] == 2, 'Manifest version must be 2')
@@ -33,7 +38,7 @@ for value in all_uuids:
     uuid.UUID(value)
 check(len(set(all_uuids)) == len(all_uuids), 'Duplicate manifest UUID')
 check(any(d.get('uuid') == rp['header']['uuid'] for d in bp['dependencies']), 'Missing RP dependency')
-check(any(d.get('module_name') == '@minecraft/server' and d.get('version') == '2.0.0' for d in bp['dependencies']), 'Wrong Script API dependency')
+check(any(d.get('module_name') == '@minecraft/server' and d.get('version') == '2.3.0' for d in bp['dependencies']), 'Wrong Script API dependency')
 check(any(d.get('module_name') == '@minecraft/server-ui' and d.get('version') == '2.0.0' for d in bp['dependencies']), 'Missing UI API dependency')
 
 texture_index = read_json(RP / 'textures' / 'item_texture.json')['texture_data']
@@ -108,7 +113,7 @@ check('claimRejection(old, owner(god)' in script and 'not_at_summit' not in scri
 
 for path in (BP / 'scripts').glob('*.js'):
     subprocess.run(['node', '--check', str(path)], check=True)
-subprocess.run(['node', '--test', str(ROOT / 'tests' / 'rules.test.js'), str(ROOT / 'tests' / 'flair.test.js'), str(ROOT / 'tests' / 'divine_combat.test.js'), str(ROOT / 'tests' / 'teleport.test.js'), str(ROOT / 'tests' / 'kratos.test.js'), str(ROOT / 'tests' / 'crown.test.js')], check=True, stdout=subprocess.DEVNULL)
+subprocess.run(['node', '--test', str(ROOT / 'tests')], check=True, stdout=subprocess.DEVNULL)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(OUT, 'w', zipfile.ZIP_DEFLATED) as archive:

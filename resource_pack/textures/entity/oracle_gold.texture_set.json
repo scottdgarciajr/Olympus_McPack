@@ -1,0 +1,7 @@
+{
+  "format_version": "1.16.100",
+  "minecraft:texture_set": {
+    "color": "oracle_gold",
+    "metalness_emissive_roughness": "oracle_gold_mer"
+  }
+}

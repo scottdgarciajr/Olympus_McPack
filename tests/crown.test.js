@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { lockGodItem } from '../behavior_pack/scripts/god_items.js';
 
 function crownHarness() {
   const path=new URL('../behavior_pack/scripts/crown.js',import.meta.url);
@@ -26,9 +27,9 @@ function crownHarness() {
     getAllPlayers:()=>[owner,recipient],sendMessage:message=>messages.push(message)};
   const api={role:p=>p.god,temple:()=>({x:0,y:0,z:0}),offeringCount:(_p,id)=>counts.get(id)||0,
     takeOffering:(_p,id,n)=>{if ((counts.get(id)||0)<n) return false;counts.set(id,counts.get(id)-n);return true;},fail:error=>{throw error;}};
-  const script=new Function('world','system','ItemStack','EquipmentSlot','WeatherType','MolangVariableMap','ActionFormData','activateDominion','dismissDominion','dominionState','dominionTick','CONFIG','dragonVictoriesAvailable',
+  const script=new Function('world','system','ItemStack','EquipmentSlot','WeatherType','MolangVariableMap','ActionFormData','activateDominion','dismissDominion','dominionState','dominionTick','CONFIG','dragonVictoriesAvailable','lockGodItem',
     `${source}\nreturn {configureCrown,CROWN_OFFERINGS,offeringsText,duplicate};`);
-  const crown=script(world,{},ItemStack,slots,{},class {},class {},()=>{},()=>{},()=>{},()=>{}, {}, (wins,used)=>wins-(used||0));
+  const crown=script(world,{},ItemStack,slots,{},class {},class {},()=>{},()=>{},()=>{},()=>{}, {}, (wins,used)=>wins-(used||0),lockGodItem);
   crown.configureCrown(api);
   props.set('olympus:crown_state',JSON.stringify({crowns:[{serial:1,ownerId:owner.id,ownerName:owner.name,ownerGod:owner.god}]}));
   props.set('olympus:dragonVictories',1);

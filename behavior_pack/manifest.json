@@ -1,18 +1,18 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Olympus SMP Behavior",
-    "description": "Nine Greek god roles and Mount Olympus",
+    "name": "Olympus SMP Behavior v3.3.3",
+    "description": "v3.3.3 | Hermes: automatic one-block ramp while sprinting. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, water-only rain clutch tracks Riptide, corners and gaps; water expires in 30s. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.",
     "uuid": "a06ad1f9-8b44-4af1-995a-95dc9c684c25",
     "version": [
-      2,
-      7,
+      3,
+      3,
       3
     ],
     "min_engine_version": [
       1,
       21,
-      90
+      120
     ]
   },
   "modules": [
@@ -20,8 +20,8 @@
       "type": "data",
       "uuid": "45604c22-4d55-478e-beb7-fca61db38eaf",
       "version": [
-        2,
-        7,
+        3,
+        3,
         3
       ]
     },
@@ -31,8 +31,8 @@
       "entry": "scripts/main.js",
       "uuid": "c6515f3a-93dc-4971-987c-ad95b689d22f",
       "version": [
-        2,
-        7,
+        3,
+        3,
         3
       ]
     }
@@ -40,7 +40,7 @@
   "dependencies": [
     {
       "module_name": "@minecraft/server",
-      "version": "2.0.0"
+      "version": "2.3.0"
     },
     {
       "module_name": "@minecraft/server-ui",
@@ -49,8 +49,8 @@
     {
       "uuid": "def06a91-6e05-457a-a359-714565d4c32c",
       "version": [
-        2,
-        7,
+        3,
+        3,
         3
       ]
     }

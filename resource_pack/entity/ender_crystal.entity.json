@@ -1,0 +1,39 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:ender_crystal",
+      "materials": {
+        "default": "ender_crystal",
+        "oracle": "olympus_oracle_glow"
+      },
+      "textures": {
+        "default": "textures/entity/endercrystal/endercrystal",
+        "beam": "textures/entity/endercrystal/endercrystal_beam",
+        "oracle": "textures/entity/oracle_gold"
+      },
+      "geometry": {
+        "default": "geometry.ender_crystal",
+        "oracle_default": "geometry.olympus.oracle.ender_crystal"
+      },
+      "animations": {
+        "move": "animation.ender_crystal.move"
+      },
+      "scripts": {
+        "initialize": [
+          "variable.time_offset = Math.random(0, 100000);"
+        ],
+        "animate": [
+          "move"
+        ],
+        "should_update_effects_offscreen": "1.0"
+      },
+      "render_controllers": [
+        "controller.render.ender_crystal",
+        {
+          "controller.render.olympus.oracle.ender_crystal.entity": "query.property('olympus:oracle_visible')"
+        }
+      ]
+    }
+  }
+}

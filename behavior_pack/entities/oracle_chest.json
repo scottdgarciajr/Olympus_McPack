@@ -1,0 +1,49 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "olympus:oracle_chest",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "properties": {
+        "olympus:oracle_visible": {
+          "type": "bool",
+          "default": false,
+          "client_sync": true
+        }
+      }
+    },
+    "components": {
+      "minecraft:collision_box": {
+        "width": 0,
+        "height": 0
+      },
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": false
+      },
+      "minecraft:timer": {
+        "looping": false,
+        "time": 20,
+        "time_down_event": {
+          "event": "olympus:expire",
+          "target": "self"
+        }
+      }
+    },
+    "component_groups": {
+      "olympus:expired": {
+        "minecraft:instant_despawn": {}
+      }
+    },
+    "events": {
+      "olympus:expire": {
+        "add": {
+          "component_groups": [
+            "olympus:expired"
+          ]
+        }
+      }
+    }
+  }
+}

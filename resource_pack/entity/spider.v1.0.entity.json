@@ -1,0 +1,41 @@
+{
+  "format_version": "1.8.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:spider",
+      "materials": {
+        "default": "spider",
+        "invisible": "spider_invisible",
+        "oracle": "olympus_oracle_glow"
+      },
+      "textures": {
+        "default": "textures/entity/spider/spider",
+        "oracle": "textures/entity/oracle_gold"
+      },
+      "geometry": {
+        "default": "geometry.spider",
+        "oracle_default": "geometry.olympus.oracle.spider"
+      },
+      "animations": {
+        "default_leg_pose": "animation.spider.default_leg_pose",
+        "look_at_target": "animation.spider.look_at_target",
+        "walk": "animation.spider.walk"
+      },
+      "animation_controllers": [
+        {
+          "move": "controller.animation.spider.move"
+        }
+      ],
+      "render_controllers": [
+        "controller.render.spider",
+        {
+          "controller.render.olympus.oracle.spider.v1.0.entity": "query.property('olympus:oracle_visible')"
+        }
+      ],
+      "spawn_egg": {
+        "texture": "spawn_egg",
+        "texture_index": 11
+      }
+    }
+  }
+}

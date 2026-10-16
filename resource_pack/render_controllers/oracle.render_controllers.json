@@ -1,0 +1,2821 @@
+{
+  "format_version": "1.10.0",
+  "render_controllers": {
+    "controller.render.olympus.oracle.allay.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.armadillo.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "body": "!variable.use_rolled_up_model"
+        },
+        {
+          "tail": "!variable.use_rolled_up_model"
+        },
+        {
+          "left_hind_leg": "!variable.use_rolled_up_model"
+        },
+        {
+          "right_hind_leg": "!variable.use_rolled_up_model"
+        },
+        {
+          "body_rolled_up": "variable.use_rolled_up_model"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.armor_stand.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "baseplate": "!query.is_in_ui"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.armor_stand.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "baseplate": "!query.is_in_ui"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.axolotl.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.bat.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.bee.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.blaze.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.blaze.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.bogged.entity": {
+      "geometry": "Geometry.oracle_overlay",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.breeze.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.camel.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "saddle": "query.is_saddled"
+        },
+        {
+          "bridle": "query.is_saddled"
+        },
+        {
+          "reins*": "query.is_saddled && query.has_rider"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.cat.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.cave_spider.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.cave_spider.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.chicken.entity": {
+      "geometry": "Array.geos[v.index]",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "arrays": {
+        "geometries": {
+          "Array.geos": [
+            "Geometry.oracle_default",
+            "Geometry.oracle_warm",
+            "Geometry.oracle_cold"
+          ]
+        }
+      }
+    },
+    "controller.render.olympus.oracle.chicken.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.copper_golem.entity": {
+      "geometry": "Geometry.oracle_flower",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": "false"
+        },
+        {
+          "flower": "query.property('minecraft:has_flower')"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.cow.entity": {
+      "geometry": "Array.geos[v.index]",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "arrays": {
+        "geometries": {
+          "Array.geos": [
+            "Geometry.oracle_default",
+            "Geometry.oracle_warm",
+            "Geometry.oracle_cold"
+          ]
+        }
+      }
+    },
+    "controller.render.olympus.oracle.cow.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.creaking.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": "!query.is_invisible"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.creeper.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.creeper.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.dolphin.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.donkey_v1.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*saddle*": "query.is_saddled"
+        },
+        {
+          "SaddleMouthLine": "query.is_saddled && query.has_rider"
+        },
+        {
+          "SaddleMouthLineR": "query.is_saddled && query.has_rider"
+        },
+        {
+          "Bag*": "query.is_chested"
+        },
+        {
+          "Ear*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.donkey_v2.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*saddle*": "query.is_saddled"
+        },
+        {
+          "SaddleMouthLine": "query.is_saddled && query.has_rider"
+        },
+        {
+          "SaddleMouthLineR": "query.is_saddled && query.has_rider"
+        },
+        {
+          "Bag*": "query.is_chested"
+        },
+        {
+          "Ear*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.donkey_v3.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "Saddle": "query.is_saddled"
+        },
+        {
+          "Bit*": "query.is_saddled"
+        },
+        {
+          "Bridle": "query.is_saddled"
+        },
+        {
+          "Reins*": "query.is_saddled && query.has_rider"
+        },
+        {
+          "Bag*": "query.is_chested"
+        },
+        {
+          "Ear*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.drowned.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.drowned.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.elder_guardian.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.elder_guardian.entity.v1.0": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.ender_crystal.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "base": "query.show_bottom"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.ender_dragon.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": "query.death_ticks > 1.0"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.enderman.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.enderman.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.endermite.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.evocation_illager.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": true
+        },
+        {
+          "arms": "!(query.is_casting || query.is_celebrating)"
+        },
+        {
+          "leftarm": "query.is_casting || query.is_celebrating"
+        },
+        {
+          "rightarm": "query.is_casting || query.is_celebrating"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.evocation_illager.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": true
+        },
+        {
+          "arms": "!(query.is_casting || query.is_celebrating)"
+        },
+        {
+          "leftarm": "query.is_casting || query.is_celebrating"
+        },
+        {
+          "rightarm": "query.is_casting || query.is_celebrating"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.experience_orb.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.fox.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "leg*": "!query.is_sleeping"
+        },
+        {
+          "head": "!query.is_sleeping"
+        },
+        {
+          "head_sleeping": "query.is_sleeping"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.frog.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "croaking_body": "!query.is_eating_mob"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.ghast.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.glow_squid.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.goat.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "right_horn": "variable.goat_has_right_horn"
+        },
+        {
+          "left_horn": "variable.goat_has_left_horn"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.guardian.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.guardian.entity.v1.0": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.happy_ghast.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": "!query.is_invisible"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.hoglin.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.horse_v1.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*saddle*": "query.is_saddled"
+        },
+        {
+          "SaddleMouthLine": "query.is_saddled && query.has_rider"
+        },
+        {
+          "SaddleMouthLineR": "query.is_saddled && query.has_rider"
+        },
+        {
+          "MuleEar*": false
+        },
+        {
+          "Bag*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.horse_v2.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*saddle*": "query.is_saddled"
+        },
+        {
+          "SaddleMouthLine": "query.is_saddled && query.has_rider"
+        },
+        {
+          "SaddleMouthLineR": "query.is_saddled && query.has_rider"
+        },
+        {
+          "MuleEar*": false
+        },
+        {
+          "Bag*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.horse_v3.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "Saddle": "query.is_saddled"
+        },
+        {
+          "Bit*": "query.is_saddled"
+        },
+        {
+          "Bridle": "query.is_saddled"
+        },
+        {
+          "Reins*": "query.is_saddled && query.has_rider"
+        },
+        {
+          "Bag*": false
+        },
+        {
+          "MuleEar*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.husk.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.husk.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.iron_golem.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.llama.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "chest*": "query.is_chested"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.llama.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "chest*": "query.is_chested"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.magma_cube.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.mooshroom.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.mooshroom.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.mule_v1.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*saddle*": "query.is_saddled"
+        },
+        {
+          "SaddleMouthLine": "query.is_saddled && query.has_rider"
+        },
+        {
+          "SaddleMouthLineR": "query.is_saddled && query.has_rider"
+        },
+        {
+          "Bag*": "query.is_chested"
+        },
+        {
+          "Ear*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.mule_v2.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*saddle*": "query.is_saddled"
+        },
+        {
+          "SaddleMouthLine": "query.is_saddled && query.has_rider"
+        },
+        {
+          "SaddleMouthLineR": "query.is_saddled && query.has_rider"
+        },
+        {
+          "Bag*": "query.is_chested"
+        },
+        {
+          "Ear*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.mule_v3.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "Saddle": "query.is_saddled"
+        },
+        {
+          "Bit*": "query.is_saddled"
+        },
+        {
+          "Bridle": "query.is_saddled"
+        },
+        {
+          "Reins*": "query.is_saddled && query.has_rider"
+        },
+        {
+          "Bag*": "query.is_chested"
+        },
+        {
+          "Ear*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.ocelot.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.ocelot.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.panda.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.parrot.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.phantom.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.pig.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": false
+        },
+        {
+          "body": "q.is_saddled"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.pig.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.piglin.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.piglin_brute.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.pillager.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.player.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": true
+        },
+        {
+          "helmet": "variable.helmet_layer_visible"
+        },
+        {
+          "leftLegging": "variable.leg_layer_visible"
+        },
+        {
+          "rightLegging": "variable.leg_layer_visible"
+        },
+        {
+          "leftBoot": "variable.boot_layer_visible"
+        },
+        {
+          "rightBoot": "variable.boot_layer_visible"
+        },
+        {
+          "leftSock": "variable.boot_layer_visible && variable.leg_layer_visible"
+        },
+        {
+          "rightSock": "variable.boot_layer_visible && variable.leg_layer_visible"
+        },
+        {
+          "bodyArmor": "variable.chest_layer_visible && !query.has_cape"
+        },
+        {
+          "leftArmArmor": "variable.chest_layer_visible && !query.has_cape"
+        },
+        {
+          "rightArmArmor": "variable.chest_layer_visible && !query.has_cape"
+        },
+        {
+          "belt": "variable.chest_layer_visible && variable.leg_layer_visible"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.polar_bear.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.pufferfish.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.pufferfish.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.rabbit.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.rabbit.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.ravager.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.salmon.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.sheep.entity": {
+      "geometry": "Array.geos[query.is_sheared]",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "arrays": {
+        "geometries": {
+          "Array.geos": [
+            "Geometry.oracle_default",
+            "Geometry.oracle_sheared"
+          ]
+        }
+      }
+    },
+    "controller.render.olympus.oracle.sheep.v1.0.entity": {
+      "geometry": "Array.geos[query.is_sheared]",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "arrays": {
+        "geometries": {
+          "Array.geos": [
+            "Geometry.oracle_default",
+            "Geometry.oracle_sheared"
+          ]
+        }
+      }
+    },
+    "controller.render.olympus.oracle.shulker.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.shulker.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.silverfish.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": "0"
+        },
+        {
+          "bodypart_0": "1"
+        },
+        {
+          "bodypart_1": "1"
+        },
+        {
+          "bodypart_2": "1"
+        },
+        {
+          "bodypart_3": "1"
+        },
+        {
+          "bodypart_4": "1"
+        },
+        {
+          "bodypart_5": "1"
+        },
+        {
+          "bodypart_6": "1"
+        },
+        {
+          "bodylayer_0": "1"
+        },
+        {
+          "bodylayer_1": "1"
+        },
+        {
+          "bodylayer_2": "1"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.skeleton.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.skeleton.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.skeleton_horse_v1.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*saddle*": false
+        },
+        {
+          "SaddleMouthLine": false
+        },
+        {
+          "SaddleMouthLineR": false
+        },
+        {
+          "Bag*": false
+        },
+        {
+          "MuleEar*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.skeleton_horse_v2.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*saddle*": false
+        },
+        {
+          "SaddleMouthLine": false
+        },
+        {
+          "SaddleMouthLineR": false
+        },
+        {
+          "Bag*": false
+        },
+        {
+          "MuleEar*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.skeleton_horse_v3.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "Saddle": false
+        },
+        {
+          "Bit*": false
+        },
+        {
+          "Bridle": false
+        },
+        {
+          "Reins*": false
+        },
+        {
+          "Bag*": false
+        },
+        {
+          "MuleEar*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.slime.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.sniffer.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.snow_golem.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.snow_golem.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.spider.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.spider.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.squid.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.stray.entity": {
+      "geometry": "Geometry.oracle_overlay",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.stray.v1.0.entity": {
+      "geometry": "Geometry.oracle_overlay",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.strider.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.tadpole.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.trader_llama.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "chest*": "query.is_chested"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.tripod_camera.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.turtle.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.vex.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.vex.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.vex.v1.0": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.villager.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.villager.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": false,
+          "head": true,
+          "nose": true,
+          "body": true,
+          "arms": true,
+          "leg0": true,
+          "leg1": true
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.villager_v2.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.vindicator.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "rightArm": "query.is_angry || query.is_celebrating"
+        },
+        {
+          "leftArm": "query.is_angry || query.is_celebrating"
+        },
+        {
+          "rightItem": "query.is_angry"
+        },
+        {
+          "arms": "!(query.is_angry || query.is_celebrating)"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.vindicator.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "rightArm": "query.is_angry || query.is_celebrating"
+        },
+        {
+          "leftArm": "query.is_angry || query.is_celebrating"
+        },
+        {
+          "rightItem": "query.is_angry"
+        },
+        {
+          "arms": "!(query.is_angry || query.is_celebrating)"
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.wandering_trader.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.warden.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.witch.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.witch.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*": false,
+          "head": true,
+          "nose": true,
+          "body": true,
+          "arms": true,
+          "leg0": true,
+          "leg1": true,
+          "hat": true,
+          "hat2": true,
+          "hat3": true,
+          "hat4": true
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.wither.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.wither.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.wither_skeleton.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.wither_skeleton.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.wolf.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.zoglin.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.zombie.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.zombie.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.zombie_horse_v1.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*saddle*": "query.is_saddled"
+        },
+        {
+          "SaddleMouthLine": "query.is_saddled && query.has_rider"
+        },
+        {
+          "SaddleMouthLineR": "query.is_saddled && query.has_rider"
+        },
+        {
+          "Bag*": false
+        },
+        {
+          "MuleEar*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.zombie_horse_v2.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "*saddle*": "query.is_saddled"
+        },
+        {
+          "SaddleMouthLine": "query.is_saddled && query.has_rider"
+        },
+        {
+          "SaddleMouthLineR": "query.is_saddled && query.has_rider"
+        },
+        {
+          "Bag*": false
+        },
+        {
+          "MuleEar*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.zombie_horse_v3.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      },
+      "part_visibility": [
+        {
+          "Saddle": "query.is_saddled"
+        },
+        {
+          "Bit*": "query.is_saddled"
+        },
+        {
+          "Bridle": "query.is_saddled"
+        },
+        {
+          "Reins*": "query.is_saddled && query.has_rider"
+        },
+        {
+          "Bag*": false
+        },
+        {
+          "MuleEar*": false
+        }
+      ]
+    },
+    "controller.render.olympus.oracle.zombie_pigman.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.zombie_pigman.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.zombie_villager.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.zombie_villager.v1.0.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    },
+    "controller.render.olympus.oracle.zombie_villager_v2.entity": {
+      "geometry": "Geometry.oracle_default",
+      "materials": [
+        {
+          "*": "Material.oracle"
+        }
+      ],
+      "textures": [
+        "Texture.oracle"
+      ],
+      "is_hurt_color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0
+      }
+    }
+  }
+}

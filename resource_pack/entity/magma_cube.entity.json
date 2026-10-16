@@ -1,0 +1,48 @@
+{
+  "format_version": "1.8.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:magma_cube",
+      "materials": {
+        "default": "magma_cube",
+        "oracle": "olympus_oracle_glow"
+      },
+      "textures": {
+        "default": "textures/entity/slime/magmacube_v2",
+        "oracle": "textures/entity/oracle_gold"
+      },
+      "geometry": {
+        "default": "geometry.magma_cube_v2",
+        "oracle_default": "geometry.olympus.oracle.magma_cube_v2"
+      },
+      "scripts": {
+        "pre_animation": [
+          "variable.slime_squish_factor = (query.previous_squish_value + (query.current_squish_value - query.previous_squish_value) * query.frame_alpha);",
+          "variable.bounce = 1 / ((variable.slime_squish_factor / (query.variant * 0.5 + 1)) + 1);",
+          "variable.horizontal_scale_amount = variable.bounce * query.variant;",
+          "variable.vertical_scale_amount = (1 / variable.bounce) * query.variant;"
+        ],
+        "scaleX": "variable.horizontal_scale_amount",
+        "scaleY": "variable.vertical_scale_amount",
+        "scaleZ": "variable.horizontal_scale_amount"
+      },
+      "animations": {
+        "move": "animation.magma_cube.move"
+      },
+      "animation_controllers": [
+        {
+          "general": "controller.animation.magma_cube.general"
+        }
+      ],
+      "render_controllers": [
+        "controller.render.magma_cube",
+        {
+          "controller.render.olympus.oracle.magma_cube.entity": "query.property('olympus:oracle_visible')"
+        }
+      ],
+      "spawn_egg": {
+        "texture": "spawn_egg_magma_cube"
+      }
+    }
+  }
+}

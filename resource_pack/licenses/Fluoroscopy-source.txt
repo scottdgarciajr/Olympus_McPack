@@ -1,0 +1,2 @@
+https://github.com/ryanlua/fluoroscopy/tree/94ac574b3bca44743b9dce581fee4ebfb8a2689f
+Unmodified gold_ore.png; Oracle samples its gold outline pixel. No ore or world x-ray is enabled.

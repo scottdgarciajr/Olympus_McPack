@@ -1,0 +1,37 @@
+{
+  "format_version": "1.8.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:tadpole",
+      "materials": {
+        "default": "tadpole",
+        "oracle": "olympus_oracle_glow"
+      },
+      "textures": {
+        "default": "textures/entity/tadpole/tadpole",
+        "oracle": "textures/entity/oracle_gold"
+      },
+      "geometry": {
+        "default": "geometry.tadpole",
+        "oracle_default": "geometry.olympus.oracle.tadpole"
+      },
+      "spawn_egg": {
+        "texture": "spawn_egg_tadpole"
+      },
+      "animations": {
+        "swim": "animation.tadpole.swim"
+      },
+      "animation_controllers": [
+        {
+          "general": "controller.animation.tadpole.general"
+        }
+      ],
+      "render_controllers": [
+        "controller.render.tadpole",
+        {
+          "controller.render.olympus.oracle.tadpole.entity": "query.property('olympus:oracle_visible')"
+        }
+      ]
+    }
+  }
+}

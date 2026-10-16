@@ -1,0 +1,53 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:sheep",
+      "materials": {
+        "default": "sheep",
+        "oracle": "olympus_oracle_glow"
+      },
+      "textures": {
+        "default": "textures/entity/sheep/sheep",
+        "oracle": "textures/entity/oracle_gold"
+      },
+      "geometry": {
+        "default": "geometry.sheep",
+        "sheared": "geometry.sheep.sheared",
+        "oracle_default": "geometry.olympus.oracle.sheep",
+        "oracle_sheared": "geometry.olympus.oracle.sheep.sheared"
+      },
+      "particle_emitters": {
+        "flame": "animation.blaze.flame"
+      },
+      "animations": {
+        "setup": "animation.sheep.setup",
+        "grazing": "animation.sheep.grazing",
+        "walk": "animation.quadruped.walk",
+        "look_at_target": "animation.common.look_at_target",
+        "baby_transform": "animation.sheep.baby_transform",
+        "move": "controller.animation.sheep.move"
+      },
+      "scripts": {
+        "animate": [
+          "setup",
+          "look_at_target",
+          "move",
+          {
+            "baby_transform": "query.is_baby"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.sheep",
+        {
+          "controller.render.olympus.oracle.sheep.v1.0.entity": "query.property('olympus:oracle_visible')"
+        }
+      ],
+      "spawn_egg": {
+        "texture": "spawn_egg",
+        "texture_index": 3
+      }
+    }
+  }
+}

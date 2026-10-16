@@ -1,0 +1,39 @@
+{
+  "format_version": "1.8.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:ghast",
+      "materials": {
+        "default": "ghast",
+        "oracle": "olympus_oracle_glow"
+      },
+      "textures": {
+        "default": "textures/entity/ghast/ghast",
+        "shooting": "textures/entity/ghast/ghast_shooting",
+        "oracle": "textures/entity/oracle_gold"
+      },
+      "geometry": {
+        "default": "geometry.ghast",
+        "oracle_default": "geometry.olympus.oracle.ghast"
+      },
+      "spawn_egg": {
+        "texture": "spawn_egg_ghast"
+      },
+      "animations": {
+        "move": "animation.ghast.move",
+        "scale": "animation.ghast.scale"
+      },
+      "animation_controllers": [
+        {
+          "move": "controller.animation.ghast.move"
+        }
+      ],
+      "render_controllers": [
+        "controller.render.ghast",
+        {
+          "controller.render.olympus.oracle.ghast.entity": "query.property('olympus:oracle_visible')"
+        }
+      ]
+    }
+  }
+}

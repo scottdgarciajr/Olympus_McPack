@@ -1,0 +1,14 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "olympus:prophetic_arrow",
+      "materials": { "default": "arrow" },
+      "textures": { "default": "textures/entity/arrows" },
+      "geometry": { "default": "geometry.arrow" },
+      "animations": { "move": "animation.arrow.move" },
+      "scripts": { "pre_animation": ["variable.shake_power = 0.0;"], "animate": ["move"] },
+      "render_controllers": ["controller.render.arrow"]
+    }
+  }
+}

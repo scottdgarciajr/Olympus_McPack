@@ -1,0 +1,51 @@
+{
+  "format_version": "1.8.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "minecraft:vindicator",
+      "materials": {
+        "default": "vindicator",
+        "oracle": "olympus_oracle_glow"
+      },
+      "textures": {
+        "default": "textures/entity/vindicator",
+        "oracle": "textures/entity/oracle_gold"
+      },
+      "geometry": {
+        "default": "geometry.vindicator",
+        "oracle_default": "geometry.olympus.oracle.vindicator"
+      },
+      "scripts": {
+        "scale": "0.9375"
+      },
+      "animations": {
+        "look_at_target_default": "animation.humanoid.look_at_target.default.v1.0",
+        "look_at_target_gliding": "animation.humanoid.look_at_target.gliding.v1.0",
+        "look_at_target_swimming": "animation.humanoid.look_at_target.swimming.v1.0",
+        "vindicator_base": "animation.vindicator.base",
+        "vindicator_attack": "animation.vindicator.attack",
+        "vindicator_walk": "animation.vindicator.walk"
+      },
+      "animation_controllers": [
+        {
+          "look_at_target": "controller.animation.humanoid.look_at_target"
+        },
+        {
+          "vindicator_base": "controller.animation.vindicator.base.v1.0"
+        }
+      ],
+      "render_controllers": [
+        "controller.render.vindicator",
+        {
+          "controller.render.olympus.oracle.vindicator.v1.0.entity": "query.property('olympus:oracle_visible')"
+        }
+      ],
+      "enable_attachables": true,
+      "spawn_egg": {
+        "texture": "spawn_egg",
+        "texture_index": 39
+      },
+      "hide_armor": true
+    }
+  }
+}

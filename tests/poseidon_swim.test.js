@@ -1,0 +1,51 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import {poseidonSwimCruise} from '../behavior_pack/scripts/poseidon_swim.js';
+import {rememberRainWater,cleanupRainWater} from '../behavior_pack/scripts/rain_water.js';
+
+test('swim cruise gently approaches walking speed without sprint or changing vertical motion',()=>{
+  const velocity={x:0.1,y:0.4,z:0},impulses=[];
+  const player={isInWater:true,isSprinting:false,getVelocity:()=>velocity,
+    applyImpulse:v=>{impulses.push(v);velocity.x+=v.x;}};
+  for(let tick=0;tick<10;tick++)poseidonSwimCruise(player,{x:1,z:0});
+  assert.ok(Math.abs(velocity.x-0.21585)<1e-6);
+  assert.ok(impulses.every(v=>v.x<=0.04 && v.y===0 && v.z===0));
+  assert.equal(velocity.y,0.4);
+});
+test('swim cruise respects idle, land, sneak, analog input and already faster movement',()=>{
+  const impulses=[];let velocity={x:0,y:0,z:0};
+  const player={isInWater:true,getVelocity:()=>velocity,applyImpulse:v=>impulses.push(v)};
+  assert.equal(poseidonSwimCruise(player,{x:0,z:0}),false);
+  player.isInWater=false;assert.equal(poseidonSwimCruise(player,{x:1,z:0}),false);
+  player.isInWater=true;player.isSneaking=true;assert.equal(poseidonSwimCruise(player,{x:1,z:0}),false);
+  player.isSneaking=false;velocity.x=1.08;assert.equal(poseidonSwimCruise(player,{x:1,z:0}),false,'do not brake Tidal Sprint/Riptide');
+  velocity.x=0.09;poseidonSwimCruise(player,{x:0.5,z:0});assert.ok(impulses[0].x<0.02,'partial stick means partial speed');
+});
+
+function worldSetup(){
+  const props=new Map(),blocks=new Map();let loaded=true;
+  const key=p=>`${p.x},${p.y},${p.z}`;
+  const world={getDynamicPropertyIds:()=>[...props.keys()],getDynamicProperty:k=>props.get(k),setDynamicProperty:(k,v)=>props.set(k,v),
+    getDimension:()=>({getBlock:p=>{if(!loaded)throw Error('unloaded');return blocks.get(key(p));}})};
+  const water=(p,type='minecraft:water')=>{const block={typeId:type,setType(value){this.typeId=value;}};blocks.set(key(p),block);return block;};
+  return {world,water,props,setLoaded:value=>{loaded=value;}};
+}
+test('only recorded rain water expires at 30 seconds; unrelated water remains',()=>{
+  const {world,water}=worldSetup(),at={x:1,y:64,z:1};
+  const placed=water(at),unrelated=water({x:2,y:64,z:1});rememberRainWater(world,'minecraft:overworld',at,1000);
+  cleanupRainWater(world,30999);assert.equal(placed.typeId,'minecraft:water');
+  cleanupRainWater(world,31000);assert.equal(placed.typeId,'minecraft:air');assert.equal(unrelated.typeId,'minecraft:water');
+  assert.equal(world.getDynamicProperty('olympus:rain_clutch_water'),undefined);
+});
+test('rain water cleanup survives a fresh world wrapper/rejoin and retries unloaded chunks',()=>{
+  const {world,water,setLoaded}=worldSetup(),at={x:1,y:64,z:1},placed=water(at);
+  rememberRainWater(world,'minecraft:overworld',at,0);setLoaded(false);cleanupRainWater({...world},30000);
+  assert.ok(world.getDynamicPropertyIds().some(key=>key.startsWith('olympus:rain_water_') && world.getDynamicProperty(key)));assert.equal(placed.typeId,'minecraft:water');
+  setLoaded(true);cleanupRainWater({...world},31000);assert.equal(placed.typeId,'minecraft:air');
+});
+test('cleanup never destroys a building block replacing rain water',()=>{
+  const {world,water}=worldSetup(),at={x:1,y:64,z:1},block=water(at);
+  rememberRainWater(world,'minecraft:overworld',at,0);block.typeId='minecraft:diamond_block';
+  cleanupRainWater(world,30000);assert.equal(block.typeId,'minecraft:diamond_block');
+  assert.equal(world.getDynamicProperty('olympus:rain_clutch_water'),undefined);
+});

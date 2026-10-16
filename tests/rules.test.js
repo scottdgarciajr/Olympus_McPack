@@ -79,8 +79,8 @@ test('Dionysus madness builds to ten stacks and adds blindness risk', () => {
 
 test('Dionysus keeps strong random buffs without stacking healing and defense to IV', () => {
   const caps=CONFIG.dionysusBuffAmplifierCaps;
-  assert.equal(dionysusBuffAmplifier('regeneration',undefined,caps),1);
-  assert.equal(dionysusBuffAmplifier('regeneration',1,caps),1);
+  assert.equal(dionysusBuffAmplifier('regeneration',undefined,caps),0);
+  assert.equal(dionysusBuffAmplifier('regeneration',1,caps),0);
   assert.equal(dionysusBuffAmplifier('resistance',1,caps),2);
   assert.equal(dionysusBuffAmplifier('resistance',2,caps),2);
   assert.equal(dionysusBuffAmplifier('strength',3,caps),3);

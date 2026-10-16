@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:entity": {
+    "description": { "identifier": "olympus:prophetic_arrow", "is_spawnable": false, "is_summonable": true },
+    "components": {
+      "minecraft:collision_box": { "width": 0.25, "height": 0.25 },
+      "minecraft:physics": {},
+      "minecraft:projectile": {
+        "gravity": 0.05, "power": 2, "inertia": 0.99, "liquid_inertia": 0.6,
+        "on_hit": {
+          "impact_damage": { "damage": 4, "knockback": false, "semi_random_diff_damage": false, "destroy_on_hit": true },
+          "remove_on_hit": {}
+        }
+      },
+      "minecraft:timer": { "looping": false, "time": 12, "time_down_event": { "event": "olympus:expire", "target": "self" } }
+    },
+    "component_groups": { "olympus:expired": { "minecraft:instant_despawn": {} } },
+    "events": { "olympus:expire": { "add": { "component_groups": ["olympus:expired"] } } }
+  }
+}
