@@ -1,13 +1,13 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Olympus SMP Behavior v3.3.5",
-    "description": "v3.3.5 | Hermes: automatic one-block steps while walking/running. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, water-only rain clutch tracks Riptide, corners and gaps; ordinary water with passable flow-blocking edges; expires in 2s; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.",
+    "name": "Olympus SMP Behavior v3.4.0",
+    "description": "v3.4.0 | Hermes: automatic one-block steps while walking/running. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, single rain-only water spot expires in 5s; no Slow Falling; admin clutch toggle; Hephaestus: 14 forge creations including 10 balanced utility items; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.",
     "uuid": "a06ad1f9-8b44-4af1-995a-95dc9c684c25",
     "version": [
       3,
-      3,
-      5
+      4,
+      0
     ],
     "min_engine_version": [
       1,
@@ -21,8 +21,8 @@
       "uuid": "45604c22-4d55-478e-beb7-fca61db38eaf",
       "version": [
         3,
-        3,
-        5
+        4,
+        0
       ]
     },
     {
@@ -32,8 +32,8 @@
       "uuid": "c6515f3a-93dc-4971-987c-ad95b689d22f",
       "version": [
         3,
-        3,
-        5
+        4,
+        0
       ]
     }
   ],
@@ -50,8 +50,8 @@
       "uuid": "def06a91-6e05-457a-a359-714565d4c32c",
       "version": [
         3,
-        3,
-        5
+        4,
+        0
       ]
     }
   ],

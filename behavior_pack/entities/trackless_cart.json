@@ -1,0 +1,63 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "olympus:trackless_cart",
+      "is_spawnable": false,
+      "is_summonable": true
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [
+          "olympus_cart",
+          "inanimate"
+        ]
+      },
+      "minecraft:health": {
+        "value": 20,
+        "max": 20
+      },
+      "minecraft:collision_box": {
+        "width": 0.98,
+        "height": 0.7
+      },
+      "minecraft:physics": {
+        "has_gravity": true
+      },
+      "minecraft:pushable": {
+        "is_pushable": true,
+        "is_pushable_by_piston": true
+      },
+      "minecraft:movement": {
+        "value": 0.32
+      },
+      "minecraft:movement.basic": {},
+      "minecraft:variable_max_auto_step": {
+        "base_value": 1.01,
+        "controlled_value": 1.01,
+        "jump_prevented_value": 0.5625
+      },
+      "minecraft:rideable": {
+        "seat_count": 1,
+        "family_types": [
+          "player"
+        ],
+        "pull_in_entities": false,
+        "interact_text": "Ride Clockwork Cart",
+        "seats": [
+          {
+            "position": [
+              0,
+              0.1,
+              0
+            ]
+          }
+        ]
+      },
+      "minecraft:nameable": {},
+      "minecraft:loot": {
+        "table": "loot_tables/trackless_cart.json"
+      }
+    }
+  }
+}

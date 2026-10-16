@@ -11,7 +11,9 @@ import { configureDivine, armSolarFlare, oracleSight, assistedArrowTick, hellfir
 import { findMadnessLanding } from './teleport.js';
 import { hermesStepUp } from './hermes_step.js';
 import { poseidonSwimCruise,recordTidalBoost,forgetTidalBoost,tidalEnvironment } from './poseidon_swim.js';
-import { spawnRainWater, cleanupRainWater } from './rain_water.js';
+import { rememberRainWater, cleanupRainWater } from './rain_water.js';
+import {rainClutchEnabled,rainClutchCommand} from './poseidon_admin.js';
+import {configureUtilityForge,utilityEquipmentTick,utilityCartTick,packUtilityCart} from './forge_utilities.js';
 import { lightPower, seaEnvironment, bucketClutch, clearEnvironment, forgetEnvironment, poseidonMiningHaste } from './sea_light.js';
 import { isPersonalGodItem, isPersonalGodTool, lockGodItem, queueGodItem, deliverQueuedGodItems } from './god_items.js';
 import { vaultRecords, ownsToolAnywhere, storeTool, withdrawTool, recoverVaultTransaction } from './tool_vault.js';
@@ -25,22 +27,22 @@ const TITLES = {
 const DESCRIPTIONS = {
   hermes: 'Speed VI, Flash-fast sprint and automatic one-block steps while moving, fall protection, and toggleable Divine Leap; Weakness III. Divine Pearl every 5 minutes.',
   zeus: 'Mining Fatigue II. Thunder or Overworld Y220+ grants lightning every 5 seconds; rain/thunder or Y220+ removes the 30-second flight activation cooldown.',
-  poseidon: 'Strength II in water/rain; Haste I underwater with modest adaptive mining compensation; Haste II in rain; Conduit Power, clear water vision, no swimming hunger, mild walking-speed swim cruise, fast Tidal Sprint, and bucket-free rain clutch with landing cushions for Riptide, corners and gaps (still water disappears after 2 seconds). Slowness III and Weakness III in Nether/desert.',
+  poseidon: 'Strength II in water/rain; Haste I underwater with modest adaptive mining compensation; Haste II in rain; Conduit Power, clear water vision, no swimming hunger, mild walking-speed swim cruise, fast Tidal Sprint, and bucket-free rain clutch placing one water spot for 5 seconds; no Slow Falling; administrator toggle. Slowness III and Weakness III in Nether/desert.',
   hades: 'Fire Resistance and Night Vision; sheltered from daylight weakness. Nether/End power and Hellfire from fire or lava.',
   ares: 'Strength II and Resistance II; Slowness III. Strength V and Resistance III rage for 30 seconds every 5 minutes.',
   apollo: 'Light-powered Solar Bow and fast flight, strongest in direct sun. Plain aim-assist arrows and gold Oracle compass and colored trails. Weakness III at night or in darkness.',
-  hephaestus: 'Haste IV, Divine Fortune IV pickaxe, and costly item combinations at the Hall or portable Divine Forge; permanent Weakness III.',
+  hephaestus: 'Haste IV, Divine Fortune IV pickaxe, and 14 tradeable forge creations including 10 utility items at the Hall or portable Divine Forge; permanent Weakness III.',
   dionysus: 'Every new foe can be cursed immediately. Random buffs include Regeneration I and Resistance III at most; each hit adds Nausea, teleports you, and may blind you. Divine Harvest replenishes used Bone Meal.',
   kratos: 'Each melee hit on a god steals a random divine gift or burden for 8 seconds. Each god kill adds one random gift or burden until Kratos dies; there is no copy limit, and burdens accumulate too.'
 };
 const CONTROLS = {
   hermes: 'Speed VI always; sprint for Speed XIV. Move into one-block ledges to step up automatically, including during normal fast walking. Grounded only; tall walls still require a route around. Use relic: pearl (5m). Sneak-use: mobility menu for Slow Falling and Divine Leap toggles. Weakness III.',
   zeus: 'Use relic: lightning; sneak-use: 30s flight. Overworld Y220+: full storm power, 5s lightning and no flight activation cooldown. Below Y220, clear weather has 3m cooldowns; rain removes cooldowns and thunder lightning has a 5s interval.',
-  poseidon: 'Sneak-use: Tidal Sprint toggle; boost only while sprinting. Jump to rise/leave water. Strength II water/rain; Haste I water with adaptive mining / II rain; clear water vision and no swimming hunger. Mild swim cruise always assists movement in water, even with Tidal Sprint off. Rain Clutch: fall in exposed rain; water appears automatically with no bucket or clicking, then disappears after 2s without flowing. Clear weather, Nether and protected areas excluded. Protection comes only from landing in water; there is no fall-damage immunity. Landing prediction updates after trident boosts and covers corners/gaps. Strength, Haste and Conduit end on leaving water/rain; water vision ends on leaving water. Tidal boost momentum ends on dry exit.',
+  poseidon: 'Sneak-use: Tidal Sprint toggle; boost only while sprinting. Jump to rise/leave water. Strength II water/rain; Haste I water with adaptive mining / II rain; clear water vision and no swimming hunger. Mild swim cruise always assists movement in water, even with Tidal Sprint off. Rain Clutch: fall in exposed rain; water appears automatically with no bucket or clicking, then disappears after 5s. Clear weather, Nether and protected areas excluded. Protection comes only from landing in water; there is no fall-damage immunity. A single ordinary water spot is placed once per fall; no Slow Falling. Administrators can enable/disable the clutch. Strength, Haste and Conduit end on leaving water/rain; water vision ends on leaving water. Tidal boost momentum ends on dry exit.',
   hades: 'Use relic while physically in fire, soul fire, or lava: Hellfire fireball (15s). Sneak-use checks readiness. Fire Resistance/Night Vision always; night and otherworld buffs remain.',
   ares: 'Use relic: War Rage, Strength V and Resistance III for 30s (5m). Strength II, Resistance II, Slowness III are passive.',
   apollo: 'Use relic: Lightflight, Solar Flare, gold Oracle compass, Get / Recover Prophetic Bow. Flight: walking speed normally, sprint for fast speed; unlimited in sun, otherwise 5s per minute. Prophetic Bow: draw/release normally with one arrow; no damage buffs. Night/darkness: Weakness III; darkness disables powers.',
-  hephaestus: 'Haste IV and Weakness III. Use your relic for the Forge Guide. Craft a portable forge with eight iron ingots around a crafting table.',
+  hephaestus: 'Haste IV and Weakness III. Use your relic for all 14 recipes, costs and utility controls. Craft a portable forge with eight iron ingots around a crafting table.',
   dionysus: 'Melee-hit different foes for random buffs. Regeneration caps at I for 60s and Resistance at III; other buffs can reach IV. Same foe: 3s cooldown. Used Bone Meal replenishes.',
   kratos: 'Melee-hit a god to steal one random representative gift or burden for 8s. Each god kill adds one random lasting gift or burden until death, with no copy limit. Use relic for status.'
 };
@@ -48,7 +50,7 @@ const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigu
   'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '3.3.5';
+const PACK_VERSION = '3.4.0';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -142,6 +144,7 @@ const now = () => Date.now();
 configureCrown({ role, temple: () => temple(), offeringCount: (p,id) => offeringCount(p,id), takeOffering: (p,id,n) => takeOffering(p,id,n), weather, setWeather: value => { currentWeather = value; world.setDynamicProperty(key('weather'), value); }, fail });
 configureDominion(fail);
 configureForge({ role, temple: () => temple(), fail });
+configureUtilityForge({blocked:(dimension,point)=>inHall(dimension,point)||temporaryBlock(dimension,point)||isForge(dimension,point),fail});
 configureDivine({role,ready,startCooldown,tell,heldItem,fail,power:apolloPower});
 const nameOf = (god) => god.charAt(0).toUpperCase() + god.slice(1);
 function tell(player, message) { player.sendMessage(prefix + message); }
@@ -838,7 +841,7 @@ function giveHephaestusTestKit(player) {
   if (!hasOwnedRelic(player,'hephaestus')) giveItem(player,new ItemStack('olympus:hephaestus_relic',1));
   giveItem(player,new ItemStack('olympus:divine_forge',1));
   for (const item of creativeForgeSamples()) giveItem(player,item);
-  tell(player,'Creative test gear granted: Forge Relic, Divine Fortune pickaxe, portable forge, and all four finished combinations. Search Creative for this kit to get another set.');
+  tell(player,'Creative test gear granted: Forge Relic, Divine Fortune pickaxe, portable forge, and all fourteen finished forge creations. Search Creative for this kit to get another set.');
 }
 function creativeGod(player,god) {
   if (role(player)) reset(player);
@@ -945,6 +948,7 @@ function updatePlayer(player) {
         godPenalty(player, 'mining_fatigue', 5, 1);
         break;
       case 'poseidon':
+        if(player.getEffect('slow_falling'))player.removeEffect('slow_falling');
         // Dolphin's Grace is not a Bedrock effect. Its invalid ID previously
         // threw here and prevented every later sea buff from being applied.
         // Conduit boosts underwater mining without accelerating melee swings.
@@ -1097,11 +1101,11 @@ function special(player, god, sneaking) {
       if (sneaking) {
         const enabled = !poseidonSpeedEnabled(player);
         player.setDynamicProperty(key('poseidonSpeed'), enabled);
-        tell(player, `v${PACK_VERSION}: Tidal Sprint ${enabled ? 'ON' : 'OFF'}. Water/rain: Strength II; Haste I in water with modest mining compensation, Haste II in rain. Hold sprint for the boost; release sprint for normal control. Hold jump to leave water. Rain Clutch is automatic only in exposed rain, needs no bucket, and its still water disappears after 2s. Mild swim cruise remains available with Tidal Sprint off.`);
+        tell(player, `v${PACK_VERSION}: Tidal Sprint ${enabled ? 'ON' : 'OFF'}. Water/rain: Strength II; Haste I in water with modest mining compensation, Haste II in rain. Hold sprint for the boost; release sprint for normal control. Hold jump to leave water. Rain Clutch is automatic only in exposed rain, needs no bucket, and places one water spot for 5s. No Slow Falling. Mild swim cruise remains available with Tidal Sprint off.`);
         showFlair(player, god, true);
       } else {
         tell(player,`v${PACK_VERSION}: Strength II in water/rain; Haste I in water with modest mining compensation, Haste II in rain. ${CONTROLS.poseidon}`);
-        tell(player,`Rain Clutch ${inRain(player)?'READY':'waiting for exposed rain'}: fall toward a solid floor in rain. No bucket or clicking needed; still water disappears after 2 seconds. Disabled in clear weather, Nether and protected areas.`);
+        tell(player,`Rain Clutch ${!rainClutchEnabled(world,player.name)?'DISABLED by administrator':inRain(player)?'READY':'waiting for exposed rain'}: fall toward a solid floor in rain. No bucket or clicking needed; one ordinary water spot disappears after 5 seconds; no Slow Falling. Disabled in clear weather, Nether and protected areas.`);
       }
     } else if (god === 'hades') {
       if (sneaking) {
@@ -1369,6 +1373,12 @@ world.beforeEvents.explosion.subscribe((event) => {
   if (blocks.some(block => inHall(event.dimension.id,block.location) || temporaryBlock(event.dimension.id,block.location) || isForge(event.dimension.id,block.location)))
     event.setImpactedBlocks(blocks.filter(block => !inHall(event.dimension.id,block.location) && !temporaryBlock(event.dimension.id,block.location) && !isForge(event.dimension.id,block.location)));
 });
+world.beforeEvents.playerInteractWithEntity.subscribe(event=>{
+  if(event.target.typeId!=='olympus:trackless_cart'||!event.player.isSneaking)return;
+  event.cancel=true;
+  const player=event.player,target=event.target;
+  system.run(()=>{try{packUtilityCart({player,target});}catch(error){fail(error);}});
+});
 world.afterEvents.entityHurt.subscribe((event) => { try { onForgeHurt(event); } catch (e) { if (CONFIG.debug) fail(e); } });
 world.afterEvents.entitySpawn.subscribe((event) => { try { onDivineProjectileSpawn(event.entity); } catch (e) { if (CONFIG.debug) fail(e); } });
 world.afterEvents.projectileHitBlock.subscribe((event) => { try { onDivineProjectileHitBlock(event); onForgeProjectileHitBlock(event); } catch (e) { fail(e); } });
@@ -1457,6 +1467,7 @@ world.afterEvents.entityDie.subscribe((event) => {
 });
 world.afterEvents.playerLeave.subscribe((event) => { forgetEnvironment(event.playerId);hermesSprintIntent.delete(event.playerId);forgetTidalBoost(event.playerId);poseidonWetState.delete(event.playerId); try { crownOwnerLeft(event.playerId); } catch (e) { fail(e); } });
 system.afterEvents.scriptEventReceive.subscribe((event) => {
+  if(event.id==='olympus:poseidon_clutch'){const message=rainClutchCommand(world,event.message);if(event.sourceEntity?.typeId==='minecraft:player')tell(event.sourceEntity,message);else console.warn(message);return;}
   if (!event.id.startsWith('olympus:')) return;
   const player = event.sourceEntity;
   if (!player || player.typeId !== 'minecraft:player') return;
@@ -1533,14 +1544,16 @@ system.runInterval(() => {
 system.runInterval(() => {
   for (const player of world.getAllPlayers()) {
     suppressOldPenalties(player);
-    updateFlight(player);
+    if(role(player)!=='poseidon')updateFlight(player);
     if (role(player) === 'hermes') { hermesFallProtection(player); hermesMotion(player); }
     try { seaEnvironment(player, role(player) === 'poseidon'); } catch (e) { if (CONFIG.debug) fail(e); }
     if (role(player) === 'poseidon') {
+      if(player.getEffect('slow_falling'))player.removeEffect('slow_falling');
+      if(player.getDynamicProperty(key('flightUntil')))player.setDynamicProperty(key('flightUntil'),undefined);
       const wetState=player.isInWater?'water':inRain(player)?'rain':'dry';
       if(poseidonWetState.get(player.id)!==wetState){poseidonWetState.set(player.id,wetState);updatePlayer(player);}
       poseidonMotion(player);
-      try { bucketClutch(player, inRain(player), (dim,p)=>inHall(dim,p)||temporaryBlock(dim,p)||isForge(dim,p), (dim,positions,blocked)=>spawnRainWater(world,dim,positions,blocked)); }
+      try { bucketClutch(player, inRain(player) && rainClutchEnabled(world,player.name), (dim,p)=>inHall(dim,p)||temporaryBlock(dim,p)||isForge(dim,p), (dim,p)=>rememberRainWater(world,dim,p)); }
       catch (e) { fail(e); }
     }
   }
@@ -1568,3 +1581,6 @@ system.runInterval(() => { for (const player of world.getAllPlayers()) if (role(
 system.runInterval(() => { try { divineTick(); } catch (e) { if (CONFIG.debug) fail(e); } }, 3);
 system.runInterval(() => { for (const player of world.getAllPlayers()) if (['hades','poseidon'].includes(role(player))) updatePlayer(player); }, 10);
 system.runInterval(() => { try { revealCrown(); } catch (e) { fail(e); } }, 6000);
+
+system.runInterval(()=>{try{utilityEquipmentTick();}catch(error){fail(error);}},5);
+system.runInterval(()=>{try{utilityCartTick();}catch(error){fail(error);}},1);

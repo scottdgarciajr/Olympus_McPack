@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.4.0 — Utility forge expansion and simple rain clutch
+
+- Ten new non-PvP utility recipes: Lantern Helmet, Clockwork Trackless Cart, Wayfinder, Ariadne Trail Spool, Builder Wand, Seedweaver Planter, Autumn Harvest Sickle, Reclaimer, Thermal Lens and Survey Level. Fourteen forge products total; forge guide lists full costs and controls.
+- Real fueled moving light; fueled, ground-only cart with one-block stepping and fuel/health-preserving packing. Building/farming consume materials; salvage rejects bound/enchanted gear and returns at most half remaining iron value. Other tools provide bounded navigation and planning information.
+- Restore Poseidon's simple rain-only, bucket-free, single native water source; remove it after five seconds. No wide cushions, new containment edges, fall immunity or Slow Falling. Clear residual Slow Falling from Poseidon.
+- Persistent global/per-player administrator clutch commands. Update both pack descriptions, status and tooltips to v3.4.0.
+- Automated suite: 79 tests pass; native Minecraft play testing remains pending.
+
 ## 3.3.5 — Restore ordinary clutch water and repair Hermes steps
 
 - Replaces the failed waterlogged carrier with ordinary Minecraft water. Invisible, non-colliding, untargetable temporary edges block fluid flow; water is removed before edges after two seconds.

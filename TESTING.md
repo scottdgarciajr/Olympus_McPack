@@ -1,5 +1,17 @@
 # In-game test checklist
 
+## 3.4.0 utility forge and simple clutch (Minecraft verification pending)
+
+- Activate both v3.4.0 packs; verify status and pack descriptions. Creative Hephaestus kit gives 14 products; Survival kit grants nothing. Forge each new recipe with exact costs, test shortages, bound/enchanted/damaged bases, full inventory, rejoin and trades. Non-Hephaestus may use/store products but cannot forge.
+- Lantern Helmet: one coal gives 90 active seconds of level-12 real light, no Night Vision; check armor rendering, no underwater light, fuel depletion and cleanup after unequip/rejoin/chunk unload.
+- Trackless Cart: deploy on ground, ride/steer, test single-block curbs, tall walls, water and fuel shortages. Coal gives 45 driving seconds; idle/airborne consume none. Dismount and sneak-interact to pack once, retaining fuel/health; redeploy. Breaking yields only one kit. Check rendering and content log.
+- Builder consumes one next-slot block per placement (max eight); protected terrain/players stop placement. Planter consumes one next-slot seed per new crop on existing farmland (3x3). Sickle harvests only ripe crops with native drops and consumes carried seeds to replant. Check cooldowns/durability and protection.
+- Salvage destroys only eligible unenchanted iron gear and recovers at most half remaining iron value. Cancel or change source during the menu; no duplicates. Check waypoint dimensions, bounded trail recording, lava-only scans, survey footprints and tool cooldowns.
+- Poseidon: no Slow Falling at any point, including after old saves/potions. In exposed Overworld rain, falling places one native water source, no bucket required; source disappears after five seconds. It can briefly flow, and corners/sideways falls can miss. Dry weather/Nether/roof/protected ground must not spawn water. Normal damage remains active. Stop rain: no further clutch, Strength/Haste/Tidal Sprint must end outside water.
+- Admin: global clutch off/on/status/reset functions, per-player script-event overrides, restart persistence and role changes. Confirm disabled status in relic UI. Upgrade from 3.3.5: old temporary containment edges/water still clean up.
+
+Historical checklists below describe superseded versions; use the v3.4.0 checklist for current clutch behavior.
+
 ## 3.3.5 native water containment and Hermes ramping (Minecraft verification pending)
 
 - Enable both v3.3.5 packs. Rain clutch must spawn ordinary visible water, catch Survival falls, stay contained and disappear with all invisible edges after two seconds. Repeat diagonal sprint, double Riptide, block corners and gaps.

@@ -1,0 +1,21 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:forge_trail_spool",
+      "menu_category": {
+        "category": "equipment"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Ariadne Trail Spool"
+      },
+      "minecraft:icon": "olympus_forge_trail_spool",
+      "minecraft:max_stack_size": 1,
+      "minecraft:glint": true,
+      "minecraft:interact_button": "Use Utility",
+      "olympus:forge_item_use": {}
+    }
+  }
+}

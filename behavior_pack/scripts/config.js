@@ -1,3 +1,4 @@
+import {UTILITY_COSTS} from './forge_catalog.js';
 export const CONFIG = {
   maxPlayers: 64,
   allowDuplicateGods: false,
@@ -23,6 +24,7 @@ export const CONFIG = {
   hermesLeapAmplifier: 1,
   zeusThunderLightningSeconds: 5,
   combinations: {
+    ...UTILITY_COSTS,
     sword_pickaxe: { xp: 30, diamond: 12, emerald: 16, lapis_lazuli: 24, netherite_ingot: 1 },
     fireball_pickaxe: { xp: 35, diamond: 16, emerald: 20, lapis_lazuli: 24, netherite_ingot: 1 },
     water_boots: { xp: 28, diamond: 12, emerald: 16, lapis_lazuli: 24, netherite_ingot: 1 },

@@ -10,7 +10,7 @@ test('real Poseidon passive code applies valid visible Strength and Haste in wat
   const source=readFileSync(new URL('../behavior_pack/scripts/main.js',import.meta.url),'utf8');
   const effectsSource=source.slice(source.indexOf('function effect('),source.indexOf('function suppressOldPenalties('));
   const passiveSource=source.slice(source.indexOf('function updatePlayer('),source.indexOf('function safeTeleport('));
-  const errors=[],effects=new Map();let raining=false;
+  const errors=[],effects=new Map([['slow_falling',{amplifier:0,duration:1200}]]);let raining=false;
   const player={id:'poseidon',isInWater:true,
     dimension:{id:'minecraft:overworld',getBiome:()=>({id:'minecraft:forest'})},
     getEffect:id=>effects.get(id),removeEffect:id=>effects.delete(id),
@@ -22,7 +22,7 @@ test('real Poseidon passive code applies valid visible Strength and Haste in wat
   const run=new Function('CONFIG','role','crowned','suppressOldPenalties','inRain','system','godBuffs','godPenalties','fail','poseidonMiningHaste','EquipmentSlot',
     `${effectsSource}\n${passiveSource}\nreturn updatePlayer;`)
     (CONFIG,()=> 'poseidon',()=>false,()=>{},()=>raining,{currentTick:100},new Map(),new Map(),e=>errors.push(e),poseidonMiningHaste,{Head:'Head'});
-  run(player);assert.equal(errors.length,0);
+  run(player);assert.equal(errors.length,0);assert.equal(effects.has('slow_falling'),false,'Poseidon always clears Slow Falling');
   assert.equal(effects.get('strength').amplifier,1);
   assert.equal(effects.get('haste').amplifier,0,'real Haste stays low to preserve attack animations');
   assert.equal(effects.get('conduit_power').amplifier,17,'only mining compensation scales with water penalties');
@@ -132,7 +132,7 @@ test('rain clutch needs no inventory, activates only in exposed rain, and respec
     dimension:{id:'minecraft:overworld',
       getBlockFromRay:origin=>origin.y-3>5?undefined:{face:'Up',block:{location:{x:0,y:3,z:0},isAir:false,isLiquid:false}},
       getBlock:at=>at.y===4?air:{isAir:true}}};
-  const clutch=(raining,blocked=false)=>bucketClutch(player,raining,()=>blocked,(_dim,positions)=>{if(!positions.length)return 0;air.setType('minecraft:water');remembered++;return 1;});
+  const clutch=(raining,blocked=false)=>bucketClutch(player,raining,()=>blocked,()=>remembered++);
   assert.equal(clutch(true),false);player.location.y=6;
   assert.equal(clutch(false),false);assert.equal(water,false,'dry weather cannot clutch');
   assert.equal(clutch(true,true),false);assert.equal(water,false,'protected land cannot be altered');

@@ -1,4 +1,3 @@
-import {CLUTCH_BOUNDARY} from './rain_water.js';
 // Environment powers kept separate from claims, Crown records, and forge systems.
 const swimmers = new Map();
 const fogged = new Set();
@@ -74,52 +73,33 @@ export function seaEnvironment(player, active) {
   });
 }
 
-export function bucketClutch(player, raining, blocked, spawnWater) {
-  const p=player.location,velocity=player.getVelocity();
-  if(player.isInWater || player.isOnGround){falls.set(player.id,{top:p.y,announced:false});return false;}
-  const fall=falls.get(player.id)||{top:p.y,announced:false};
-  fall.top=Math.max(fall.top,p.y);falls.set(player.id,fall);
-  if(!raining || player.dimension.id!=='minecraft:overworld' || velocity.y> -0.15 || (fall.top-p.y<2 && velocity.y> -0.6))return false;
-  const options={includePassableBlocks:false,includeLiquidBlocks:false};
-  const footprint=[[0,0],[-0.3,-0.3],[-0.3,0.3],[0.3,-0.3],[0.3,0.3],[-0.75,0],[0.75,0],[0,-0.75],[0,0.75]];
-  let position={...p},v={...velocity},floors=[];
-  // Recompute every tick, even after an earlier placement: a second Riptide
-  // launch can change the landing completely. Sweep four upcoming ticks, not
-  // just the column below the player, with all four body corners included.
-  for(let tick=0;tick<4 && !floors.length;tick++) {
-    const next={x:position.x+v.x,y:position.y+v.y,z:position.z+v.z};
-    const delta={x:v.x,y:v.y,z:v.z},length=Math.hypot(v.x,v.y,v.z),seen=new Set();
-    for(const [dx,dz] of footprint)for(const vertical of [false,true])try {
-      const origin=vertical ? {x:next.x+dx,y:position.y+0.2,z:next.z+dz} : {x:position.x+dx,y:position.y+0.1,z:position.z+dz};
-      const direction=vertical?{x:0,y:-1,z:0}:{x:delta.x/length,y:delta.y/length,z:delta.z/length};
-      const hit=player.dimension.getBlockFromRay(origin,direction,{...options,maxDistance:vertical?Math.max(0.3,-v.y+0.3):length+0.2});
-      if(!hit?.block || hit.face!=='Up' || hit.block.isAir || hit.block.isLiquid)continue;
-      if(hit.block.location.y+1>position.y+0.3)continue;
-      const at=hit.block.location,key=`${at.x},${at.y},${at.z}`;
-      if(!seen.has(key)){seen.add(key);floors.push(at);}
+export function bucketClutch(player, raining, blocked, rememberWater) {
+  const p = player.location, velocity = player.getVelocity();
+  if (player.isInWater || player.isOnGround) { falls.set(player.id,{top:p.y,used:false}); return false; }
+  const fall = falls.get(player.id) || { top: p.y, used: false };
+  fall.top = Math.max(fall.top, p.y);
+  falls.set(player.id, fall);
+  if (!raining || player.dimension.id!=='minecraft:overworld' || velocity.y > -0.5 || fall.used || (fall.top-p.y<2 && velocity.y>-0.9)) return false;
+  // Stable raycasts find the actual collidable landing surface. isSolid is a
+  // pre-release API and was always undefined in the previous stable build.
+  const reach = Math.max(2, Math.ceil(-velocity.y * 2) + 1);
+  for (const ahead of [1, 0.5, 0]) {
+    try {
+      const hit=player.dimension.getBlockFromRay(
+        {x:p.x+velocity.x*ahead,y:p.y+0.1,z:p.z+velocity.z*ahead}, {x:0,y:-1,z:0},
+        {maxDistance:reach,includePassableBlocks:false,includeLiquidBlocks:false});
+      if (!hit?.block || hit.face!=='Up' || hit.block.isAir || hit.block.isLiquid) continue;
+      const floor=hit.block;
+      const location={x:floor.location.x,y:floor.location.y+1,z:floor.location.z};
+      const air = player.dimension.getBlock(location);
+      if (!air?.isAir || blocked(player.dimension.id, location) || blocked(player.dimension.id,floor.location)) continue;
+      air.setType('minecraft:water');
+      try { rememberWater(player.dimension.id,location); }
+      catch(error) { air.setType('minecraft:air');throw error; }
+      fall.used = true;
+      try { player.sendMessage('§b[Olympus v3.4.0] Rain Clutch: water placed automatically; disappears in 5 seconds. No bucket needed.'); } catch {}
+      return true;
     } catch {}
-    position=next;
-    v={x:v.x*0.98,y:(v.y-0.08)*0.98,z:v.z*0.98};
   }
-  const locations=[],visited=new Set();
-  // A 3x3 cushion above and between the landing blocks catches edge/corner
-  // contacts and gives fast
-  // falls time to enter water before hitting terrain. Air only; no terrain is
-  // replaced (gaps at terrain height are filled with water too). Every source
-  // uses real contained water and is tracked for the two-second cleanup.
-  for(const floor of floors)for(const dy of [1,0,2])for(const dx of [0,-1,1])for(const dz of [0,-1,1])try {
-    if(locations.length>=48)break;
-    const location={x:floor.x+dx,y:floor.y+dy,z:floor.z+dz},key=`${location.x},${location.y},${location.z}`;
-    if(visited.has(key))continue;visited.add(key);
-    if(blocked(player.dimension.id,location) || blocked(player.dimension.id,floor))continue;
-    const air=player.dimension.getBlock(location);
-    if(!air || (!air.isAir && air.typeId!==CLUTCH_BOUNDARY))continue;
-    locations.push(location);
-  } catch {}
-  const placed=locations.length ? spawnWater(player.dimension.id,locations,blocked) : 0;
-  if(placed && !fall.announced) {
-    fall.announced=true;
-    try{player.sendMessage('§b[Olympus v3.3.5] Rain Clutch: still landing water placed; disappears in 2 seconds.');}catch{}
-  }
-  return placed>0;
+  return false;
 }

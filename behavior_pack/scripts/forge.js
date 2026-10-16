@@ -1,10 +1,15 @@
 import { world, system, EquipmentSlot, EntityDamageCause, ItemStack, MolangVariableMap } from '@minecraft/server';
 import { ActionFormData } from '@minecraft/server-ui';
 import { CONFIG } from './config.js';
+import {UTILITY_RECIPES} from './forge_catalog.js';
+import {forgeRequirements} from './forge_rules.js';
+import {useUtilityItem} from './forge_utilities.js';
+import {isPersonalGodItem} from './god_items.js';
 
 const KEY = 'olympus:combination';
 const MATERIALS = ['diamond', 'emerald', 'lapis_lazuli', 'netherite_ingot'];
 const RECIPES = [
+  ...UTILITY_RECIPES,
   { id: 'sword_pickaxe', name: 'Forgecleaver Sword-Pickaxe', base: 'minecraft:diamond_pickaxe', ingredient: 'minecraft:diamond_sword', output: 'olympus:forge_sword_pickaxe', lore: 'Mines stone and ore; 6 bonus attack damage. Use: a six-block ore pulse every 30 seconds.' },
   { id: 'fireball_pickaxe', name: 'Cinderbolt Pickaxe', base: 'minecraft:diamond_pickaxe', ingredient: 'minecraft:blaze_rod', output: 'olympus:forge_fireball_pickaxe', lore: 'Mines stone and ore. Use: a ghast-style fireball with a small terrain-breaking blast every 15 seconds.' },
   { id: 'water_boots', name: 'Undertow Boots', base: 'minecraft:diamond_boots', ingredient: 'minecraft:heart_of_the_sea', output: 'olympus:forge_water_boots', lore: 'Wear: Dolphin’s Grace I in water. Sneak in water: short forward surge every 25 seconds.' },
@@ -13,7 +18,7 @@ const RECIPES = [
 function combinedItem(recipe) {
   const result=new ItemStack(recipe.output,1);
   result.nameTag=`§6${recipe.name}`;
-  result.setLore([`§6Divine Forge creation`,`§7${recipe.lore}`,`§8Made by Hephaestus; usable by everyone.`]);
+  result.setLore([`§6Divine Forge creation v3.4.0`,...(recipe.lore.match(/.{1,48}(?:\s|$)/g)||[recipe.lore]).map(line=>'§7'+line.trim()),`§8Made by Hephaestus; usable by everyone.`]);
   return result;
 }
 export function creativeForgeSamples() {
@@ -84,7 +89,7 @@ export function showForgeGuide(player) {
     return `§6${recipe.name}§r: ${recipe.base.replace('minecraft:','').replaceAll('_',' ')} + ${recipe.ingredient.replace('minecraft:','').replaceAll('_',' ')}\n§7${recipe.lore} Cost: ${costText(cost)}.`;
   });
   const form=new ActionFormData().title('§6HEPHAESTUS FORGE GUIDE')
-    .body(`§eCraft a portable Divine Forge at a crafting table: 8 iron ingots around 1 crafting table (III / ICI / III). Place it on an empty block, then tap its smithing table. The Hall forge beside your altar also works.\n\nHold the plain diamond base item, carry the other item and all listed resources, select a recipe, then confirm. The forge consumes both source items and creates a unique tool. Source enchantments do not carry over. Only Hephaestus can forge; anyone may use or trade the result.\n\n${lines.join('\n\n')}`)
+    .body(`§eCraft a portable Divine Forge at a crafting table: 8 iron ingots around 1 crafting table (III / ICI / III). Place it on an empty block, then tap its smithing table. The Hall forge beside your altar also works.\n\nHold exactly one fresh base item, carry the other item and all listed resources, select a recipe, then confirm. The forge consumes both source items and creates a unique tool. Source enchantments do not carry over. Only Hephaestus can forge; anyone may use or trade the result.\n\n${lines.join('\n\n')}`)
     .button('Close');
   form.show(player).catch(api.fail);
 }
@@ -95,14 +100,14 @@ function amount(container,id) {
   return count;
 }
 function ingredientSlot(container,id,skip) {
-  for (let i=0; i<container.size; i++) if (i !== skip && container.getItem(i)?.typeId === id) return i;
+  for (let i=0; i<container.size; i++) if (i !== skip && container.getItem(i)?.typeId === id && !isPersonalGodItem(container.getItem(i))) return i;
   return -1;
 }
 function consume(container,id,count,skip=-1) {
   for (let i=0; i<container.size && count>0; i++) {
     if (i === skip) continue;
     const item = container.getItem(i);
-    if (item?.typeId !== id) continue;
+    if (item?.typeId !== id || isPersonalGodItem(item)) continue;
     const taken = Math.min(count,item.amount);
     if (taken === item.amount) container.setItem(i,undefined);
     else { item.amount -= taken; container.setItem(i,item); }
@@ -111,7 +116,8 @@ function consume(container,id,count,skip=-1) {
   if (count) throw new Error(`Missing ${id}`);
 }
 function costText(cost) {
-  return `${cost.xp} levels, ${cost.diamond} diamonds, ${cost.emerald} emeralds, ${cost.lapis_lazuli} lapis${cost.netherite_ingot ? `, ${cost.netherite_ingot} netherite` : ''}`;
+  const resources=[...MATERIALS.filter(id=>cost[id]).map(id=>`${cost[id]} ${id.replaceAll('_',' ')}`),...Object.entries(cost.materials||{}).map(([id,n])=>`${n} ${id.replaceAll('_',' ')}`)];
+  return `${cost.xp} levels, ${resources.join(', ')}`;
 }
 export function showForge(player) {
   if (!nearForge(player)) return;
@@ -119,7 +125,7 @@ export function showForge(player) {
   const held = bag(player)?.getItem(player.selectedSlotIndex);
   const options = RECIPES;
   const form = new ActionFormData().title('§6DIVINE COMBINATION FORGE')
-    .body(allowed ? `Select a recipe to see its ingredients and price. To forge it, hold the diamond base item and carry everything else.\nHeld: ${held?.nameTag || held?.typeId || 'none'}` :
+    .body(allowed ? `Select a recipe to see its ingredients and price. To forge it, hold exactly one fresh base item and carry everything else.\nHeld: ${held?.nameTag || held?.typeId || 'none'}` :
       'Only Hephaestus can combine equipment. Select a recipe to see its ingredients and price; finished gear is usable by everyone.');
   for (const recipe of options) form.button(`${recipe.name}\n${recipe.base.replace('minecraft:','').replaceAll('_',' ')} + ${recipe.ingredient.replace('minecraft:','').replaceAll('_',' ')}`);
   form.button('Close').show(player).then(result => {
@@ -130,7 +136,7 @@ export function showForge(player) {
 function preview(player,recipe,slot) {
   const cost = CONFIG.combinations[recipe.id];
   new ActionFormData().title(`§6${recipe.name}`)
-    .body(`${recipe.base.replace('minecraft:','').replaceAll('_',' ')} + ${recipe.ingredient.replace('minecraft:','').replaceAll('_',' ')}\n${recipe.lore}\n\nAdditional cost: ${costText(cost)}\n\nHold a fresh, unenchanted base item before confirming. Both inputs are consumed to make a distinct new item; their enchantments and durability do not transfer.`)
+    .body(`${recipe.base.replace('minecraft:','').replaceAll('_',' ')} + ${recipe.ingredient.replace('minecraft:','').replaceAll('_',' ')}\n${recipe.lore}\n\nAdditional cost: ${costText(cost)}\n\nHold exactly one fresh, unenchanted base item before confirming. Both inputs are consumed to make a distinct new item; their enchantments and durability do not transfer.`)
     .button(api.role(player)==='hephaestus'?'Combine items':'Only Hephaestus can combine').button('Back').show(player).then(result => {
       if (result.selection === 0 && api.role(player)==='hephaestus') combine(player,recipe,slot);
       if (result.selection === 1) showForge(player);
@@ -138,24 +144,25 @@ function preview(player,recipe,slot) {
 }
 function combine(player,recipe,slot) {
   const container = bag(player), base = container?.getItem(slot), cost = CONFIG.combinations[recipe.id];
+  const requirements=forgeRequirements(recipe,cost);
   const second = container && ingredientSlot(container,recipe.ingredient,slot);
   if (!nearForge(player) || api.role(player) !== 'hephaestus' || player.selectedSlotIndex !== slot ||
-      !base || base.typeId !== recipe.base || base.getDynamicProperty(KEY) || base.getComponent('minecraft:durability')?.damage > 0 || base.getComponent('minecraft:enchantable')?.getEnchantments()?.length > 0 || second < 0 ||
-      player.level < cost.xp || MATERIALS.some(id => amount(container,`minecraft:${id}`) < cost[id])) {
+      !base || base.amount!==1 || isPersonalGodItem(base) || base.typeId !== recipe.base || base.getDynamicProperty(KEY) || base.getComponent('minecraft:durability')?.damage > 0 || base.getComponent('minecraft:enchantable')?.getEnchantments()?.length > 0 || second < 0 ||
+      player.level < cost.xp || Object.entries(requirements).some(([id,n])=>{let count=0;for(let i=0;i<container.size;i++)if(i!==slot && container.getItem(i)?.typeId===id && !isPersonalGodItem(container.getItem(i)))count+=container.getItem(i).amount;return count<n;})) {
     player.sendMessage('§cCombination requirements changed or resources are insufficient.'); return;
   }
   const original = [];
   for (let i=0; i<container.size; i++) original.push(container.getItem(i));
-  const result = combinedItem(recipe);
+  const result = combinedItem(recipe),originalLevel=player.level;
   try {
-    consume(container,recipe.ingredient,1,slot);
-    for (const id of MATERIALS) if (cost[id]) consume(container,`minecraft:${id}`,cost[id],slot);
+    for(const [id,n] of Object.entries(requirements))consume(container,id,n,slot);
     container.setItem(slot,result);
     player.addLevels(-cost.xp);
     player.sendMessage(`§6Forged ${recipe.name}. Its power and appearance remain with the item, even when traded.`);
     try { player.dimension.playSound('random.anvil_use',player.location); } catch {}
   } catch (error) {
     for (let i=0; i<container.size; i++) container.setItem(i,original[i]);
+    if(player.level!==originalLevel)player.addLevels(originalLevel-player.level);
     api.fail(error);
     player.sendMessage('§cCombination failed; your items were restored.');
   }
@@ -243,6 +250,7 @@ function magnet(player) {
   startPower(player,'magnet',CONFIG.forgePowers.magnetCooldownSeconds);
 }
 export function useForgeItem(player,itemId) {
+  if(UTILITY_RECIPES.some(recipe=>recipe.output===itemId)){useUtilityItem(player,itemId);return;}
   if (!player || !['olympus:forge_sword_pickaxe','olympus:forge_fireball_pickaxe','olympus:forge_magnet_axe'].includes(itemId)) return;
   if (bag(player)?.getItem(player.selectedSlotIndex)?.typeId!==itemId) return;
   if (system.currentTick-(recentUse.get(player.id)||-100)<3) return;

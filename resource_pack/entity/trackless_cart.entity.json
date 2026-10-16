@@ -1,0 +1,20 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "olympus:trackless_cart",
+      "materials": {
+        "default": "minecart"
+      },
+      "textures": {
+        "default": "textures/entity/minecart"
+      },
+      "geometry": {
+        "default": "geometry.minecart"
+      },
+      "render_controllers": [
+        "controller.render.minecart"
+      ]
+    }
+  }
+}

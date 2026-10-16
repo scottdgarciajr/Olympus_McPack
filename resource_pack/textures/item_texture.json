@@ -64,6 +64,36 @@
     },
     "olympus_crown_control": {
       "textures": "textures/items/crown_control"
+    },
+    "olympus_forge_lantern_helmet": {
+      "textures": "textures/items/forge/lantern_helmet"
+    },
+    "olympus_forge_trackless_cart": {
+      "textures": "textures/items/forge/trackless_cart"
+    },
+    "olympus_forge_wayfinder": {
+      "textures": "textures/items/forge/wayfinder"
+    },
+    "olympus_forge_trail_spool": {
+      "textures": "textures/items/forge/trail_spool"
+    },
+    "olympus_forge_builder_wand": {
+      "textures": "textures/items/forge/builder_wand"
+    },
+    "olympus_forge_planter": {
+      "textures": "textures/items/forge/planter"
+    },
+    "olympus_forge_harvest_sickle": {
+      "textures": "textures/items/forge/harvest_sickle"
+    },
+    "olympus_forge_salvage_tool": {
+      "textures": "textures/items/forge/salvage_tool"
+    },
+    "olympus_forge_thermal_lens": {
+      "textures": "textures/items/forge/thermal_lens"
+    },
+    "olympus_forge_masons_level": {
+      "textures": "textures/items/forge/masons_level"
     }
   }
 }

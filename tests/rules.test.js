@@ -32,7 +32,8 @@ test('Zeus flight bypasses cooldown in wet weather, while lightning has its own 
 });
 
 test('combinations have substantial configurable costs', () => {
-  for (const cost of Object.values(CONFIG.combinations)) {
+  for (const id of ['sword_pickaxe','fireball_pickaxe','water_boots','magnet_axe']) {
+    const cost=CONFIG.combinations[id];
     assert.ok(cost.xp >= 24);
     assert.ok(cost.diamond >= 10);
     assert.ok(cost.emerald >= 12);

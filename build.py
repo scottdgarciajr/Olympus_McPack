@@ -42,6 +42,28 @@ check(any(d.get('module_name') == '@minecraft/server' and d.get('version') == '2
 check(any(d.get('module_name') == '@minecraft/server-ui' and d.get('version') == '2.0.0' for d in bp['dependencies']), 'Missing UI API dependency')
 
 texture_index = read_json(RP / 'textures' / 'item_texture.json')['texture_data']
+utilities=read_json(ROOT/'forge_utilities.json')
+check(len(utilities)==10 and len({r['output'] for r in utilities})==10, 'Expected ten distinct utility creations')
+for recipe in utilities:
+    definition=read_json(BP/'items'/(recipe['output'].split(':')[1]+'.json'))['minecraft:item']
+    components=definition['components']
+    check(definition['description']['identifier']==recipe['output'], 'Utility ID mismatch')
+    check(components['minecraft:max_stack_size']==1 and 'minecraft:damage' not in components, 'Utility must not grant combat damage')
+    icon=components['minecraft:icon']
+    check(icon in texture_index and (RP/(texture_index[icon]['textures']+'.png')).is_file(), 'Utility artwork missing')
+    if recipe['id']=='lantern_helmet':
+        check(components['minecraft:wearable']=={'slot':'slot.armor.head','protection':2}, 'Helmet armor balance changed')
+        check((RP/'attachables'/'lantern_helmet.player.json').is_file(), 'Helmet worn model missing')
+    else:
+        check(components.get('olympus:forge_item_use')=={}, 'Utility use hook missing')
+cart=read_json(BP/'entities'/'trackless_cart.json')['minecraft:entity']['components']
+check(cart['minecraft:rideable']['seat_count']==1 and cart['minecraft:physics']['has_gravity'], 'Cart must be a grounded single-seat vehicle')
+check(cart['minecraft:loot']['table']=='loot_tables/trackless_cart.json', 'Cart recovery missing')
+check(read_json(BP/'loot_tables'/'trackless_cart.json')['pools'][0]['rolls']==1, 'Cart must not duplicate kits')
+light=read_json(BP/'blocks'/'forge_lantern_light.json')['minecraft:block']['components']
+check(light['minecraft:light_emission']==12 and light['minecraft:collision_box'] is False, 'Lantern light must be passable and bounded')
+for mode in ('on','off','status','reset'):
+    check((BP/'functions'/'olympus'/f'poseidon_clutch_{mode}.mcfunction').read_text().strip()==f'scriptevent olympus:poseidon_clutch {mode}', 'Clutch admin function missing')
 clutch=read_json(BP/'blocks'/'clutch_boundary.json')['minecraft:block']['components']
 check(clutch['minecraft:collision_box'] is False and clutch['minecraft:selection_box'] is False, 'Clutch edges must allow player movement, targeting and projectiles')
 flow=clutch['minecraft:liquid_detection']['detection_rules'][0]

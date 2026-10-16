@@ -1,13 +1,13 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Olympus SMP Resources v3.3.5",
-    "description": "v3.3.5 | Gold Oracle compass and colored direction trails, clear Poseidon water. Pair with Olympus Behavior v3.3.5.",
+    "name": "Olympus SMP Resources v3.4.0",
+    "description": "v3.4.0 | Gold Oracle compass and colored direction trails, clear Poseidon water. Pair with Olympus Behavior v3.4.0.",
     "uuid": "def06a91-6e05-457a-a359-714565d4c32c",
     "version": [
       3,
-      3,
-      5
+      4,
+      0
     ],
     "min_engine_version": [
       1,
@@ -21,8 +21,8 @@
       "uuid": "148f6c15-a3b3-4f02-9c59-ff3af25c3e40",
       "version": [
         3,
-        3,
-        5
+        4,
+        0
       ]
     }
   ],

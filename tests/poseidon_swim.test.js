@@ -31,23 +31,23 @@ function worldSetup(){
   const water=(p,type='minecraft:water')=>{const block={typeId:type,setType(value){this.typeId=value;}};blocks.set(key(p),block);return block;};
   return {world,water,props,setLoaded:value=>{loaded=value;}};
 }
-test('only recorded rain water expires at two seconds; unrelated water remains',()=>{
+test('only recorded rain water expires at five seconds; unrelated water remains',()=>{
   const {world,water}=worldSetup(),at={x:1,y:64,z:1};
   const placed=water(at),unrelated=water({x:2,y:64,z:1});rememberRainWater(world,'minecraft:overworld',at,1000);
-  cleanupRainWater(world,2999);assert.equal(placed.typeId,'minecraft:water');
-  cleanupRainWater(world,3000);assert.equal(placed.typeId,'minecraft:air');assert.equal(unrelated.typeId,'minecraft:water');
+  cleanupRainWater(world,5999);assert.equal(placed.typeId,'minecraft:water');
+  cleanupRainWater(world,6000);assert.equal(placed.typeId,'minecraft:air');assert.equal(unrelated.typeId,'minecraft:water');
   assert.equal(world.getDynamicProperty('olympus:rain_clutch_water'),undefined);
 });
 test('rain water cleanup survives a fresh world wrapper/rejoin and retries unloaded chunks',()=>{
   const {world,water,setLoaded}=worldSetup(),at={x:1,y:64,z:1},placed=water(at);
-  rememberRainWater(world,'minecraft:overworld',at,0);setLoaded(false);cleanupRainWater({...world},2000);
+  rememberRainWater(world,'minecraft:overworld',at,0);setLoaded(false);cleanupRainWater({...world},5000);
   assert.ok(world.getDynamicPropertyIds().some(key=>key.startsWith('olympus:rain_water_') && world.getDynamicProperty(key)));assert.equal(placed.typeId,'minecraft:water');
-  setLoaded(true);cleanupRainWater({...world},3000);assert.equal(placed.typeId,'minecraft:air');
+  setLoaded(true);cleanupRainWater({...world},6000);assert.equal(placed.typeId,'minecraft:air');
 });
 test('cleanup never destroys a building block replacing rain water',()=>{
   const {world,water}=worldSetup(),at={x:1,y:64,z:1},block=water(at);
   rememberRainWater(world,'minecraft:overworld',at,0);block.typeId='minecraft:diamond_block';
-  cleanupRainWater(world,2000);assert.equal(block.typeId,'minecraft:diamond_block');
+  cleanupRainWater(world,5000);assert.equal(block.typeId,'minecraft:diamond_block');
   assert.equal(world.getDynamicProperty('olympus:rain_clutch_water'),undefined);
 });
 

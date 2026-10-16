@@ -1,0 +1,219 @@
+[
+  {
+    "id": "lantern_helmet",
+    "name": "Lantern Helmet",
+    "base": "minecraft:iron_helmet",
+    "ingredient": "minecraft:lantern",
+    "output": "olympus:forge_lantern_helmet",
+    "lore": "Wear: level-12 moving light. One coal/charcoal fuels 90 active seconds. Iron-level head protection; no night vision.",
+    "cost": {
+      "xp": 8,
+      "diamond": 2,
+      "emerald": 8,
+      "lapis_lazuli": 8,
+      "netherite_ingot": 0,
+      "materials": {
+        "copper_ingot": 8,
+        "iron_ingot": 4
+      }
+    },
+    "durability": 165,
+    "color": "#eab84f"
+  },
+  {
+    "id": "trackless_cart",
+    "name": "Clockwork Trackless Cart",
+    "base": "minecraft:minecart",
+    "ingredient": "minecraft:lodestone",
+    "output": "olympus:forge_trackless_cart",
+    "lore": "Use on clear ground to deploy. Ride and steer; 6.4 blocks/sec, one-block steps, no flight. Coal/charcoal: 45 driving seconds. Sneak-interact while empty to pack; fuel/health are retained.",
+    "cost": {
+      "xp": 45,
+      "diamond": 24,
+      "emerald": 48,
+      "lapis_lazuli": 48,
+      "netherite_ingot": 2,
+      "materials": {
+        "iron_ingot": 64,
+        "redstone": 32,
+        "gold_ingot": 16
+      }
+    },
+    "durability": 0,
+    "color": "#b87345"
+  },
+  {
+    "id": "wayfinder",
+    "name": "Wayfinder Compass",
+    "base": "minecraft:compass",
+    "ingredient": "minecraft:amethyst_shard",
+    "output": "olympus:forge_wayfinder",
+    "lore": "Sneak-use: save one waypoint. Use: bearing and distance in the same dimension. No teleportation or target detection.",
+    "cost": {
+      "xp": 12,
+      "diamond": 3,
+      "emerald": 12,
+      "lapis_lazuli": 16,
+      "netherite_ingot": 0,
+      "materials": {
+        "copper_ingot": 12,
+        "redstone": 8
+      }
+    },
+    "durability": 0,
+    "color": "#50c6c8"
+  },
+  {
+    "id": "trail_spool",
+    "name": "Ariadne Trail Spool",
+    "base": "minecraft:lead",
+    "ingredient": "minecraft:echo_shard",
+    "output": "olympus:forge_trail_spool",
+    "lore": "Use: toggle breadcrumb recording while held. Sneak-use: retrace the last 48 markers (4-block spacing). No teleportation; trail stays with the item.",
+    "cost": {
+      "xp": 24,
+      "diamond": 8,
+      "emerald": 24,
+      "lapis_lazuli": 32,
+      "netherite_ingot": 0,
+      "materials": {
+        "string": 32,
+        "redstone": 16,
+        "gold_ingot": 8
+      }
+    },
+    "durability": 0,
+    "color": "#d37bde"
+  },
+  {
+    "id": "builder_wand",
+    "name": "Mason Builder Wand",
+    "base": "minecraft:diamond_shovel",
+    "ingredient": "minecraft:scaffolding",
+    "output": "olympus:forge_builder_wand",
+    "lore": "Use: place up to eight ordinary building blocks in a row beside the aimed face. Put building blocks in the next hotbar slot. Consumes every block; 3-second cooldown; no containers or redstone machinery.",
+    "cost": {
+      "xp": 32,
+      "diamond": 12,
+      "emerald": 32,
+      "lapis_lazuli": 32,
+      "netherite_ingot": 1,
+      "materials": {
+        "iron_ingot": 24,
+        "redstone": 24,
+        "quartz": 24
+      }
+    },
+    "durability": 384,
+    "color": "#7ab7e8"
+  },
+  {
+    "id": "planter",
+    "name": "Seedweaver Planter",
+    "base": "minecraft:iron_hoe",
+    "ingredient": "minecraft:glow_berries",
+    "output": "olympus:forge_planter",
+    "lore": "Use on farmland: plant a 3x3 area using wheat seeds, carrots, potatoes or beetroot seeds from the next hotbar slot. Consumes each planting; no growth boost. 5-second cooldown.",
+    "cost": {
+      "xp": 16,
+      "diamond": 4,
+      "emerald": 16,
+      "lapis_lazuli": 16,
+      "netherite_ingot": 0,
+      "materials": {
+        "iron_ingot": 12,
+        "redstone": 12,
+        "bone_meal": 16
+      }
+    },
+    "durability": 384,
+    "color": "#7ebf59"
+  },
+  {
+    "id": "harvest_sickle",
+    "name": "Autumn Harvest Sickle",
+    "base": "minecraft:iron_hoe",
+    "ingredient": "minecraft:shears",
+    "output": "olympus:forge_harvest_sickle",
+    "lore": "Use: harvest at most nine ripe crops in a 3x3 area. Replants only if you carry the matching seed/crop. Normal drops; no Fortune bonus or instant growth. 12-second cooldown.",
+    "cost": {
+      "xp": 24,
+      "diamond": 8,
+      "emerald": 24,
+      "lapis_lazuli": 24,
+      "netherite_ingot": 0,
+      "materials": {
+        "iron_ingot": 16,
+        "redstone": 16,
+        "gold_ingot": 8
+      }
+    },
+    "durability": 384,
+    "color": "#df9c41"
+  },
+  {
+    "id": "salvage_tool",
+    "name": "Reclaimer Salvage Tool",
+    "base": "minecraft:iron_axe",
+    "ingredient": "minecraft:blast_furnace",
+    "output": "olympus:forge_salvage_tool",
+    "lore": "Use: choose an unenchanted vanilla iron tool/armor to destroy and recover at most half its remaining iron value. No god/forged gear, enchantments, diamonds or duplication.",
+    "cost": {
+      "xp": 26,
+      "diamond": 8,
+      "emerald": 24,
+      "lapis_lazuli": 24,
+      "netherite_ingot": 0,
+      "materials": {
+        "iron_ingot": 24,
+        "redstone": 16
+      }
+    },
+    "durability": 256,
+    "color": "#b3b9bb"
+  },
+  {
+    "id": "thermal_lens",
+    "name": "Thermal Safety Lens",
+    "base": "minecraft:spyglass",
+    "ingredient": "minecraft:magma_cream",
+    "output": "olympus:forge_thermal_lens",
+    "lore": "Use: scan loaded blocks within eight blocks for the nearest lava hazard and show a direction/particle warning. No player, mob, chest or ore detection. 15-second cooldown.",
+    "cost": {
+      "xp": 22,
+      "diamond": 6,
+      "emerald": 24,
+      "lapis_lazuli": 24,
+      "netherite_ingot": 0,
+      "materials": {
+        "copper_ingot": 16,
+        "redstone": 16,
+        "blaze_rod": 4
+      }
+    },
+    "durability": 256,
+    "color": "#ed6d3b"
+  },
+  {
+    "id": "masons_level",
+    "name": "Mason Survey Level",
+    "base": "minecraft:clock",
+    "ingredient": "minecraft:smooth_stone",
+    "output": "olympus:forge_masons_level",
+    "lore": "Use: preview a square footprint and center line on the ground for eight seconds. Sneak-use: cycle 5/9/13-block widths. Measuring only; never places or breaks terrain.",
+    "cost": {
+      "xp": 12,
+      "diamond": 3,
+      "emerald": 12,
+      "lapis_lazuli": 12,
+      "netherite_ingot": 0,
+      "materials": {
+        "iron_ingot": 8,
+        "redstone": 8,
+        "quartz": 8
+      }
+    },
+    "durability": 0,
+    "color": "#8fc6b5"
+  }
+]

@@ -18,45 +18,8 @@ export function rememberRainWater(world,dimension,location,now=Date.now(),bounda
   const key=shardKey(dimension,location);
   const shard=read(world,key)||{dimension,blocks:[]};
   shard.blocks=shard.blocks.filter(([x,y,z])=>x!==location.x || y!==location.y || z!==location.z);
-  shard.blocks.push([location.x,location.y,location.z,now+2_000,boundary?1:0]);
+  shard.blocks.push([location.x,location.y,location.z,now+5_000,boundary?1:0]);
   save(world,key,shard);
-}
-export function spawnRainWater(world,dimensionId,locations,blocked,now=Date.now()) {
-  const dimension=world.getDimension(dimensionId),water=new Map(),edges=new Map(),changed=[],snapshots=new Map();
-  const tracked=p=>(read(world,shardKey(dimensionId,p))?.blocks||[]).some(([x,y,z,,kind])=>x===p.x && y===p.y && z===p.z && kind!==1);
-  try {
-    for(const p of locations) {
-      const block=dimension.getBlock(p);
-      if(!block || blocked(dimensionId,p))return 0;
-      if(block.isAir || block.typeId===CLUTCH_BOUNDARY)water.set(coordinate(dimensionId,p),{p,block});
-    }
-    if(!water.size)return 0;
-    for(const {p} of water.values())for(const [dx,dy,dz] of sides) {
-      const at={x:p.x+dx,y:p.y+dy,z:p.z+dz},id=coordinate(dimensionId,at);
-      if(water.has(id)||edges.has(id))continue;
-      const block=dimension.getBlock(at);if(!block)return 0;
-      if(block.isAir || block.typeId===CLUTCH_BOUNDARY) {
-        if(blocked(dimensionId,at))return 0;
-        edges.set(id,{p:at,block});
-      } else if(!block.isLiquidBlocking('Water') && !tracked(at))return 0;
-    }
-    const mutate=(block,type)=>{changed.push({block,type:block.typeId});block.setType(type);};
-    // Seal all exposed faces BEFORE spawning ordinary water. These edges have
-    // no collision or selection box; they only block fluid updates.
-    for(const {block} of edges.values())if(block.typeId!==CLUTCH_BOUNDARY)mutate(block,CLUTCH_BOUNDARY);
-    for(const {block} of water.values())mutate(block,CLUTCH_WATER);
-    for(const [group,boundary] of [[edges,true],[water,false]])for(const {p} of group.values()) {
-      const key=shardKey(dimensionId,p);
-      if(!snapshots.has(key))snapshots.set(key,world.getDynamicProperty(key));
-      rememberRainWater(world,dimensionId,p,now,boundary);
-    }
-    return water.size;
-  } catch {
-    // No partial uncontained pool or abandoned temporary edges on failure.
-    for(const {block,type} of changed.reverse())try{block.setType(type);}catch{}
-    for(const [key,value] of snapshots)try{world.setDynamicProperty(key,value);}catch{}
-    return 0;
-  }
 }
 function expire(world,dimension,blocks,now,boundaryPhase,pending) {
   const remaining=[];

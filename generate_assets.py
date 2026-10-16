@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-VERSION = [3, 3, 5]
+VERSION = [3, 4, 0]
 VERSION_TEXT = '.'.join(map(str, VERSION))
 GODS = {
     'hermes': ('Hermes Winged Relic', '#f4cf58'),
@@ -87,7 +87,7 @@ bp_uuid = 'a06ad1f9-8b44-4af1-995a-95dc9c684c25'
 rp_uuid = 'def06a91-6e05-457a-a359-714565d4c32c'
 write_json(BP / 'manifest.json', {
     'format_version': 2,
-    'header': {'name': f'Olympus SMP Behavior v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Hermes: automatic one-block steps while walking/running. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, water-only rain clutch tracks Riptide, corners and gaps; ordinary water with passable flow-blocking edges; expires in 2s; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
+    'header': {'name': f'Olympus SMP Behavior v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Hermes: automatic one-block steps while walking/running. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, single rain-only water spot expires in 5s; no Slow Falling; admin clutch toggle; Hephaestus: 14 forge creations including 10 balanced utility items; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
     'modules': [
         {'type': 'data', 'uuid': '45604c22-4d55-478e-beb7-fca61db38eaf', 'version': VERSION},
         {'type': 'script', 'language': 'javascript', 'entry': 'scripts/main.js', 'uuid': 'c6515f3a-93dc-4971-987c-ad95b689d22f', 'version': VERSION}
@@ -295,4 +295,9 @@ write_json(RP / 'textures' / 'terrain_texture.json', {
     'resource_pack_name': 'Olympus SMP', 'texture_name': 'atlas.terrain', 'padding': 8, 'num_mip_levels': 4,
     'texture_data': {'olympus_clutch_invisible': {'textures': 'textures/blocks/clutch_invisible'}}
 })
+import runpy
+runpy.run_path(str(ROOT / 'generate_utilities.py'))
 print('Generated pack assets and functions.')
+
+for mode in ('on','off','status','reset'):
+    (functions / f'poseidon_clutch_{mode}.mcfunction').write_text(f'scriptevent olympus:poseidon_clutch {mode}\n',encoding='utf-8')
