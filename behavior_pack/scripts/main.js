@@ -11,7 +11,7 @@ import { configureDivine, armSolarFlare, oracleSight, assistedArrowTick, hellfir
 import { findMadnessLanding } from './teleport.js';
 import { hermesStepUp } from './hermes_step.js';
 import { poseidonSwimCruise,recordTidalBoost,forgetTidalBoost,tidalEnvironment } from './poseidon_swim.js';
-import { rememberRainWater, cleanupRainWater } from './rain_water.js';
+import { spawnRainWater, cleanupRainWater } from './rain_water.js';
 import { lightPower, seaEnvironment, bucketClutch, clearEnvironment, forgetEnvironment, poseidonMiningHaste } from './sea_light.js';
 import { isPersonalGodItem, isPersonalGodTool, lockGodItem, queueGodItem, deliverQueuedGodItems } from './god_items.js';
 import { vaultRecords, ownsToolAnywhere, storeTool, withdrawTool, recoverVaultTransaction } from './tool_vault.js';
@@ -23,7 +23,7 @@ const TITLES = {
   hephaestus: 'God of Craftsmanship', dionysus: 'God of Wine and Madness', kratos: 'Forbidden God Slayer'
 };
 const DESCRIPTIONS = {
-  hermes: 'Speed VI, Flash-fast sprint with automatic one-block ramping, fall protection, and toggleable Divine Leap; Weakness III. Divine Pearl every 5 minutes.',
+  hermes: 'Speed VI, Flash-fast sprint and automatic one-block steps while moving, fall protection, and toggleable Divine Leap; Weakness III. Divine Pearl every 5 minutes.',
   zeus: 'Mining Fatigue II. Thunder or Overworld Y220+ grants lightning every 5 seconds; rain/thunder or Y220+ removes the 30-second flight activation cooldown.',
   poseidon: 'Strength II in water/rain; Haste I underwater with modest adaptive mining compensation; Haste II in rain; Conduit Power, clear water vision, no swimming hunger, mild walking-speed swim cruise, fast Tidal Sprint, and bucket-free rain clutch with landing cushions for Riptide, corners and gaps (still water disappears after 2 seconds). Slowness III and Weakness III in Nether/desert.',
   hades: 'Fire Resistance and Night Vision; sheltered from daylight weakness. Nether/End power and Hellfire from fire or lava.',
@@ -34,7 +34,7 @@ const DESCRIPTIONS = {
   kratos: 'Each melee hit on a god steals a random divine gift or burden for 8 seconds. Each god kill adds one random gift or burden until Kratos dies; there is no copy limit, and burdens accumulate too.'
 };
 const CONTROLS = {
-  hermes: 'Speed VI always; sprint for Speed XIV and automatic one-block steps on slopes. Grounded only; tall walls still require a route around. Use relic: pearl (5m). Sneak-use: mobility menu for Slow Falling and Divine Leap toggles. Weakness III.',
+  hermes: 'Speed VI always; sprint for Speed XIV. Move into one-block ledges to step up automatically, including during normal fast walking. Grounded only; tall walls still require a route around. Use relic: pearl (5m). Sneak-use: mobility menu for Slow Falling and Divine Leap toggles. Weakness III.',
   zeus: 'Use relic: lightning; sneak-use: 30s flight. Overworld Y220+: full storm power, 5s lightning and no flight activation cooldown. Below Y220, clear weather has 3m cooldowns; rain removes cooldowns and thunder lightning has a 5s interval.',
   poseidon: 'Sneak-use: Tidal Sprint toggle; boost only while sprinting. Jump to rise/leave water. Strength II water/rain; Haste I water with adaptive mining / II rain; clear water vision and no swimming hunger. Mild swim cruise always assists movement in water, even with Tidal Sprint off. Rain Clutch: fall in exposed rain; water appears automatically with no bucket or clicking, then disappears after 2s without flowing. Clear weather, Nether and protected areas excluded. Protection comes only from landing in water; there is no fall-damage immunity. Landing prediction updates after trident boosts and covers corners/gaps. Strength, Haste and Conduit end on leaving water/rain; water vision ends on leaving water. Tidal boost momentum ends on dry exit.',
   hades: 'Use relic while physically in fire, soul fire, or lava: Hellfire fireball (15s). Sneak-use checks readiness. Fire Resistance/Night Vision always; night and otherworld buffs remain.',
@@ -48,7 +48,7 @@ const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigu
   'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '3.3.4';
+const PACK_VERSION = '3.3.5';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -72,6 +72,7 @@ const lastRelicUse = new Map();
 const lastTestKitUse = new Map();
 const lastFlairUse = new Map();
 const poseidonWetState = new Map();
+const hermesSprintIntent = new Map();
 const hermesTrailTick = new Map();
 const hermesFallTick = new Map();
 const hermesTurboTick = new Map();
@@ -228,7 +229,11 @@ function hermesMotion(player) {
   try {
     const input = player.inputInfo.getMovementVector();
     const magnitude = Math.hypot(input.x, input.y);
-    const turbo = player.isSprinting && !player.isInWater && !player.isSneaking && magnitude >= 0.25;
+    if(player.isSprinting)hermesSprintIntent.set(player.id,system.currentTick);
+    const sprintIntent=system.currentTick-(hermesSprintIntent.get(player.id)??-100)<=6;
+    const movement=movementDirection(input,player.getViewDirection());
+    const stepped=magnitude>=0.25 && hermesStepUp(player,movement);
+    const turbo = (player.isSprinting || (stepped && sprintIntent)) && !player.isInWater && !player.isSneaking && magnitude >= 0.25;
     if (!turbo) {
       if (hermesTurboTick.has(player.id)) {
         hermesTurboTick.delete(player.id);
@@ -250,7 +255,6 @@ function hermesMotion(player) {
     const forwardX = view.x / horizontal, forwardZ = view.z / horizontal;
     const rightX = -forwardZ, rightZ = forwardX;
     const { x: directionX, z: directionZ } = movementDirection(input, view);
-    hermesStepUp(player,{x:directionX,z:directionZ});
     const velocity = player.getVelocity();
     const targetX = directionX * CONFIG.hermesSprintSpeed;
     const targetZ = directionZ * CONFIG.hermesSprintSpeed;
@@ -683,7 +687,7 @@ function reset(player) {
   player.setDynamicProperty(key('madnessLast'), undefined);
   kratosDeath(player);
   lastFlairUse.delete(player.id);
-  hermesTrailTick.delete(player.id);
+  hermesTrailTick.delete(player.id);hermesSprintIntent.delete(player.id);
   hermesFallTick.delete(player.id);
   hermesTurboTick.delete(player.id);
   poseidonTrailTick.delete(player.id);
@@ -993,7 +997,7 @@ function safeTeleport(player) {
 }
 function hermesMobilityMenu(player) {
   new ActionFormData().title('§6HERMES MOBILITY')
-    .body(`Sprint to ramp up single-block ledges automatically; clear headroom required.\nSlow Falling: ${hermesSlowfallEnabled(player)?'ON':'OFF'}\nDivine Leap: ${player.getDynamicProperty(key('hermesLeap'))===true?'ON':'OFF'}`)
+    .body(`Move into single-block ledges to step up automatically; clear headroom required.\nSlow Falling: ${hermesSlowfallEnabled(player)?'ON':'OFF'}\nDivine Leap: ${player.getDynamicProperty(key('hermesLeap'))===true?'ON':'OFF'}`)
     .button('Toggle Slow Falling').button('Toggle Divine Leap').button('Close')
     .show(player).then(result => {
       if (role(player)!=='hermes') return;
@@ -1451,7 +1455,7 @@ world.afterEvents.entityDie.subscribe((event) => {
     }
   } catch (e) { fail(e); }
 });
-world.afterEvents.playerLeave.subscribe((event) => { forgetEnvironment(event.playerId);forgetTidalBoost(event.playerId);poseidonWetState.delete(event.playerId); try { crownOwnerLeft(event.playerId); } catch (e) { fail(e); } });
+world.afterEvents.playerLeave.subscribe((event) => { forgetEnvironment(event.playerId);hermesSprintIntent.delete(event.playerId);forgetTidalBoost(event.playerId);poseidonWetState.delete(event.playerId); try { crownOwnerLeft(event.playerId); } catch (e) { fail(e); } });
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   if (!event.id.startsWith('olympus:')) return;
   const player = event.sourceEntity;
@@ -1536,7 +1540,7 @@ system.runInterval(() => {
       const wetState=player.isInWater?'water':inRain(player)?'rain':'dry';
       if(poseidonWetState.get(player.id)!==wetState){poseidonWetState.set(player.id,wetState);updatePlayer(player);}
       poseidonMotion(player);
-      try { bucketClutch(player, inRain(player), (dim,p)=>inHall(dim,p)||temporaryBlock(dim,p)||isForge(dim,p), (dim,p)=>rememberRainWater(world,dim,p)); }
+      try { bucketClutch(player, inRain(player), (dim,p)=>inHall(dim,p)||temporaryBlock(dim,p)||isForge(dim,p), (dim,positions,blocked)=>spawnRainWater(world,dim,positions,blocked)); }
       catch (e) { fail(e); }
     }
   }

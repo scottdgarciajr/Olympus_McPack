@@ -1,4 +1,4 @@
-import {placeClutchWater,removeClutchWater} from './rain_water.js';
+import {CLUTCH_BOUNDARY} from './rain_water.js';
 // Environment powers kept separate from claims, Crown records, and forge systems.
 const swimmers = new Map();
 const fogged = new Set();
@@ -74,7 +74,7 @@ export function seaEnvironment(player, active) {
   });
 }
 
-export function bucketClutch(player, raining, blocked, rememberWater) {
+export function bucketClutch(player, raining, blocked, spawnWater) {
   const p=player.location,velocity=player.getVelocity();
   if(player.isInWater || player.isOnGround){falls.set(player.id,{top:p.y,announced:false});return false;}
   const fall=falls.get(player.id)||{top:p.y,announced:false};
@@ -101,26 +101,25 @@ export function bucketClutch(player, raining, blocked, rememberWater) {
     position=next;
     v={x:v.x*0.98,y:(v.y-0.08)*0.98,z:v.z*0.98};
   }
-  let placed=0;const visited=new Set();
+  const locations=[],visited=new Set();
   // A 3x3 cushion above and between the landing blocks catches edge/corner
   // contacts and gives fast
   // falls time to enter water before hitting terrain. Air only; no terrain is
   // replaced (gaps at terrain height are filled with water too). Every source
   // uses real contained water and is tracked for the two-second cleanup.
   for(const floor of floors)for(const dy of [1,0,2])for(const dx of [0,-1,1])for(const dz of [0,-1,1])try {
-    if(placed>=48)break;
+    if(locations.length>=48)break;
     const location={x:floor.x+dx,y:floor.y+dy,z:floor.z+dz},key=`${location.x},${location.y},${location.z}`;
     if(visited.has(key))continue;visited.add(key);
     if(blocked(player.dimension.id,location) || blocked(player.dimension.id,floor))continue;
     const air=player.dimension.getBlock(location);
-    if(!air?.isAir)continue;
-    placeClutchWater(air);
-    try{rememberWater(player.dimension.id,location);}catch(error){removeClutchWater(air);throw error;}
-    placed++;
+    if(!air || (!air.isAir && air.typeId!==CLUTCH_BOUNDARY))continue;
+    locations.push(location);
   } catch {}
+  const placed=locations.length ? spawnWater(player.dimension.id,locations,blocked) : 0;
   if(placed && !fall.announced) {
     fall.announced=true;
-    try{player.sendMessage('§b[Olympus v3.3.4] Rain Clutch: still landing water placed; disappears in 2 seconds.');}catch{}
+    try{player.sendMessage('§b[Olympus v3.3.5] Rain Clutch: still landing water placed; disappears in 2 seconds.');}catch{}
   }
   return placed>0;
 }

@@ -126,18 +126,18 @@ test('swimming preserves existing food instead of feeding Poseidon, and fog clea
 
 test('rain clutch needs no inventory, activates only in exposed rain, and respects protected land and Nether',()=>{
   let water=false,remembered=0;
-  const air={get isAir(){return !water;},setType:type=>{water=type==='olympus:clutch_water';},setWaterlogged(){}};
+  const air={get isAir(){return !water;},setType:type=>{water=type==='minecraft:water';},setWaterlogged(){}};
   const player={id:'rain-fall',location:{x:0,y:20,z:0},isInWater:false,getVelocity:()=>({x:0,y:-1.8,z:0}),
     getComponent:()=>{throw Error('rain clutch must never access inventory');},
     dimension:{id:'minecraft:overworld',
       getBlockFromRay:origin=>origin.y-3>5?undefined:{face:'Up',block:{location:{x:0,y:3,z:0},isAir:false,isLiquid:false}},
       getBlock:at=>at.y===4?air:{isAir:true}}};
-  const clutch=(raining,blocked=false)=>bucketClutch(player,raining,()=>blocked,()=>remembered++);
+  const clutch=(raining,blocked=false)=>bucketClutch(player,raining,()=>blocked,(_dim,positions)=>{if(!positions.length)return 0;air.setType('minecraft:water');remembered++;return 1;});
   assert.equal(clutch(true),false);player.location.y=6;
   assert.equal(clutch(false),false);assert.equal(water,false,'dry weather cannot clutch');
   assert.equal(clutch(true,true),false);assert.equal(water,false,'protected land cannot be altered');
   assert.equal(clutch(true),true);assert.equal(water,true);assert.equal(remembered,1);
-  assert.equal(clutch(true),false,'only one clutch per fall');
+  player.isInWater=true;assert.equal(clutch(true),false,'clutch ends once the player enters water');player.isInWater=false;
   forgetEnvironment(player.id);water=false;player.dimension.id='minecraft:nether';
   assert.equal(clutch(true),false);assert.equal(water,false);
 });

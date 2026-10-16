@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {poseidonSwimCruise,recordTidalBoost,forgetTidalBoost,tidalEnvironment} from '../behavior_pack/scripts/poseidon_swim.js';
-import {rememberRainWater,cleanupRainWater,placeClutchWater,removeClutchWater,CLUTCH_WATER} from '../behavior_pack/scripts/rain_water.js';
+import {rememberRainWater,cleanupRainWater,placeClutchWater,removeClutchWater,CLUTCH_WATER,CLUTCH_BOUNDARY} from '../behavior_pack/scripts/rain_water.js';
 import {readFileSync} from 'node:fs';
 
 test('swim cruise gently approaches walking speed without sprint or changing vertical motion',()=>{
@@ -59,17 +59,18 @@ test('Tidal Sprint momentum ends on dry exit without altering vertical motion or
   recordTidalBoost(player);forgetTidalBoost(player.id);tidalEnvironment(player,false);
   assert.equal(impulses.length,1,'trident release clears the Tidal marker, retaining native launch momentum');
 });
-test('clutch carrier contains real water, blocks all six flow directions and has no collision',()=>{
-  const changes=[],block={typeId:'minecraft:air',setType(type){this.typeId=type;changes.push(type);},setWaterlogged:value=>changes.push(value)};
-  placeClutchWater(block);assert.deepEqual(changes,[CLUTCH_WATER,true]);
-  removeClutchWater(block);assert.deepEqual(changes,[CLUTCH_WATER,true,false,'minecraft:air'],'clear fluid before removing carrier');
-  const definition=JSON.parse(readFileSync(new URL('../behavior_pack/blocks/clutch_water.json',import.meta.url),'utf8'))['minecraft:block'];
+test('clutch uses ordinary water, with passable invisible flow-blocking edges',()=>{
+  const changes=[],block={typeId:'minecraft:air',setType(type){this.typeId=type;changes.push(type);},setWaterlogged(){throw Error('ordinary water must not be waterlogged');}};
+  placeClutchWater(block);assert.deepEqual(changes,['minecraft:water']);
+  removeClutchWater(block);assert.deepEqual(changes,['minecraft:water','minecraft:air']);
+  const definition=JSON.parse(readFileSync(new URL('../behavior_pack/blocks/clutch_boundary.json',import.meta.url),'utf8'))['minecraft:block'];
+  assert.equal(definition.description.identifier,CLUTCH_BOUNDARY);
   assert.equal(definition.components['minecraft:collision_box'],false);
+  assert.equal(definition.components['minecraft:selection_box'],false);
   const rule=definition.components['minecraft:liquid_detection'].detection_rules[0];
-  assert.equal(rule.can_contain_liquid,true);assert.equal(rule.on_liquid_touches,'blocking');
-  assert.deepEqual([...rule.stops_liquid_flowing_from_direction].sort(),['down','east','north','south','up','west']);
+  assert.equal(rule.can_contain_liquid,false);assert.equal(rule.on_liquid_touches,'blocking');
 });
-test('failed waterlogging rolls the carrier back instead of leaving a dry custom block',()=>{
-  const block={typeId:'minecraft:air',setType(type){this.typeId=type;},setWaterlogged(){throw Error('unsupported');}};
-  assert.throws(()=>placeClutchWater(block));assert.equal(block.typeId,'minecraft:air');
+test('upgrading cleans up an old waterlogged carrier without releasing its liquid',()=>{
+  const changes=[],block={typeId:'olympus:clutch_water',setType(type){this.typeId=type;changes.push(type);},setWaterlogged:value=>changes.push(value)};
+  removeClutchWater(block);assert.deepEqual(changes,[false,'minecraft:air']);
 });

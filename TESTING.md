@@ -1,5 +1,12 @@
 # In-game test checklist
 
+## 3.3.5 native water containment and Hermes ramping (Minecraft verification pending)
+
+- Enable both v3.3.5 packs. Rain clutch must spawn ordinary visible water, catch Survival falls, stay contained and disappear with all invisible edges after two seconds. Repeat diagonal sprint, double Riptide, block corners and gaps.
+- Walk out through every edge. Have another player melee and shoot arrows through the edge blocks; movement, targeting and damage must remain normal. There is no fall-immunity rule.
+- Rejoin/unload a water source near a chunk edge, then return; cleanup must remove water before opening shared boundaries. Protected/unsuitable terrain should abort placement safely rather than create uncontained water.
+- Hermes: walk and sprint into a bare quartz one-block ledge, then grass-covered steps. Repeat when collision has interrupted sprint. Check direct steps and automatic hops, low ceilings, tall walls and airborne movement. No wall climbing or repeat airborne hopping.
+
 ## 3.3.4 brief still-water clutch and wet-power cleanup (Minecraft verification pending)
 
 - Activate both v3.3.4 packs and verify status. In Survival rain, repeat diagonal sprint, double Riptide, corner and gap landings. Confirm the real water catches falls, remains visible, never spreads, and vanishes after two seconds with no leftover carrier/water. Check waterlogging visuals/content log on Bedrock 1.21.120+.

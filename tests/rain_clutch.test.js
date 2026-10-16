@@ -22,7 +22,7 @@ function scene(id,solids,location,velocity) {
   const player={id,location,dimension,getVelocity:()=>velocity,
     getComponent(){throw Error('no inventory required');},setProperty(){throw Error('no damage immunity');},
     setDynamicProperty(){throw Error('no grace timer');},sendMessage(){}};
-  const clutch=blocked=>bucketClutch(player,true,blocked||(()=>false),(_dim,p)=>placed.push({...p}));
+  const clutch=blocked=>bucketClutch(player,true,blocked||(()=>false),(_dim,positions)=>{for(const p of positions){blockAt(p).setType(CLUTCH_WATER);placed.push({...p});}return positions.length;});
   return {player,velocity,blocks,placed,clutch};
 }
 const flat=()=>Array.from({length:61},(_,x)=>Array.from({length:9},(_,z)=>({x:x-10,y:0,z:z-4}))).flat();

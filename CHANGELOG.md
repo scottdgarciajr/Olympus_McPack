@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.5 — Restore ordinary clutch water and repair Hermes steps
+
+- Replaces the failed waterlogged carrier with ordinary Minecraft water. Invisible, non-colliding, untargetable temporary edges block fluid flow; water is removed before edges after two seconds.
+- Shared edges and unloaded source cleanup preserve containment across spatial shards; all placement rolls back if persistence fails. No damage immunity.
+- Hermes attempts one-block steps before the sprint-only early return, including during regular fast walking and briefly interrupted sprinting. Collision rays ignore plants, and a grounded automatic hop is available if a valid direct step is rejected. Tall walls remain unclimbable.
+
 ## 3.3.4 — Two-second still-water clutch and immediate wet-power cleanup
 
 - Clutch uses real water in a transparent non-colliding carrier, with flow disabled in all six directions. No fall-damage immunity.

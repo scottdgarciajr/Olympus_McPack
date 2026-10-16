@@ -3,7 +3,7 @@ const HAZARDS=new Set(['minecraft:lava','minecraft:flowing_lava','minecraft:fire
 // Bounded ground stepping, rather than a vertical impulse that could be
 // repeatedly applied against walls. Collision checks remain server-side.
 export function hermesStepUp(player,direction) {
-  if(!player.isSprinting || !player.isOnGround || player.isSneaking || player.isInWater || player.isGliding || player.isFlying)return false;
+  if(!player.isOnGround || player.isSneaking || player.isInWater || player.isGliding)return false;
   const length=Math.hypot(direction.x,direction.z);
   if(length<0.25)return false;
   const forward={x:direction.x/length,y:0,z:direction.z/length};
@@ -26,19 +26,22 @@ export function hermesStepUp(player,direction) {
     const top=floor.block.location.y+(floor.faceLocation?.y ?? 1),rise=top-at.y;
     if(rise<0.6 || rise>1.001)return false;
     destination.y=top+0.01;
-    // Check the swept standing volume, not only the destination. Conservatively
-    // require air so fences, low ceilings, closed doors and unloaded blocks stop
-    // stepping rather than allowing a teleport through them.
-    const samples=Math.ceil(travel/0.2),checked=new Set();
+    // Raycasts ignore passable grass/plants but still reject real collision,
+    // ceilings and walls across the whole swept standing volume.
+    const samples=Math.ceil(travel/0.2);
     for(let i=0;i<=samples;i++) {
       const x=at.x+forward.x*travel*i/samples,z=at.z+forward.z*travel*i/samples;
-      for(let bx=Math.floor(x-0.3);bx<=Math.floor(x+0.3);bx++)
-        for(let bz=Math.floor(z-0.3);bz<=Math.floor(z+0.3);bz++)
-          for(let by=Math.floor(destination.y);by<=Math.floor(destination.y+1.79);by++) {
-            const key=`${bx},${by},${bz}`;if(checked.has(key))continue;checked.add(key);
-            if(!player.dimension.getBlock({x:bx,y:by,z:bz})?.isAir)return false;
-          }
+      for(const [dx,dz] of [[0,0],[-0.29,-0.29],[-0.29,0.29],[0.29,-0.29],[0.29,0.29]]) {
+        const head={x:x+dx,y:destination.y+1.79,z:z+dz};
+        if(!player.dimension.getBlock(head))return false;
+        if(player.dimension.getBlockFromRay(head,{x:0,y:-1,z:0},{...options,maxDistance:1.78}))return false;
+      }
     }
-    return player.tryTeleport(destination,{checkForBlocks:true,keepVelocity:true});
+    if(player.tryTeleport(destination,{checkForBlocks:true,keepVelocity:true}))return true;
+    // A clear, supported ONE-block ledge can use a native-height automatic
+    // hop if the engine rejects stepping. Ground-only gating prevents repeats
+    // in the air or climbing taller walls.
+    player.applyImpulse({x:0,y:Math.max(0,0.42-velocity.y),z:0});
+    return true;
   } catch { return false; } // World limits/unloaded chunks must stop a step.
 }
