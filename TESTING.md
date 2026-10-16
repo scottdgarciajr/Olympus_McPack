@@ -1,5 +1,11 @@
 # In-game test checklist
 
+## 3.3.4 brief still-water clutch and wet-power cleanup (Minecraft verification pending)
+
+- Activate both v3.3.4 packs and verify status. In Survival rain, repeat diagonal sprint, double Riptide, corner and gap landings. Confirm the real water catches falls, remains visible, never spreads, and vanishes after two seconds with no leftover carrier/water. Check waterlogging visuals/content log on Bedrock 1.21.120+.
+- While clutch water is present, walk/swim through it: the carrier must not collide with players. Damage remains normal; there is no fall-immunity fallback. Rejoin/unload during expiry and verify deferred cleanup.
+- Sprint out of water onto dry ground: Tidal speed should end immediately. Stop rain while sprinting/falling: no new clutch or continued rain buffs. Strength/Haste/Conduit clear immediately outside water/rain; Night Vision clears on leaving water. Native Riptide must retain its launch momentum.
+
 ## 3.3.3 physical water clutch (Minecraft verification pending)
 
 - Enable both v3.3.3 packs and verify status. As Poseidon in Survival with no bucket, test long falls in exposed rain, diagonal sprinting off cliffs and two Riptide launches during one airborne trip. Water must follow the new trajectory rather than staying at the first predicted landing.

@@ -1,3 +1,4 @@
+import {placeClutchWater,removeClutchWater} from './rain_water.js';
 // Environment powers kept separate from claims, Crown records, and forge systems.
 const swimmers = new Map();
 const fogged = new Set();
@@ -104,7 +105,8 @@ export function bucketClutch(player, raining, blocked, rememberWater) {
   // A 3x3 cushion above and between the landing blocks catches edge/corner
   // contacts and gives fast
   // falls time to enter water before hitting terrain. Air only; no terrain is
-  // replaced (gaps at terrain height are filled with water too). Every source is tracked for the 30-second cleanup.
+  // replaced (gaps at terrain height are filled with water too). Every source
+  // uses real contained water and is tracked for the two-second cleanup.
   for(const floor of floors)for(const dy of [1,0,2])for(const dx of [0,-1,1])for(const dz of [0,-1,1])try {
     if(placed>=48)break;
     const location={x:floor.x+dx,y:floor.y+dy,z:floor.z+dz},key=`${location.x},${location.y},${location.z}`;
@@ -112,13 +114,13 @@ export function bucketClutch(player, raining, blocked, rememberWater) {
     if(blocked(player.dimension.id,location) || blocked(player.dimension.id,floor))continue;
     const air=player.dimension.getBlock(location);
     if(!air?.isAir)continue;
-    air.setType('minecraft:water');
-    try{rememberWater(player.dimension.id,location);}catch(error){air.setType('minecraft:air');throw error;}
+    placeClutchWater(air);
+    try{rememberWater(player.dimension.id,location);}catch(error){removeClutchWater(air);throw error;}
     placed++;
   } catch {}
   if(placed && !fall.announced) {
     fall.announced=true;
-    try{player.sendMessage('§b[Olympus v3.3.3] Rain Clutch: landing water placed; disappears in 30 seconds.');}catch{}
+    try{player.sendMessage('§b[Olympus v3.3.4] Rain Clutch: still landing water placed; disappears in 2 seconds.');}catch{}
   }
   return placed>0;
 }

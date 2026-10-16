@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-VERSION = [3, 3, 3]
+VERSION = [3, 3, 4]
 VERSION_TEXT = '.'.join(map(str, VERSION))
 GODS = {
     'hermes': ('Hermes Winged Relic', '#f4cf58'),
@@ -87,7 +87,7 @@ bp_uuid = 'a06ad1f9-8b44-4af1-995a-95dc9c684c25'
 rp_uuid = 'def06a91-6e05-457a-a359-714565d4c32c'
 write_json(BP / 'manifest.json', {
     'format_version': 2,
-    'header': {'name': f'Olympus SMP Behavior v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Hermes: automatic one-block ramp while sprinting. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, water-only rain clutch tracks Riptide, corners and gaps; water expires in 30s. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
+    'header': {'name': f'Olympus SMP Behavior v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Hermes: automatic one-block ramp while sprinting. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, water-only rain clutch tracks Riptide, corners and gaps; water never flows and expires in 2s; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
     'modules': [
         {'type': 'data', 'uuid': '45604c22-4d55-478e-beb7-fca61db38eaf', 'version': VERSION},
         {'type': 'script', 'language': 'javascript', 'entry': 'scripts/main.js', 'uuid': 'c6515f3a-93dc-4971-987c-ad95b689d22f', 'version': VERSION}
@@ -258,4 +258,30 @@ for name in ('crown_setup', 'crown_status', 'crown_reset', 'crown_recover', 'cro
 (functions / 'help.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus: /function olympus/setup places the Hall of Eight Gods. Reserve a god at its altar for 10 minutes, then return with its offering to claim. The center contains the Crown throne. /function olympus/crown_status and /function olympus/crown_help explain the Crown trial."}]}\n', encoding='utf-8')
 (RP / 'textures' / 'particle').mkdir(parents=True, exist_ok=True)
 Image.new('RGBA', (1, 1), (255, 255, 255, 255)).save(RP / 'textures' / 'particle' / 'oracle_spark.png')
+# A non-colliding carrier for real water, with flow disabled in every direction.
+write_json(BP / 'blocks' / 'clutch_water.json', {
+    'format_version': '1.21.120',
+    'minecraft:block': {
+        'description': {'identifier': 'olympus:clutch_water'},
+        'components': {
+            'minecraft:geometry': 'minecraft:geometry.full_block',
+            'minecraft:material_instances': {'*': {'texture': 'olympus_clutch_invisible', 'render_method': 'alpha_blend', 'ambient_occlusion': False, 'face_dimming': False}},
+            'minecraft:collision_box': False,
+            'minecraft:selection_box': False,
+            'minecraft:light_dampening': 0,
+            'minecraft:destructible_by_mining': False,
+            'minecraft:destructible_by_explosion': False,
+            'minecraft:liquid_detection': {'detection_rules': [{
+                'liquid_type': 'water', 'can_contain_liquid': True, 'on_liquid_touches': 'blocking',
+                'stops_liquid_flowing_from_direction': ['up','down','north','south','east','west']
+            }]}
+        }
+    }
+})
+(RP / 'textures' / 'blocks').mkdir(parents=True, exist_ok=True)
+Image.new('RGBA', (16,16), (0,0,0,0)).save(RP / 'textures' / 'blocks' / 'clutch_invisible.png')
+write_json(RP / 'textures' / 'terrain_texture.json', {
+    'resource_pack_name': 'Olympus SMP', 'texture_name': 'atlas.terrain', 'padding': 8, 'num_mip_levels': 4,
+    'texture_data': {'olympus_clutch_invisible': {'textures': 'textures/blocks/clutch_invisible'}}
+})
 print('Generated pack assets and functions.')

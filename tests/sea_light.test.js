@@ -27,10 +27,18 @@ test('real Poseidon passive code applies valid visible Strength and Haste in wat
   assert.equal(effects.get('haste').amplifier,0,'real Haste stays low to preserve attack animations');
   assert.equal(effects.get('conduit_power').amplifier,17,'only mining compensation scales with water penalties');
   player.isInWater=false;raining=true;run(player);
+  assert.equal(effects.has('night_vision'),false,'water vision ends immediately on leaving water');
   assert.equal(effects.get('strength').amplifier,1);
   assert.equal(effects.get('haste').amplifier,1);
   raining=false;run(player);
-  assert.equal(effects.has('strength'),false);assert.equal(effects.has('haste'),false);
+  assert.equal(effects.has('strength'),false);assert.equal(effects.has('haste'),false);assert.equal(effects.has('conduit_power'),false);
+});
+
+test('a stale wet sensor cannot keep rain powers active after weather clears',()=>{
+  const source=readFileSync(new URL('../behavior_pack/scripts/main.js',import.meta.url),'utf8');
+  const body=source.slice(source.indexOf('function inRain('),source.indexOf('function zeusStorm('));
+  const check=new Function('weather',`${body};return inRain;`)(()=> 'Clear');
+  assert.equal(check({dimension:{id:'minecraft:overworld'},isInWater:false,getProperty:()=>true}),false);
 });
 
 test('Zeus Y220 storm power bypasses clear-weather cooldown but keeps five-second lightning interval',()=>{
@@ -61,8 +69,8 @@ test('Tidal Sprint preserves upward momentum and gives jump priority when exitin
   const player={id:'swim-exit',isInWater:true,isSprinting:true,location:{x:0,y:0,z:0},
     inputInfo:{getMovementVector:()=>input,getButtonState:()=>jumping?1:0},
     getViewDirection:()=>view,getVelocity:()=>velocity,applyImpulse:v=>impulses.push(v)};
-  const motion=new Function('inRain','poseidonSpeedEnabled','InputButton','ButtonState','movementDirection','CONFIG','poseidonTrailTick','system','MolangVariableMap','fail','poseidonSwimCruise',`${body};return poseidonMotion;`)
-    (()=>false,()=>true,{Jump:'jump'},{Pressed:1},movementDirection,CONFIG,new Map(),{currentTick:0},class {},e=>{throw e;},poseidonSwimCruise);
+  const motion=new Function('inRain','poseidonSpeedEnabled','InputButton','ButtonState','movementDirection','CONFIG','poseidonTrailTick','system','MolangVariableMap','fail','poseidonSwimCruise','tidalEnvironment','recordTidalBoost',`${body};return poseidonMotion;`)
+    (()=>false,()=>true,{Jump:'jump'},{Pressed:1},movementDirection,CONFIG,new Map(),{currentTick:0},class {},e=>{throw e;},poseidonSwimCruise,()=>{},()=>{});
   player.isSprinting=false;motion(player);assert.equal(impulses.length,1);assert.ok(impulses[0].x<=0.04,'only gentle cruise without sprint');
   player.isSprinting=true;
   motion(player);
@@ -118,7 +126,7 @@ test('swimming preserves existing food instead of feeding Poseidon, and fog clea
 
 test('rain clutch needs no inventory, activates only in exposed rain, and respects protected land and Nether',()=>{
   let water=false,remembered=0;
-  const air={get isAir(){return !water;},setType:type=>{water=type==='minecraft:water';}};
+  const air={get isAir(){return !water;},setType:type=>{water=type==='olympus:clutch_water';},setWaterlogged(){}};
   const player={id:'rain-fall',location:{x:0,y:20,z:0},isInWater:false,getVelocity:()=>({x:0,y:-1.8,z:0}),
     getComponent:()=>{throw Error('rain clutch must never access inventory');},
     dimension:{id:'minecraft:overworld',

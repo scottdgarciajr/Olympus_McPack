@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.3.4 — Two-second still-water clutch and immediate wet-power cleanup
+
+- Clutch uses real water in a transparent non-colliding carrier, with flow disabled in all six directions. No fall-damage immunity.
+- Water and carrier expire after two seconds; fluid is removed first so cleanup cannot release it to spread.
+- Water/rain transitions are checked each tick. Strength, Haste and Conduit clear on dry exit, and water vision clears on leaving water. Clear weather ignores stale wet-sensor state.
+- Tidal Sprint extra momentum ends on dry exit; native Riptide launches clear the Tidal marker and retain their own momentum.
+
 ## 3.3.3 — Water-only clutch for fast landings, corners and gaps
 
 - Removed all Poseidon fall-immunity properties, damage-sensor rules and brief clutch grace; safety is physical water only.

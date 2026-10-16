@@ -1,0 +1,11 @@
+{
+  "resource_pack_name": "Olympus SMP",
+  "texture_name": "atlas.terrain",
+  "padding": 8,
+  "num_mip_levels": 4,
+  "texture_data": {
+    "olympus_clutch_invisible": {
+      "textures": "textures/blocks/clutch_invisible"
+    }
+  }
+}

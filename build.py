@@ -42,6 +42,11 @@ check(any(d.get('module_name') == '@minecraft/server' and d.get('version') == '2
 check(any(d.get('module_name') == '@minecraft/server-ui' and d.get('version') == '2.0.0' for d in bp['dependencies']), 'Missing UI API dependency')
 
 texture_index = read_json(RP / 'textures' / 'item_texture.json')['texture_data']
+clutch=read_json(BP/'blocks'/'clutch_water.json')['minecraft:block']['components']
+check(clutch['minecraft:collision_box'] is False, 'Clutch water must not stop player movement')
+flow=clutch['minecraft:liquid_detection']['detection_rules'][0]
+check(flow['can_contain_liquid'] and set(flow['stops_liquid_flowing_from_direction'])=={'up','down','north','south','east','west'}, 'Clutch water must contain real water without spreading')
+check((RP/'textures'/'blocks'/'clutch_invisible.png').is_file(), 'Clutch carrier texture missing')
 script = (BP / 'scripts' / 'main.js').read_text(encoding='utf-8')
 for god in GODS:
     item = read_json(BP / 'items' / f'{god}_relic.json')['minecraft:item']

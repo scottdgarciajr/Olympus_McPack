@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {poseidonSwimCruise} from '../behavior_pack/scripts/poseidon_swim.js';
-import {rememberRainWater,cleanupRainWater} from '../behavior_pack/scripts/rain_water.js';
+import {poseidonSwimCruise,recordTidalBoost,forgetTidalBoost,tidalEnvironment} from '../behavior_pack/scripts/poseidon_swim.js';
+import {rememberRainWater,cleanupRainWater,placeClutchWater,removeClutchWater,CLUTCH_WATER} from '../behavior_pack/scripts/rain_water.js';
+import {readFileSync} from 'node:fs';
 
 test('swim cruise gently approaches walking speed without sprint or changing vertical motion',()=>{
   const velocity={x:0.1,y:0.4,z:0},impulses=[];
@@ -30,22 +31,45 @@ function worldSetup(){
   const water=(p,type='minecraft:water')=>{const block={typeId:type,setType(value){this.typeId=value;}};blocks.set(key(p),block);return block;};
   return {world,water,props,setLoaded:value=>{loaded=value;}};
 }
-test('only recorded rain water expires at 30 seconds; unrelated water remains',()=>{
+test('only recorded rain water expires at two seconds; unrelated water remains',()=>{
   const {world,water}=worldSetup(),at={x:1,y:64,z:1};
   const placed=water(at),unrelated=water({x:2,y:64,z:1});rememberRainWater(world,'minecraft:overworld',at,1000);
-  cleanupRainWater(world,30999);assert.equal(placed.typeId,'minecraft:water');
-  cleanupRainWater(world,31000);assert.equal(placed.typeId,'minecraft:air');assert.equal(unrelated.typeId,'minecraft:water');
+  cleanupRainWater(world,2999);assert.equal(placed.typeId,'minecraft:water');
+  cleanupRainWater(world,3000);assert.equal(placed.typeId,'minecraft:air');assert.equal(unrelated.typeId,'minecraft:water');
   assert.equal(world.getDynamicProperty('olympus:rain_clutch_water'),undefined);
 });
 test('rain water cleanup survives a fresh world wrapper/rejoin and retries unloaded chunks',()=>{
   const {world,water,setLoaded}=worldSetup(),at={x:1,y:64,z:1},placed=water(at);
-  rememberRainWater(world,'minecraft:overworld',at,0);setLoaded(false);cleanupRainWater({...world},30000);
+  rememberRainWater(world,'minecraft:overworld',at,0);setLoaded(false);cleanupRainWater({...world},2000);
   assert.ok(world.getDynamicPropertyIds().some(key=>key.startsWith('olympus:rain_water_') && world.getDynamicProperty(key)));assert.equal(placed.typeId,'minecraft:water');
-  setLoaded(true);cleanupRainWater({...world},31000);assert.equal(placed.typeId,'minecraft:air');
+  setLoaded(true);cleanupRainWater({...world},3000);assert.equal(placed.typeId,'minecraft:air');
 });
 test('cleanup never destroys a building block replacing rain water',()=>{
   const {world,water}=worldSetup(),at={x:1,y:64,z:1},block=water(at);
   rememberRainWater(world,'minecraft:overworld',at,0);block.typeId='minecraft:diamond_block';
-  cleanupRainWater(world,30000);assert.equal(block.typeId,'minecraft:diamond_block');
+  cleanupRainWater(world,2000);assert.equal(block.typeId,'minecraft:diamond_block');
   assert.equal(world.getDynamicProperty('olympus:rain_clutch_water'),undefined);
+});
+
+test('Tidal Sprint momentum ends on dry exit without altering vertical motion or native Riptide',()=>{
+  const impulses=[],player={id:'tidal-exit',isSprinting:true,getVelocity:()=>({x:1.08,y:0.5,z:0}),applyImpulse:v=>impulses.push(v)};
+  recordTidalBoost(player);tidalEnvironment(player,true);assert.equal(impulses.length,0);
+  tidalEnvironment(player,false);assert.deepEqual(impulses[0],{x:0.28-1.08,y:0,z:0});
+  tidalEnvironment(player,false);assert.equal(impulses.length,1,'only remove our boost once');
+  recordTidalBoost(player);forgetTidalBoost(player.id);tidalEnvironment(player,false);
+  assert.equal(impulses.length,1,'trident release clears the Tidal marker, retaining native launch momentum');
+});
+test('clutch carrier contains real water, blocks all six flow directions and has no collision',()=>{
+  const changes=[],block={typeId:'minecraft:air',setType(type){this.typeId=type;changes.push(type);},setWaterlogged:value=>changes.push(value)};
+  placeClutchWater(block);assert.deepEqual(changes,[CLUTCH_WATER,true]);
+  removeClutchWater(block);assert.deepEqual(changes,[CLUTCH_WATER,true,false,'minecraft:air'],'clear fluid before removing carrier');
+  const definition=JSON.parse(readFileSync(new URL('../behavior_pack/blocks/clutch_water.json',import.meta.url),'utf8'))['minecraft:block'];
+  assert.equal(definition.components['minecraft:collision_box'],false);
+  const rule=definition.components['minecraft:liquid_detection'].detection_rules[0];
+  assert.equal(rule.can_contain_liquid,true);assert.equal(rule.on_liquid_touches,'blocking');
+  assert.deepEqual([...rule.stops_liquid_flowing_from_direction].sort(),['down','east','north','south','up','west']);
+});
+test('failed waterlogging rolls the carrier back instead of leaving a dry custom block',()=>{
+  const block={typeId:'minecraft:air',setType(type){this.typeId=type;},setWaterlogged(){throw Error('unsupported');}};
+  assert.throws(()=>placeClutchWater(block));assert.equal(block.typeId,'minecraft:air');
 });
