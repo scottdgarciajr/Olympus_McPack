@@ -73,7 +73,7 @@ export function seaEnvironment(player, active) {
   });
 }
 
-export function bucketClutch(player, raining, blocked, rememberWater) {
+export function bucketClutch(player, raining, blocked, spawnWater) {
   const p = player.location, velocity = player.getVelocity();
   if (player.isInWater || player.isOnGround) { falls.set(player.id,{top:p.y,used:false}); return false; }
   const fall = falls.get(player.id) || { top: p.y, used: false };
@@ -93,11 +93,12 @@ export function bucketClutch(player, raining, blocked, rememberWater) {
       const location={x:floor.location.x,y:floor.location.y+1,z:floor.location.z};
       const air = player.dimension.getBlock(location);
       if (!air?.isAir || blocked(player.dimension.id, location) || blocked(player.dimension.id,floor.location)) continue;
-      air.setType('minecraft:water');
-      try { rememberWater(player.dimension.id,location); }
-      catch(error) { air.setType('minecraft:air');throw error; }
+      const locations=[];
+      for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)for(let dy=0;dy<2;dy++)
+        locations.push({x:location.x+dx,y:location.y+dy,z:location.z+dz});
+      if(!spawnWater(player.dimension.id,locations,blocked))continue;
       fall.used = true;
-      try { player.sendMessage('§b[Olympus v3.4.0] Rain Clutch: water placed automatically; disappears in 5 seconds. No bucket needed.'); } catch {}
+      try { player.sendMessage('§b[Olympus v3.4.1] Rain Clutch: 3x3 water, 2 blocks tall; no spread; disappears in 5 seconds.'); } catch {}
       return true;
     } catch {}
   }

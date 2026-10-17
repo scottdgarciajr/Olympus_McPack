@@ -55,9 +55,31 @@ test('no ledge, no supported landing, hazards and unloaded blocks cannot trigger
 test('a rejected direct step gets one automatic hop and never repeats in midair',()=>{
   const {player,calls,impulses,denyTeleport}=runner();denyTeleport();assert.equal(hermesStepUp(player,{x:1,z:0}),true);
   assert.deepEqual(impulses,[{x:0,y:0.42,z:0}]);
+  const attempts=calls.length;
   player.isOnGround=false;
   for(let tick=0;tick<20;tick++)assert.equal(hermesStepUp(player,{x:1,z:0}),false);
-  assert.equal(calls.length,1,'holding into a wall cannot accumulate height');
+  assert.equal(calls.length,attempts,'holding into a wall cannot accumulate height');
+});
+
+test('a shoulder contacting a mountain edge steps even when the center ray misses',()=>{
+  const {player,calls}=runner(),nativeRay=player.dimension.getBlockFromRay;
+  player.dimension.getBlockFromRay=(origin,direction,options)=>{
+    if(direction.y!==-1 && origin.z<0.7)return undefined;
+    return nativeRay(origin,direction,options);
+  };
+  assert.equal(hermesStepUp(player,{x:1,z:0}),true);
+  assert.equal(calls.length,1);assert.equal(calls[0].at.y,65.01);
+  assert.ok(calls[0].at.z>0.7,'move onto the supported part of the edge');
+});
+
+test('a blocked center landing still considers a clear shoulder route without wall climbing',()=>{
+  const {player,calls}=runner(),nativeRay=player.dimension.getBlockFromRay;
+  player.dimension.getBlockFromRay=(origin,direction,options)=>{
+    if(direction.y===-1 && options.maxDistance===1.78 && origin.z>0.3)return {block:{typeId:'minecraft:stone'}};
+    return nativeRay(origin,direction,options);
+  };
+  assert.equal(hermesStepUp(player,{x:1,z:0}),false,'all body corners must fit, not just the center');
+  assert.equal(calls.length,0);
 });
 
 test('passable plants do not block stepping onto bare or grassy one-block ledges',()=>{

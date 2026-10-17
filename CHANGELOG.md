@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.4.1 — Contained rain pool and mountain-edge stepping
+
+- Poseidon rain clutch now places a 3x3 footprint of ordinary water, two blocks tall. Passable invisible edges prevent flow; water and edges clean up after five seconds. Rain-only, bucket-free, admin toggles and no Slow Falling remain.
+- Protect terrain and abort unsafe/unloaded containment; roll back partial placement if persistence fails. Remove water before boundaries, retaining shared edges beside unexpired/unloaded sources.
+- Hermes checks both shoulders as well as his center so mountain-edge contacts can step onto supported single-block ledges. Try alternate supported positions when the center route lacks clearance; tall walls, low ceilings and airborne stepping remain excluded.
+- Automated checks cover pool dimensions, containment ordering, rollback, rain gates, edge contacts and headroom. Minecraft play testing remains pending.
+
 ## 3.4.0 — Utility forge expansion and simple rain clutch
 
 - Ten new non-PvP utility recipes: Lantern Helmet, Clockwork Trackless Cart, Wayfinder, Ariadne Trail Spool, Builder Wand, Seedweaver Planter, Autumn Harvest Sickle, Reclaimer, Thermal Lens and Survey Level. Fourteen forge products total; forge guide lists full costs and controls.

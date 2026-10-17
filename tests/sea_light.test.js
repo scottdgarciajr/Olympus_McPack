@@ -132,7 +132,7 @@ test('rain clutch needs no inventory, activates only in exposed rain, and respec
     dimension:{id:'minecraft:overworld',
       getBlockFromRay:origin=>origin.y-3>5?undefined:{face:'Up',block:{location:{x:0,y:3,z:0},isAir:false,isLiquid:false}},
       getBlock:at=>at.y===4?air:{isAir:true}}};
-  const clutch=(raining,blocked=false)=>bucketClutch(player,raining,()=>blocked,()=>remembered++);
+  const clutch=(raining,blocked=false)=>bucketClutch(player,raining,()=>blocked,(_dimension,points)=>{assert.equal(points.length,18);water=true;remembered++;return 18;});
   assert.equal(clutch(true),false);player.location.y=6;
   assert.equal(clutch(false),false);assert.equal(water,false,'dry weather cannot clutch');
   assert.equal(clutch(true,true),false);assert.equal(water,false,'protected land cannot be altered');

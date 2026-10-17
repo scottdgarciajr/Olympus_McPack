@@ -1,5 +1,13 @@
 # In-game test checklist
 
+## 3.4.1 contained pool and mountain edges (Minecraft verification pending)
+
+- Enable both v3.4.1 packs and verify status. In Survival exposed rain, fall onto flat stone: water must be three blocks across each horizontal axis and two blocks tall. Check no flow beyond the pool, five-second water/edge cleanup, no Slow Falling, no bucket use, normal combat/projectile hits and movement through the invisible perimeter.
+- Repeat over uneven ground, shared/repeated pools, protected terrain, vegetation and chunk borders. Existing blocks must survive; unsafe containment must abort. Rejoin/unload during cleanup; water must clear before edges when chunks reload. Admin off/on and dry-weather/Nether gates still apply.
+- Hermes: walk and sprint into quartz, grass slopes and diagonal mountain corners touching only one shoulder. Check continuous one-block ascents, clear headroom, collision-canceled sprint and both diagonal directions. Two-block walls, low ceilings, sneaking and midair must not permit climbing.
+
+Historical checklists below describe superseded versions; use v3.4.1 for the current clutch.
+
 ## 3.4.0 utility forge and simple clutch (Minecraft verification pending)
 
 - Activate both v3.4.0 packs; verify status and pack descriptions. Creative Hephaestus kit gives 14 products; Survival kit grants nothing. Forge each new recipe with exact costs, test shortages, bound/enchanted/damaged bases, full inventory, rejoin and trades. Non-Hephaestus may use/store products but cannot forge.
