@@ -1,5 +1,13 @@
 # In-game test checklist
 
+## 3.4.3 visuals and ready chat (Minecraft verification pending)
+
+- Activate both v3.4.3 packs; verify status. On supported hardware select Vibrant Visuals in Video/Graphics Mode, then switch back to ordinary graphics. Two players may choose different modes. Check temple, icons, worn gear, Oracle particles/outlines and Poseidon underwater visibility in both modes. If unavailable, check device support and other active packs.
+- Use Pearl, Hellfire, War Rage, Apollo Flare/Oracle/limited Lightflight, Zeus lightning/flight, Crown Authority/Dominion and forge powers. Each cooldown completion sends only its player one ready notice. Multiple completions group, and no ready messages occur less than ten seconds apart. Rapid tools and same-target combat cooldowns stay quiet.
+- Reuse a move before a queued notice sends: no stale ready announcement during its new cooldown. Test death/reset, role change, Crown unequip/transfer and Kratos losing stolen lightning. Log in with old expired cooldowns: no backlog. Log in during an active cooldown: notify once when it ends. Environmental restrictions remain unchanged; sun/storm cooldown bypasses do not generate repeated ready spam.
+
+Use this checklist for the new features; older mechanics below remain version-specific.
+
 ## 3.4.2 placement regression and size controls (Minecraft verification pending)
 
 - Status must show v3.4.2. In exposed rain, test sand, grass with tall/short grass and flowers, bare stone/quartz. Default pool is 3x3 across, two tall; no flow, no custom perimeter dependency. Five-second cleanup restores plants and removes native structure voids; normal player movement/combat still works. Failure messages identify protection/unloaded terrain/placement exceptions.

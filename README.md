@@ -1,6 +1,6 @@
 # Olympus SMP
 
-**Current version: 3.4.2.** Both pack names/descriptions and `/function olympus/status` show **v3.4.2**. This release supersedes the old ability descriptions below.
+**Current version: 3.4.3.** Both pack names/descriptions and `/function olympus/status` show **v3.4.3**. Vibrant Visuals compatibility and private cooldown-ready notices are included. This release supersedes the old ability descriptions below.
 
 **Personal equipment is inventory-locked:** God relics, Poseidon's Tidecaller, both Apollo bows, Hephaestus's personal Divine Fortune pickaxe, and Crown equipment cannot be voluntarily given, dropped, crafted away, or stored in containers. They remain movable within the player's inventory/equipment and stay on death. Existing carried gear is locked on rejoin. A full inventory reserves new personal items persistently until space opens. Hephaestus's forged products and portable forge remain tradeable/storable, as do ordinary resources and consumables. The established Crown transfer on a PvP kill is still handled by the ownership system. Gear previously stored before this update is not automatically pulled from unloaded chests.
 
@@ -21,7 +21,7 @@
 
 Oracle model edges and entity properties derive from the MIT-licensed Mojang **bedrock-samples v1.21.120.4**; source/licensing is bundled. This requires overriding vanilla entity definitions to add a default-hidden client property. Other packs that replace those entities can conflict depending on pack order. No beta API is required. **Minecraft rendering/gameplay acceptance remains pending.**
 
-Built from GitHub main `0b1436d` (2.7.3), with the unstable local checkout preserved at `../backups/OlympusSMP-unstable-2026-10-16`. Requires Bedrock **1.21.120+**, stable Script API **2.3.0**, and both packs. Install `dist/Olympus_SMP_FINAL.mcaddon`; `/function olympus/status` must report **v3.4.2**. Existing pack UUIDs and progression are preserved. See CHANGELOG for superseded mechanics.
+Built from GitHub main `0b1436d` (2.7.3), with the unstable local checkout preserved at `../backups/OlympusSMP-unstable-2026-10-16`. Requires Bedrock **1.21.120+**, stable Script API **2.3.0**, and both packs. Install `dist/Olympus_SMP_FINAL.mcaddon`; `/function olympus/status` must report **v3.4.3**. Existing pack UUIDs and progression are preserved. See CHANGELOG for superseded mechanics.
 
 ## Start here: add the pack to your world
 
@@ -180,3 +180,9 @@ Restart, join as operator, follow **Start here: add the pack to your world** abo
 ## Rebuild and verification
 
 Edit `behavior_pack/scripts/config.js` for balance. Run `npm run build` to regenerate the original Bedrock structure and installable archive. Preserve pack UUIDs and increment the version in `generate_assets.py` for later updates. The reference [Roman / Greek Style Shrine Temple](https://www.planetminecraft.com/project/roman-greek-style-shrine-temple/) informed the broad Greek temple style. Its download page did not state permission to redistribute a modified schematic, so the bundled Hall is original. Offline checks parse the structure and package but cannot establish that Minecraft loaded the script; use `TESTING.md` in a test world.
+
+## Player visuals and cooldown notices — v3.4.3
+
+The resource pack declares the `pbr` capability following [Mojang’s Vibrant Visuals documentation](https://learn.microsoft.com/en-us/minecraft/creator/documents/vibrantvisuals/vvresourcepacks?view=minecraft-bedrock-stable). Each player can select Vibrant Visuals in Minecraft’s Video/Graphics Mode settings on a supported device, or keep their normal graphics. Olympus does not force the mode or require RTX hardware. Other incompatible active packs/device limitations can still disable the option. Vanilla lighting/material defaults remain; this is compatibility, not a replacement texture overhaul.
+
+After an observed ability cooldown ends, only that player receives `Ready again: <ability>`. Simultaneous completions share a message, with at most one ready message per ten seconds. Reusing a move cancels its queued reminder; old expired timers on login, removed abilities and canceled timers do not announce. Main god abilities, active Crown powers, original forge powers, and the longer utility actions are covered. Rapid gadget timers, per-target hit timers, toggles and automatic passive powers stay quiet. A ready notice means the cooldown finished; ordinary light/equipment/target requirements still apply.

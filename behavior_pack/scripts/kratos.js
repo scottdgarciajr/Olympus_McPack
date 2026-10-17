@@ -76,6 +76,10 @@ export function kratosStatus(player) {
   const total=entries.reduce((sum,[,count])=>sum+count,0);
   return `Lasting (${total}): ${names.join(', ')||'none'}; temporary: ${seconds>0?`${temp?.[0]} (${seconds}s)`:'none'}`;
 }
+export function kratosHasLightning(player) {
+  const temp=read(player,TEMP);
+  return lastingCopies(player).some(power=>power[1]==='olympus:lightning') || Number(player.getDynamicProperty(UNTIL)||0)>Date.now() && temp?.[1]==='olympus:lightning';
+}
 export function kratosUsePower(player,weather) {
   const temp=read(player,TEMP);
   if (!lastingCopies(player).some(power=>power[1]==='olympus:lightning') && !(Number(player.getDynamicProperty(UNTIL)||0)>Date.now() && temp?.[1]==='olympus:lightning')) return false;

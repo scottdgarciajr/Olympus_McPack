@@ -128,6 +128,12 @@ export function crownOwner(player) { return owns(state(),player); }
 export function crownCooldownSeconds(player, seconds) {
   return crowned(player) && api.role(player) !== 'zeus' ? Math.ceil(seconds / 2) : seconds;
 }
+export function crownCooldownTimers(player) {
+  if(!crowned(player))return [];
+  const c=activeRecord(state(),player);if(!c)return [];
+  return [{id:`crown_${c.serial}_authority`,label:'Divine Authority',until:Number(c.authorityUntil||0)},
+    {id:`crown_${c.serial}_dominion`,label:'Dominion',until:Number(c.dominionUntil||0)}];
+}
 function throne() {
   const t = api.temple();
   return t && { x: t.x + 16, y: t.y + 2, z: t.z + 16, dimension: t.dimension || 'minecraft:overworld' };

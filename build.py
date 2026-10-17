@@ -22,6 +22,7 @@ def read_json(path):
 
 bp = read_json(BP / 'manifest.json')
 rp = read_json(RP / 'manifest.json')
+check('pbr' in rp.get('capabilities',[]) and 'raytraced' not in rp['capabilities'], 'Resource pack must allow optional Vibrant Visuals without requiring RTX')
 runpy.run_path(str(ROOT / 'validate_oracle_assets.py'))
 for pack in (bp,rp):
     version='.'.join(map(str,pack['header']['version']))
@@ -152,6 +153,8 @@ with zipfile.ZipFile(OUT, 'w', zipfile.ZIP_DEFLATED) as archive:
                 archive.write(path, f'{prefix}/{path.relative_to(folder).as_posix()}')
 with zipfile.ZipFile(OUT) as archive:
     check(archive.testzip() is None, 'ZIP CRC failure')
+    bundled_rp=json.loads(archive.read('resource_pack/manifest.json'))
+    check('pbr' in bundled_rp.get('capabilities',[]) and 'raytraced' not in bundled_rp['capabilities'], 'Installable server resource pack must permit player-selected Vibrant Visuals')
     names = set(archive.namelist())
     check('behavior_pack/manifest.json' in names and 'resource_pack/manifest.json' in names, 'Nested or missing pack root')
     check('behavior_pack/structures/olympus/hall_of_eight.mcstructure' in names, 'Temple was not bundled')

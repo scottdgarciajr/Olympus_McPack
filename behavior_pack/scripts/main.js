@@ -17,6 +17,18 @@ import {configureUtilityForge,utilityEquipmentTick,utilityCartTick,packUtilityCa
 import { lightPower, seaEnvironment, bucketClutch, clearEnvironment, forgetEnvironment, poseidonMiningHaste } from './sea_light.js';
 import { isPersonalGodItem, isPersonalGodTool, lockGodItem, queueGodItem, deliverQueuedGodItems } from './god_items.js';
 import { vaultRecords, ownsToolAnywhere, storeTool, withdrawTool, recoverVaultTransaction } from './tool_vault.js';
+import {crownCooldownTimers} from './crown.js';
+import {kratosHasLightning} from './kratos.js';
+import {createCooldownNotifier,playerCooldownTimers} from './cooldown_notifications.js';
+
+const cooldownNotices=createCooldownNotifier();
+system.runInterval(()=>{
+  const players=world.getAllPlayers();cooldownNotices.retain(players.map(player=>player.id));
+  for(const player of players)try{
+    const god=role(player);
+    cooldownNotices.update(player,god,playerCooldownTimers(player,god,{storm:god==='zeus'&&zeusStorm(player),sun:god==='apollo'&&apolloPower(player).sun,stolenLightning:god==='kratos'&&kratosHasLightning(player),crown:crownCooldownTimers(player)}));
+  }catch(error){if(CONFIG.debug)fail(error);}
+},20);
 
 const GODS = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus', 'kratos'];
 const TITLES = {
@@ -50,7 +62,7 @@ const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigu
   'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '3.4.2';
+const PACK_VERSION = '3.4.3';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],

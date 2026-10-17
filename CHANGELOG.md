@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.4.3 — Optional Vibrant Visuals and quiet ready notices
+
+- Declare resource-pack `pbr` compatibility with existing Bedrock 1.21.120 minimum. Players choose Vibrant Visuals locally on compatible devices; normal graphics remain available and RTX is not required.
+- Send private one-time ability-ready chat notices after observed cooldowns expire. Group simultaneous completions and enforce a ten-second minimum between ready messages. Cancel queued reminders when a move is reused, reset, removed, or its role changes; ignore already expired timers on login and clear disconnected sessions.
+- Cover god abilities, worn Crown Authority/Dominion, original forge powers and longer utility actions. Exclude fast gadgets and per-target combat timers from chat spam. Keep environmental requirements and actual cooldown durations unchanged.
+- Automated suite: 94 tests pass; client graphics/play verification remains pending.
+
 ## 3.4.2 — Rain placement repair, selectable sizes and native ground steps
 
 - Replace custom containment dependency with native pass-through structure voids. Temporarily replace/restore natural plants instead of aborting the whole pool; recognize sand/grass/stone floors without a liquid API query. Placement failures report their reason once per fall.
