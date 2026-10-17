@@ -23,7 +23,7 @@ def read_json(path):
 bp = read_json(BP / 'manifest.json')
 rp = read_json(RP / 'manifest.json')
 check('pbr' in rp.get('capabilities',[]) and 'raytraced' not in rp['capabilities'], 'Resource pack must allow optional Vibrant Visuals without requiring RTX')
-runpy.run_path(str(ROOT / 'validate_oracle_assets.py'))
+runpy.run_path(str(ROOT / 'validate_native_rendering.py'))
 for pack in (bp,rp):
     version='.'.join(map(str,pack['header']['version']))
     check(f'v{version}' in pack['header']['name'] and f'v{version}' in pack['header']['description'], 'Pack name/description must identify the exact build')
@@ -156,6 +156,11 @@ with zipfile.ZipFile(OUT) as archive:
     bundled_rp=json.loads(archive.read('resource_pack/manifest.json'))
     check('pbr' in bundled_rp.get('capabilities',[]) and 'raytraced' not in bundled_rp['capabilities'], 'Installable server resource pack must permit player-selected Vibrant Visuals')
     names = set(archive.namelist())
+    for name in names:
+        for prefix,kind in [('resource_pack/entity/','minecraft:client_entity'),('behavior_pack/entities/','minecraft:entity'),('behavior_pack/items/','minecraft:item')]:
+            if name.startswith(prefix) and name.endswith('.json'):
+                identifier=json.loads(archive.read(name))[kind]['description']['identifier']
+                check(not identifier.startswith('minecraft:'), f'Bundled vanilla override would replace native animations: {name}')
     check('behavior_pack/manifest.json' in names and 'resource_pack/manifest.json' in names, 'Nested or missing pack root')
     check('behavior_pack/structures/olympus/hall_of_eight.mcstructure' in names, 'Temple was not bundled')
     check(not any('/st_' in name or 'super_tnt' in name for name in names), 'Destructive Combine Anything content must not be bundled')

@@ -1,6 +1,6 @@
 # Olympus SMP
 
-**Current version: 3.4.3.** Both pack names/descriptions and `/function olympus/status` show **v3.4.3**. Vibrant Visuals compatibility and private cooldown-ready notices are included. This release supersedes the old ability descriptions below.
+**Current version: 3.4.4.** Both pack names/descriptions and `/function olympus/status` show **v3.4.4**. Vibrant Visuals compatibility and private cooldown-ready notices are included. This release supersedes the old ability descriptions below.
 
 **Personal equipment is inventory-locked:** God relics, Poseidon's Tidecaller, both Apollo bows, Hephaestus's personal Divine Fortune pickaxe, and Crown equipment cannot be voluntarily given, dropped, crafted away, or stored in containers. They remain movable within the player's inventory/equipment and stay on death. Existing carried gear is locked on rejoin. A full inventory reserves new personal items persistently until space opens. Hephaestus's forged products and portable forge remain tradeable/storable, as do ordinary resources and consumables. The established Crown transfer on a PvP kill is still handled by the ownership system. Gear previously stored before this update is not automatically pulled from unloaded chests.
 
@@ -19,9 +19,9 @@
 - **Tidal Sprint:** Strength, Haste and Conduit clear immediately when Poseidon leaves water/rain; water vision clears on leaving water. Wet conditions are checked every tick, including a weather stop. Clear weather cannot use a stale wet sensor to keep rain powers. Tidal boost momentum is reduced to normal land movement on dry exit; native Riptide momentum is retained. With the relic toggle enabled, **hold sprint** for the water/rain boost; release sprint to stop additional thrust. Hold jump to rise or leave water; jump takes priority over looking down and reduces horizontal thrust near exits.
 - **Zeus:** At **Y220+ in the Overworld**, flight activation ignores its normal cooldown and lightning uses the five-second thunder interval even in clear weather. The same controls apply: sneak-use for a 30-second flight, normal use for lightning.
 
-Oracle model edges and entity properties derive from the MIT-licensed Mojang **bedrock-samples v1.21.120.4**; source/licensing is bundled. This requires overriding vanilla entity definitions to add a default-hidden client property. Other packs that replace those entities can conflict depending on pack order. No beta API is required. **Minecraft rendering/gameplay acceptance remains pending.**
+Oracle uses only private compass/trail particles and bounded chest discovery. Vanilla player/mob definitions and animations remain owned by Minecraft; no entity-model ESP overrides are bundled.
 
-Built from GitHub main `0b1436d` (2.7.3), with the unstable local checkout preserved at `../backups/OlympusSMP-unstable-2026-10-16`. Requires Bedrock **1.21.120+**, stable Script API **2.3.0**, and both packs. Install `dist/Olympus_SMP_FINAL.mcaddon`; `/function olympus/status` must report **v3.4.3**. Existing pack UUIDs and progression are preserved. See CHANGELOG for superseded mechanics.
+Built from GitHub main `0b1436d` (2.7.3), with the unstable local checkout preserved at `../backups/OlympusSMP-unstable-2026-10-16`. Requires Bedrock **1.21.120+**, stable Script API **2.3.0**, and both packs. Install `dist/Olympus_SMP_FINAL.mcaddon`; `/function olympus/status` must report **v3.4.4**. Existing pack UUIDs and progression are preserved. See CHANGELOG for superseded mechanics.
 
 ## Start here: add the pack to your world
 
@@ -145,8 +145,8 @@ Each god has a custom relic icon, colored particle emblem, sound, and ambient au
 - Poseidon uses physical landing water only: no damage sensor, fall immunity, Resistance, Slow Falling or teleport safety. Protected/unloaded terrain and missing landing surfaces can still prevent water placement; water-only protection cannot guarantee every possible fall. Hermes retains Slow Falling.
 - Bedrock caps real enchantments at vanilla levels. Divine Fortune IV is Fortune III plus a scripted ore bonus. Apollo's enhanced bow damage is a scripted bonus on hit.
 - New forge results are custom Bedrock items with unique artwork and scripted powers; they do not raise vanilla enchantment limits. The old vanilla-equipment combinations remain supported for worlds that already own them. A missing or incompatible behavior pack removes scripted powers.
-- Hellfire and Cinderbolt use native projectile impact/explosion components, respecting mob griefing and Hall protection. Oracle uses a viewer-only gold ground compass, colored trails and optional native model edges; graphics-mode acceptance remains pending. Solar Flare visuals do not create a world explosion.
-- Rain powers use the stable weather-change event. A native player environment sensor also recognizes water/rain after reloading. Covered areas and dry biomes do not count as open rain.
+- Hellfire and Cinderbolt use native projectile impact/explosion components, respecting mob griefing and Hall protection. Oracle uses a viewer-only gold ground compass, colored trails and target/chest particles; graphics-mode acceptance remains pending. Solar Flare visuals do not create a world explosion.
+- Rain powers use the stable weather-change event. Scripted sky/biome and water checks recognize water/rain without replacing the player entity. Covered areas and dry biomes do not count as open rain.
 
 ## Operator commands
 
@@ -186,3 +186,9 @@ Edit `behavior_pack/scripts/config.js` for balance. Run `npm run build` to regen
 The resource pack declares the `pbr` capability following [Mojang’s Vibrant Visuals documentation](https://learn.microsoft.com/en-us/minecraft/creator/documents/vibrantvisuals/vvresourcepacks?view=minecraft-bedrock-stable). Each player can select Vibrant Visuals in Minecraft’s Video/Graphics Mode settings on a supported device, or keep their normal graphics. Olympus does not force the mode or require RTX hardware. Other incompatible active packs/device limitations can still disable the option. Vanilla lighting/material defaults remain; this is compatibility, not a replacement texture overhaul.
 
 After an observed ability cooldown ends, only that player receives `Ready again: <ability>`. Simultaneous completions share a message, with at most one ready message per ten seconds. Reusing a move cancels its queued reminder; old expired timers on login, removed abilities and canceled timers do not announce. Main god abilities, active Crown powers, original forge powers, and the longer utility actions are covered. Rapid gadget timers, per-target hit timers, toggles and automatic passive powers stay quiet. A ready notice means the cooldown finished; ordinary light/equipment/target requirements still apply.
+
+## Native Minecraft animations — v3.4.4
+
+Vanilla player, mob, weapon and item definitions are now provided entirely by Minecraft. Olympus no longer copies or overrides their entity models, animation bindings or controllers. This restores native spear animations for Hermes and other players and avoids maintaining replacement vanilla animation definitions as Minecraft updates.
+
+Oracle retains its private gold ground compass, colored directions/trails, target/chest particles and bearing/distance display. Model-shaped ESP outlines are removed. Custom Olympus wearable appearances still use native armor rendering. God movement, damage, cooldowns, Poseidon's clutch and optional Vibrant Visuals remain unchanged. See [compatibility checks](ANIMATION_AUDIT.md). Replace both server packs and refresh client resources; visual play verification remains pending.

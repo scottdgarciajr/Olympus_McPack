@@ -1,7 +1,6 @@
 import { world, system, EntityDamageCause, MolangVariableMap } from '@minecraft/server';
 import { CONFIG } from './config.js';
 import { scanChests } from './oracle_esp.js';
-import { updateOracleEdges, clearOracleEdges } from './oracle_render.js';
 
 const flareShots = new Map();
 const processedFlare = new Map();
@@ -288,7 +287,6 @@ function updateVision(player) {
   const v=visions.get(player.id);
   if (!v) return;
   if (system.currentTick>=v.until || api.role(player)!=='apollo' || player.dimension.id!==v.dimension || (api.power && !api.power(player).lit)) {
-    clearOracleEdges(player,v);
     visions.delete(player.id);
     player.onScreenDisplay.setActionBar('');
     return;
@@ -304,11 +302,6 @@ function updateVision(player) {
     try { return ['minecraft:chest','minecraft:trapped_chest','minecraft:ender_chest'].includes(player.dimension.getBlock(at)?.typeId); }
     catch { return false; }
   });
-  try { updateOracleEdges(player,v,v.targets,chests); }
-  catch(error) {
-    if(!v.outlineErrorReported){v.outlineErrorReported=true;api.fail?.(error);}
-    // Rendering failures must never prevent particles or directional feedback.
-  }
   const lines=[];
   let particleTargets=0;
   const showParticles=system.currentTick-(v.lastSparkTick ?? -100)>=3;
@@ -405,7 +398,6 @@ export function divineTick() {
   for (const [id,v] of visions) {
     if (system.currentTick>=v.until || !world.getAllPlayers().some(p=>p.id===id)) {
       const player=world.getAllPlayers().find(p=>p.id===id);
-      clearOracleEdges(player,v);
       try { player?.onScreenDisplay.setActionBar(''); } catch {}
       visions.delete(id); continue;
     }

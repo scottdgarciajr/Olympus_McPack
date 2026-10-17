@@ -1,5 +1,12 @@
 # In-game test checklist
 
+## 3.4.4 native animations and compass-only Oracle (Minecraft verification pending)
+
+- Replace both server packs, remove older active Olympus resources and redownload client resources; status must show v3.4.4. Check spear hold/jab/charge as Hermes and another player, first/third person, walking/sprinting and mountain steps. The addon must contain no vanilla player/mob/item/animation replacements.
+- Test trident melee/charge/Riptide, bows/crossbows, shield blocking, mining, swimming, crawling, riding, baby-mob movement and custom Crown/boots/helmet. Minecraft supplies the native animations; other active packs can still affect them.
+- Oracle must retain its gold compass, colored ground directions/trails, target/chest particles and range/distance feedback with no model-shaped outlines or entity-property overrides. Verify expiry/darkness/dimension/disconnect cleanup. Old chest markers must disappear after upgrade.
+- Check Poseidon Strength/Haste/swim controls/rain clutch and admin sizes, Hermes stepping, Apollo flight/bows, private gear, forge utilities, cooldown notices and optional Vibrant Visuals. Removing vanilla entity overrides must not change these scripted mechanics.
+
 ## 3.4.3 visuals and ready chat (Minecraft verification pending)
 
 - Activate both v3.4.3 packs; verify status. On supported hardware select Vibrant Visuals in Video/Graphics Mode, then switch back to ordinary graphics. Two players may choose different modes. Check temple, icons, worn gear, Oracle particles/outlines and Poseidon underwater visibility in both modes. If unavailable, check device support and other active packs.

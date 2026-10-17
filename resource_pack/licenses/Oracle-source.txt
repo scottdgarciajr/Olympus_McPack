@@ -1,3 +1,0 @@
-Vanilla definitions and model-derived animated mesh edges: https://github.com/Mojang/bedrock-samples/tree/v1.21.120.4
-Oracle adds a client-synced, default-false property to vanilla definitions. Only Apollo receives per-viewer true overrides.
-Gold emissive depth-always material implements the documented Bedrock material mechanism used by outline addons.

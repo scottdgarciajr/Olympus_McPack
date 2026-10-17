@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-VERSION = [3, 4, 3]
+VERSION = [3, 4, 4]
 VERSION_TEXT = '.'.join(map(str, VERSION))
 GODS = {
     'hermes': ('Hermes Winged Relic', '#f4cf58'),
@@ -87,7 +87,7 @@ bp_uuid = 'a06ad1f9-8b44-4af1-995a-95dc9c684c25'
 rp_uuid = 'def06a91-6e05-457a-a359-714565d4c32c'
 write_json(BP / 'manifest.json', {
     'format_version': 2,
-    'header': {'name': f'Olympus SMP Behavior v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Optional Vibrant Visuals; private grouped cooldown-ready chat alerts. Hermes: physical ground checks for grass/sand steps. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, rain clutch defaults to 3x3 water, 2 tall; native containment; 5s cleanup; configurable size and original single-water option; no Slow Falling; admin clutch toggle; Hephaestus: 14 forge creations including 10 balanced utility items; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
+    'header': {'name': f'Olympus SMP Behavior v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Native Minecraft animations; particle-only Oracle compass. Optional Vibrant Visuals; private grouped cooldown-ready chat alerts. Hermes: physical ground checks for grass/sand steps. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, rain clutch defaults to 3x3 water, 2 tall; native containment; 5s cleanup; configurable size and original single-water option; no Slow Falling; admin clutch toggle; Hephaestus: 14 forge creations including 10 balanced utility items; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
     'modules': [
         {'type': 'data', 'uuid': '45604c22-4d55-478e-beb7-fca61db38eaf', 'version': VERSION},
         {'type': 'script', 'language': 'javascript', 'entry': 'scripts/main.js', 'uuid': 'c6515f3a-93dc-4971-987c-ad95b689d22f', 'version': VERSION}
@@ -97,7 +97,7 @@ write_json(BP / 'manifest.json', {
 })
 write_json(RP / 'manifest.json', {
     'format_version': 2,
-    'header': {'name': f'Olympus SMP Resources v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Vibrant Visuals compatible (player graphics choice). Gold Oracle compass and colored direction trails, clear Poseidon water. Pair with Olympus Behavior v{VERSION_TEXT}.', 'uuid': rp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
+    'header': {'name': f'Olympus SMP Resources v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Native Minecraft animations; gold particle Oracle compass. Vibrant Visuals compatible (player graphics choice). Gold Oracle compass and colored direction trails, clear Poseidon water. Pair with Olympus Behavior v{VERSION_TEXT}.', 'uuid': rp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
     'modules': [{'type': 'resources', 'uuid': '148f6c15-a3b3-4f02-9c59-ff3af25c3e40', 'version': VERSION}],
     'capabilities': ['pbr'],
     'metadata': {'authors': ['Olympus SMP'], 'product_type': 'addon'}

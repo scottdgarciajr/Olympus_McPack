@@ -1,13 +1,13 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Olympus SMP Behavior v3.4.3",
-    "description": "v3.4.3 | Optional Vibrant Visuals; private grouped cooldown-ready chat alerts. Hermes: physical ground checks for grass/sand steps. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, rain clutch defaults to 3x3 water, 2 tall; native containment; 5s cleanup; configurable size and original single-water option; no Slow Falling; admin clutch toggle; Hephaestus: 14 forge creations including 10 balanced utility items; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.",
+    "name": "Olympus SMP Behavior v3.4.4",
+    "description": "v3.4.4 | Native Minecraft animations; particle-only Oracle compass. Optional Vibrant Visuals; private grouped cooldown-ready chat alerts. Hermes: physical ground checks for grass/sand steps. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, rain clutch defaults to 3x3 water, 2 tall; native containment; 5s cleanup; configurable size and original single-water option; no Slow Falling; admin clutch toggle; Hephaestus: 14 forge creations including 10 balanced utility items; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.",
     "uuid": "a06ad1f9-8b44-4af1-995a-95dc9c684c25",
     "version": [
       3,
       4,
-      3
+      4
     ],
     "min_engine_version": [
       1,
@@ -22,7 +22,7 @@
       "version": [
         3,
         4,
-        3
+        4
       ]
     },
     {
@@ -33,7 +33,7 @@
       "version": [
         3,
         4,
-        3
+        4
       ]
     }
   ],
@@ -51,7 +51,7 @@
       "version": [
         3,
         4,
-        3
+        4
       ]
     }
   ],

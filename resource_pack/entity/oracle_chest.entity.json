@@ -3,20 +3,7 @@
   "minecraft:client_entity": {
     "description": {
       "identifier": "olympus:oracle_chest",
-      "materials": {
-        "default": "olympus_oracle_glow"
-      },
-      "textures": {
-        "default": "textures/entity/oracle_gold"
-      },
-      "geometry": {
-        "default": "geometry.olympus.oracle.olympus.chest_source"
-      },
-      "render_controllers": [
-        {
-          "controller.render.olympus.oracle_chest": "query.property('olympus:oracle_visible')"
-        }
-      ]
+      "render_controllers": []
     }
   }
 }

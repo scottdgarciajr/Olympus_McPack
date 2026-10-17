@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { lightPower, seaEnvironment, clearEnvironment, bucketClutch, forgetEnvironment, poseidonMiningHaste } from '../behavior_pack/scripts/sea_light.js';
 import { poseidonSwimCruise } from '../behavior_pack/scripts/poseidon_swim.js';
 import { CONFIG } from '../behavior_pack/scripts/config.js';
@@ -161,10 +161,7 @@ test('Sunflight runs indefinitely, torch flight expires, and darkness cancels im
 });
 
 test('rain clutch never grants fall immunity, resistance, slow falling or teleport protection',()=>{
-  const definition=JSON.parse(readFileSync(new URL('../behavior_pack/entities/player.json',import.meta.url),'utf8'))['minecraft:entity'];
-  assert.equal(definition.description.properties['olympus:rain_fall_guard'],undefined);
-  assert.equal(definition.description.properties['olympus:clutch_fall_guard'],undefined);
-  assert.equal(definition.components['minecraft:damage_sensor'],undefined);
+  assert.equal(existsSync(new URL('../behavior_pack/entities/player.json',import.meta.url)),false,'Minecraft owns player behavior and damage handling');
   const clutch=readFileSync(new URL('../behavior_pack/scripts/sea_light.js',import.meta.url),'utf8').split('export function bucketClutch(')[1];
   assert.doesNotMatch(clutch,/addEffect|setProperty|setDynamicProperty|teleport|clearVelocity|applyImpulse/);
 });

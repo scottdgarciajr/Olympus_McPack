@@ -5,16 +5,15 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { CONFIG } from '../behavior_pack/scripts/config.js';
 import { scanChests } from '../behavior_pack/scripts/oracle_esp.js';
-import { updateOracleEdges, clearOracleEdges } from '../behavior_pack/scripts/oracle_render.js';
 
 // The Bedrock runtime is unavailable to Node. Load the real combat module with
 // small API doubles so the impact and cooldown paths can still be exercised.
 const path = resolve(dirname(fileURLToPath(import.meta.url)),'../behavior_pack/scripts/divine_combat.js');
 const source = readFileSync(path,'utf8').replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'');
 function runtime(world,system,MapType=class { setColorRGB() {} setFloat() {} }) {
-  const factory = new Function('world','system','EntityDamageCause','MolangVariableMap','CONFIG','scanChests','updateOracleEdges','clearOracleEdges',
+  const factory = new Function('world','system','EntityDamageCause','MolangVariableMap','CONFIG','scanChests',
     `${source}\nreturn {onDivineBowRelease,configureDivine,armSolarFlare,onDivineProjectileSpawn,onDivineProjectileHitEntity,hellfire,oracleSight,divineTick,assistedArrowTick};`);
-  return factory(world,system,{magic:'magic',projectile:'projectile'},MapType,CONFIG,scanChests,updateOracleEdges,clearOracleEdges);
+  return factory(world,system,{magic:'magic',projectile:'projectile'},MapType,CONFIG,scanChests);
 }
 function target(id,typeId='minecraft:zombie') {
   const damage=[],effects=[];
@@ -139,7 +138,7 @@ test('Oracle and Solar Flare cannot activate in darkness',()=>{
   assert.equal(props.get('olympus:flareArmed'),undefined);
 });
 
-test('Oracle draws a gold ground compass and colored trails even if model outlines fail',()=>{
+test('Oracle draws a gold ground compass and colored trails without touching entity rendering',()=>{
   const particles=[],messages=[],failures=[];
   const dimension={id:'minecraft:overworld',playSound(){},getBlockFromRay:()=>({block:{location:{x:0,y:-1,z:0}}}),
     getBlock:at=>({typeId:at.x===3 && at.y===0 && at.z===3?'minecraft:chest':'minecraft:air'})};
@@ -155,7 +154,7 @@ test('Oracle draws a gold ground compass and colored trails even if model outlin
   const api=runtime({getAllPlayers:()=>[viewer]},system,class {setColorRGB(_name,color){this.color=color;}});
   api.configureDivine({role:()=> 'apollo',ready:()=>true,startCooldown(){},tell(){},fail:e=>failures.push(e)});
   api.oracleSight(viewer);
-  assert.equal(failures.length,1);assert.match(messages[0],/Neighbor E 12m/);
+  assert.equal(failures.length,0,'compass never invokes the throwing entity-render override');assert.match(messages[0],/Neighbor E 12m/);
   const ground=particles.filter(p=>p.at.y<0.2);
   assert.ok(ground.filter(p=>p.color.red===1 && p.color.green===0.82).length>=24,'gold base ring');
   assert.ok(ground.some(p=>p.color.blue===1 && p.at.x>3),'cyan trail toward player');
@@ -164,7 +163,7 @@ test('Oracle draws a gold ground compass and colored trails even if model outlin
   system.currentTick+=3;api.divineTick();
   assert.ok(particles.some(p=>p.color.green===0.55 && p.at.x>2 && p.at.z>2),'orange chest direction and destination');
   assert.match(messages.at(-1),/Chests:1/);
-  assert.equal(failures.length,1,'outline error reported once; compass continues refreshing');
+  assert.equal(failures.length,0,'compass continues refreshing without entity rendering calls');
 });
 
 test('Prophetic release snapshot catches delayed native arrow ownership after switching items',()=>{

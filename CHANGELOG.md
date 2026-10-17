@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.4.4 — Native Minecraft animations and compass-only Oracle
+
+- Remove copied vanilla player/mob behavior and client definitions, generated mesh outlines/controllers and their generators. Minecraft now supplies all vanilla entity/weapon animations, including Hermes's spear. No replacement animation set is bundled.
+- Keep Oracle's private gold compass, colored ground directions/trails, target/chest particles, bounded discovery and bearing/distance feedback. Remove model-shaped ESP/property overrides; old custom chest markers despawn on upgrade.
+- Preserve custom Olympus equipment appearances using native armor rendering, god abilities, Poseidon clutch, Vibrant Visuals compatibility and cooldown notices.
+- Build checks reject any new vanilla entity/item or animation/controller override. 96 tests pass; Minecraft visual verification remains pending.
+
 ## 3.4.3 — Optional Vibrant Visuals and quiet ready notices
 
 - Declare resource-pack `pbr` compatibility with existing Bedrock 1.21.120 minimum. Players choose Vibrant Visuals locally on compatible devices; normal graphics remain available and RTX is not required.

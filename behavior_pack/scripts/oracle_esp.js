@@ -1,4 +1,4 @@
-// Bounded chest discovery. Rendering is native animated geometry in oracle_render.
+// Bounded chest discovery. Oracle uses private compass, trail and target particles only.
 export function* scanChests(dimension, origin, radius) {
   const p={x:Math.floor(origin.x),y:Math.floor(origin.y),z:Math.floor(origin.z)};
   // Near shells appear first; scan work is bounded by the caller each tick.

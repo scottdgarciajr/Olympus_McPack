@@ -29,7 +29,8 @@
           "event": "olympus:expire",
           "target": "self"
         }
-      }
+      },
+      "minecraft:instant_despawn": {}
     },
     "component_groups": {
       "olympus:expired": {

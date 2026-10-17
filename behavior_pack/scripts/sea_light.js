@@ -101,7 +101,7 @@ export function bucketClutch(player, raining, blocked, spawnWater, size=[3,3,2])
       const report=reason=>{if(!fall.warned){fall.warned=true;try{player.sendMessage('§e[Rain Clutch] '+reason);}catch{}}};
       if(!spawnWater(player.dimension.id,locations,blocked,report))continue;
       fall.used = true;
-      try { player.sendMessage(`§b[Olympus v3.4.2] Rain Clutch: ${size[0]}x${size[1]} water, ${size[2]} tall; disappears in 5 seconds.`); } catch {}
+      try { player.sendMessage(`§b[Olympus v3.4.4] Rain Clutch: ${size[0]}x${size[1]} water, ${size[2]} tall; disappears in 5 seconds.`); } catch {}
       return true;
     } catch {}
   }
