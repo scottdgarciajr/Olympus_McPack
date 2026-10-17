@@ -12,7 +12,7 @@ import { findMadnessLanding } from './teleport.js';
 import { hermesStepUp } from './hermes_step.js';
 import { poseidonSwimCruise,recordTidalBoost,forgetTidalBoost,tidalEnvironment } from './poseidon_swim.js';
 import { spawnRainWater, cleanupRainWater } from './rain_water.js';
-import {rainClutchEnabled,rainClutchCommand} from './poseidon_admin.js';
+import {rainClutchEnabled,rainClutchCommand,rainClutchSize} from './poseidon_admin.js';
 import {configureUtilityForge,utilityEquipmentTick,utilityCartTick,packUtilityCart} from './forge_utilities.js';
 import { lightPower, seaEnvironment, bucketClutch, clearEnvironment, forgetEnvironment, poseidonMiningHaste } from './sea_light.js';
 import { isPersonalGodItem, isPersonalGodTool, lockGodItem, queueGodItem, deliverQueuedGodItems } from './god_items.js';
@@ -25,7 +25,7 @@ const TITLES = {
   hephaestus: 'God of Craftsmanship', dionysus: 'God of Wine and Madness', kratos: 'Forbidden God Slayer'
 };
 const DESCRIPTIONS = {
-  hermes: 'Speed VI, Flash-fast sprint and automatic one-block steps while moving, fall protection, and toggleable Divine Leap; Weakness III. Divine Pearl every 5 minutes.',
+  hermes: 'Speed VI, Flash-fast sprint and automatic one-block steps on natural grass/sand while moving, fall protection, and toggleable Divine Leap; Weakness III. Divine Pearl every 5 minutes.',
   zeus: 'Mining Fatigue II. Thunder or Overworld Y220+ grants lightning every 5 seconds; rain/thunder or Y220+ removes the 30-second flight activation cooldown.',
   poseidon: 'Strength II in water/rain; Haste I underwater with modest adaptive mining compensation; Haste II in rain; Conduit Power, clear water vision, no swimming hunger, mild walking-speed swim cruise, fast Tidal Sprint, and bucket-free rain clutch placing 3x3 water, 2 blocks tall, for 5 seconds without spreading; no Slow Falling; administrator toggle. Slowness III and Weakness III in Nether/desert.',
   hades: 'Fire Resistance and Night Vision; sheltered from daylight weakness. Nether/End power and Hellfire from fire or lava.',
@@ -38,7 +38,7 @@ const DESCRIPTIONS = {
 const CONTROLS = {
   hermes: 'Speed VI always; sprint for Speed XIV. Move into one-block ledges to step up automatically, including during normal fast walking. Grounded only; tall walls still require a route around. Use relic: pearl (5m). Sneak-use: mobility menu for Slow Falling and Divine Leap toggles. Weakness III.',
   zeus: 'Use relic: lightning; sneak-use: 30s flight. Overworld Y220+: full storm power, 5s lightning and no flight activation cooldown. Below Y220, clear weather has 3m cooldowns; rain removes cooldowns and thunder lightning has a 5s interval.',
-  poseidon: 'Sneak-use: Tidal Sprint toggle; boost only while sprinting. Jump to rise/leave water. Strength II water/rain; Haste I water with adaptive mining / II rain; clear water vision and no swimming hunger. Mild swim cruise always assists movement in water, even with Tidal Sprint off. Rain Clutch: fall in exposed rain; water appears automatically with no bucket or clicking, then disappears after 5s. Clear weather, Nether and protected areas excluded. Protection comes only from landing in water; there is no fall-damage immunity. A 3x3 pool, 2 blocks tall, is placed once per fall without spreading; no Slow Falling. Administrators can enable/disable the clutch. Strength, Haste and Conduit end on leaving water/rain; water vision ends on leaving water. Tidal boost momentum ends on dry exit.',
+  poseidon: 'Sneak-use: Tidal Sprint toggle; boost only while sprinting. Jump to rise/leave water. Strength II water/rain; Haste I water with adaptive mining / II rain; clear water vision and no swimming hunger. Mild swim cruise always assists movement in water, even with Tidal Sprint off. Rain Clutch: fall in exposed rain; water appears automatically with no bucket or clicking, then disappears after 5s. Clear weather, Nether and protected areas excluded. Protection comes only from landing in water; there is no fall-damage immunity. A 3x3 pool, 2 blocks tall, is placed once per fall without spreading; no Slow Falling. Administrators can enable/disable or resize the clutch; single mode restores the original one-water placement. Strength, Haste and Conduit end on leaving water/rain; water vision ends on leaving water. Tidal boost momentum ends on dry exit.',
   hades: 'Use relic while physically in fire, soul fire, or lava: Hellfire fireball (15s). Sneak-use checks readiness. Fire Resistance/Night Vision always; night and otherworld buffs remain.',
   ares: 'Use relic: War Rage, Strength V and Resistance III for 30s (5m). Strength II, Resistance II, Slowness III are passive.',
   apollo: 'Use relic: Lightflight, Solar Flare, gold Oracle compass, Get / Recover Prophetic Bow. Flight: walking speed normally, sprint for fast speed; unlimited in sun, otherwise 5s per minute. Prophetic Bow: draw/release normally with one arrow; no damage buffs. Night/darkness: Weakness III; darkness disables powers.',
@@ -50,7 +50,7 @@ const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigu
   'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
   'levitation', 'nausea', 'blindness', 'regeneration'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '3.4.1';
+const PACK_VERSION = '3.4.2';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
@@ -1101,11 +1101,11 @@ function special(player, god, sneaking) {
       if (sneaking) {
         const enabled = !poseidonSpeedEnabled(player);
         player.setDynamicProperty(key('poseidonSpeed'), enabled);
-        tell(player, `v${PACK_VERSION}: Tidal Sprint ${enabled ? 'ON' : 'OFF'}. Water/rain: Strength II; Haste I in water with modest mining compensation, Haste II in rain. Hold sprint for the boost; release sprint for normal control. Hold jump to leave water. Rain Clutch is automatic only in exposed rain, needs no bucket, and places 3x3 water, 2 blocks tall, for 5s without spreading. No Slow Falling. Mild swim cruise remains available with Tidal Sprint off.`);
+        tell(player, `v${PACK_VERSION}: Tidal Sprint ${enabled ? 'ON' : 'OFF'}. Water/rain: Strength II; Haste I in water with modest mining compensation, Haste II in rain. Hold sprint for the boost; release sprint for normal control. Hold jump to leave water. Rain Clutch is automatic only in exposed rain, needs no bucket, and places ${rainClutchSize(world).join("x")} water (width/depth/height), for 5s. No Slow Falling. Mild swim cruise remains available with Tidal Sprint off.`);
         showFlair(player, god, true);
       } else {
         tell(player,`v${PACK_VERSION}: Strength II in water/rain; Haste I in water with modest mining compensation, Haste II in rain. ${CONTROLS.poseidon}`);
-        tell(player,`Rain Clutch ${!rainClutchEnabled(world,player.name)?'DISABLED by administrator':inRain(player)?'READY':'waiting for exposed rain'}: fall toward a solid floor in rain. No bucket or clicking needed; 3x3 water, 2 blocks tall, disappears after 5 seconds without spreading; no Slow Falling. Disabled in clear weather, Nether and protected areas.`);
+        tell(player,`Rain Clutch ${!rainClutchEnabled(world,player.name)?'DISABLED by administrator':inRain(player)?'READY':'waiting for exposed rain'}: fall toward a solid floor in rain. No bucket or clicking needed; ${rainClutchSize(world).join("x")} water (width/depth/height) disappears after 5 seconds; no Slow Falling. Disabled in clear weather, Nether and protected areas.`);
       }
     } else if (god === 'hades') {
       if (sneaking) {
@@ -1553,7 +1553,7 @@ system.runInterval(() => {
       const wetState=player.isInWater?'water':inRain(player)?'rain':'dry';
       if(poseidonWetState.get(player.id)!==wetState){poseidonWetState.set(player.id,wetState);updatePlayer(player);}
       poseidonMotion(player);
-      try { bucketClutch(player, inRain(player) && rainClutchEnabled(world,player.name), (dim,p)=>inHall(dim,p)||temporaryBlock(dim,p)||isForge(dim,p), (dim,points,blocked)=>spawnRainWater(world,dim,points,blocked)); }
+      try { bucketClutch(player, inRain(player) && rainClutchEnabled(world,player.name), (dim,p)=>inHall(dim,p)||temporaryBlock(dim,p)||isForge(dim,p), (dim,points,blocked,report)=>spawnRainWater(world,dim,points,blocked,Date.now(),report),rainClutchSize(world)); }
       catch (e) { fail(e); }
     }
   }

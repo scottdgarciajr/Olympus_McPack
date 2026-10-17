@@ -64,6 +64,8 @@ light=read_json(BP/'blocks'/'forge_lantern_light.json')['minecraft:block']['comp
 check(light['minecraft:light_emission']==12 and light['minecraft:collision_box'] is False, 'Lantern light must be passable and bounded')
 for mode in ('on','off','status','reset'):
     check((BP/'functions'/'olympus'/f'poseidon_clutch_{mode}.mcfunction').read_text().strip()==f'scriptevent olympus:poseidon_clutch {mode}', 'Clutch admin function missing')
+for mode in ('single','default'):
+    check((BP/'functions'/'olympus'/f'poseidon_clutch_{mode}.mcfunction').read_text().strip()==f'scriptevent olympus:poseidon_clutch size {mode}', 'Clutch size function missing')
 clutch=read_json(BP/'blocks'/'clutch_boundary.json')['minecraft:block']['components']
 check(clutch['minecraft:collision_box'] is False and clutch['minecraft:selection_box'] is False, 'Clutch edges must allow player movement, targeting and projectiles')
 flow=clutch['minecraft:liquid_detection']['detection_rules'][0]

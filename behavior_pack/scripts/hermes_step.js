@@ -1,8 +1,40 @@
 const HAZARDS=new Set(['minecraft:lava','minecraft:flowing_lava','minecraft:fire','minecraft:soul_fire','minecraft:cactus','minecraft:magma','minecraft:campfire','minecraft:soul_campfire','minecraft:powder_snow']);
+const FULL=new Set(['grass','grass_block','dirt','coarse_dirt','rooted_dirt','dirt_with_roots','sand','red_sand','gravel','stone','cobblestone','deepslate','cobbled_deepslate','sandstone','red_sandstone','quartz_block','smooth_quartz','snow','netherrack','end_stone'].map(id=>'minecraft:'+id));
+const PASSABLE=new Set(['air','short_grass','tallgrass','tall_grass','fern','large_fern','deadbush','dead_bush','dandelion','poppy','blue_orchid','allium','azure_bluet','oxeye_daisy','cornflower','lily_of_the_valley','white_tulip','orange_tulip','pink_tulip','red_tulip','sunflower','lilac','rose_bush','peony','structure_void'].map(id=>'minecraft:'+id));
+function naturalStep(player,direction) {
+  if(!player.teleport || player.isSneaking || player.isInWater || player.isGliding)return false;
+  const length=Math.hypot(direction.x,direction.z);if(length<0.25)return false;
+  const at=player.location,v=player.getVelocity();if(v.y>0.15)return false;
+  const blockAt=(x,y,z)=>player.dimension.getBlock({x:Math.floor(x),y:Math.floor(y),z:Math.floor(z)});
+  // Verify physical support rather than trusting isOnGround during fast
+  // collision ticks. Only feet actually touching a full block may step.
+  const feet=Math.round(at.y);
+  if(Math.abs(at.y-feet)>0.1 || !FULL.has(blockAt(at.x,feet-0.05,at.z)?.typeId))return false;
+  const forward={x:direction.x/length,z:direction.z/length},right={x:-forward.z,z:forward.x};
+  const clear=(x,y,z)=>{
+    for(let bx=Math.floor(x-0.29);bx<=Math.floor(x+0.29);bx++)for(let bz=Math.floor(z-0.29);bz<=Math.floor(z+0.29);bz++)for(let by=Math.floor(y);by<=Math.floor(y+1.79);by++) {
+      const block=blockAt(bx,by,bz);if(!block || !(block.isAir || PASSABLE.has(block.typeId)))return false;
+    }
+    return true;
+  };
+  for(const distance of [0.35,0.55,0.75,1,1.25,1.5])for(const offset of [0,-0.22,0.22]) {
+    const x=at.x+forward.x*distance+right.x*offset,z=at.z+forward.z*distance+right.z*offset;
+    const floor=blockAt(x,feet+0.05,z);if(!FULL.has(floor?.typeId))continue;
+    const y=feet+1.01;if(y-at.y<0.6 || y-at.y>1.12)continue;
+    let fits=true;const samples=Math.ceil(distance/0.15);
+    for(let i=0;i<=samples;i++)if(!clear(at.x+(x-at.x)*i/samples,y,at.z+(z-at.z)*i/samples)){fits=false;break;}
+    if(!fits)continue;
+    // The complete swept body was checked above. Native teleport avoids
+    // checkForBlocks treating harmless plants as a rejected destination.
+    player.teleport({x,y,z},{keepVelocity:true});return true;
+  }
+  return false;
+}
 
 // Bounded ground stepping, rather than a vertical impulse that could be
 // repeatedly applied against walls. Collision checks remain server-side.
 export function hermesStepUp(player,direction) {
+  try{if(naturalStep(player,direction))return true;}catch{return false;}
   if(!player.isOnGround || player.isSneaking || player.isInWater || player.isGliding)return false;
   const length=Math.hypot(direction.x,direction.z);
   if(length<0.25)return false;

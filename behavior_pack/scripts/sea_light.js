@@ -73,7 +73,7 @@ export function seaEnvironment(player, active) {
   });
 }
 
-export function bucketClutch(player, raining, blocked, spawnWater) {
+export function bucketClutch(player, raining, blocked, spawnWater, size=[3,3,2]) {
   const p = player.location, velocity = player.getVelocity();
   if (player.isInWater || player.isOnGround) { falls.set(player.id,{top:p.y,used:false}); return false; }
   const fall = falls.get(player.id) || { top: p.y, used: false };
@@ -92,13 +92,16 @@ export function bucketClutch(player, raining, blocked, spawnWater) {
       const floor=hit.block;
       const location={x:floor.location.x,y:floor.location.y+1,z:floor.location.z};
       const air = player.dimension.getBlock(location);
-      if (!air?.isAir || blocked(player.dimension.id, location) || blocked(player.dimension.id,floor.location)) continue;
+      // The placer accepts air AND restorable plants. Rejecting non-air here
+      // prevents grass landings from ever reaching that placement logic.
+      if (!air || blocked(player.dimension.id, location) || blocked(player.dimension.id,floor.location)) continue;
       const locations=[];
-      for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)for(let dy=0;dy<2;dy++)
+      for(let dx=-Math.floor(size[0]/2);dx<Math.ceil(size[0]/2);dx++)for(let dz=-Math.floor(size[1]/2);dz<Math.ceil(size[1]/2);dz++)for(let dy=0;dy<size[2];dy++)
         locations.push({x:location.x+dx,y:location.y+dy,z:location.z+dz});
-      if(!spawnWater(player.dimension.id,locations,blocked))continue;
+      const report=reason=>{if(!fall.warned){fall.warned=true;try{player.sendMessage('§e[Rain Clutch] '+reason);}catch{}}};
+      if(!spawnWater(player.dimension.id,locations,blocked,report))continue;
       fall.used = true;
-      try { player.sendMessage('§b[Olympus v3.4.1] Rain Clutch: 3x3 water, 2 blocks tall; no spread; disappears in 5 seconds.'); } catch {}
+      try { player.sendMessage(`§b[Olympus v3.4.2] Rain Clutch: ${size[0]}x${size[1]} water, ${size[2]} tall; disappears in 5 seconds.`); } catch {}
       return true;
     } catch {}
   }

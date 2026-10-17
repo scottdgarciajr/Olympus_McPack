@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-VERSION = [3, 4, 1]
+VERSION = [3, 4, 2]
 VERSION_TEXT = '.'.join(map(str, VERSION))
 GODS = {
     'hermes': ('Hermes Winged Relic', '#f4cf58'),
@@ -87,7 +87,7 @@ bp_uuid = 'a06ad1f9-8b44-4af1-995a-95dc9c684c25'
 rp_uuid = 'def06a91-6e05-457a-a359-714565d4c32c'
 write_json(BP / 'manifest.json', {
     'format_version': 2,
-    'header': {'name': f'Olympus SMP Behavior v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Hermes: automatic one-block steps while walking/running. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, rain-only 3x3 water, 2 blocks tall, expires in 5s without spreading; no Slow Falling; admin clutch toggle; Hephaestus: 14 forge creations including 10 balanced utility items; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
+    'header': {'name': f'Olympus SMP Behavior v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Hermes: physical ground checks for grass/sand steps. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, rain clutch defaults to 3x3 water, 2 tall; native containment; 5s cleanup; configurable size and original single-water option; no Slow Falling; admin clutch toggle; Hephaestus: 14 forge creations including 10 balanced utility items; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
     'modules': [
         {'type': 'data', 'uuid': '45604c22-4d55-478e-beb7-fca61db38eaf', 'version': VERSION},
         {'type': 'script', 'language': 'javascript', 'entry': 'scripts/main.js', 'uuid': 'c6515f3a-93dc-4971-987c-ad95b689d22f', 'version': VERSION}
@@ -301,3 +301,6 @@ print('Generated pack assets and functions.')
 
 for mode in ('on','off','status','reset'):
     (functions / f'poseidon_clutch_{mode}.mcfunction').write_text(f'scriptevent olympus:poseidon_clutch {mode}\n',encoding='utf-8')
+
+for mode in ('single','default'):
+    (functions / f'poseidon_clutch_{mode}.mcfunction').write_text(f'scriptevent olympus:poseidon_clutch size {mode}\n',encoding='utf-8')

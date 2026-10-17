@@ -28,6 +28,21 @@ test('Hermes steps directly onto one-block ledges without a jump or velocity res
   assert.equal(calls[0].at.y,65.01);assert.equal(calls[0].at.z,0.5);
   assert.deepEqual(calls[0].options,{checkForBlocks:true,keepVelocity:true});
 });
+test('native block-grid stepping climbs grass and sand when isOnGround flickers false',()=>{
+ for(const typeId of ['minecraft:grass_block','minecraft:sand']){
+  const destinations=[];let tall=false,ceiling=false;
+  const player={location:{x:0.7,y:64,z:0.5},isOnGround:false,getVelocity:()=>({x:0.8,y:-0.2,z:0}),
+   teleport:(at,options)=>destinations.push({at,options}),dimension:{getBlock:p=>{
+    const solid=p.y<=63 || p.x>=1 && (p.y===64 || tall && p.y===65) || ceiling && p.y===66;
+    return {typeId:solid?typeId:'minecraft:short_grass',isAir:false};
+   }}};
+  assert.equal(hermesStepUp(player,{x:1,z:0}),true);assert.equal(destinations[0].at.y,65.01);assert.ok(destinations[0].at.x>=1);
+  assert.deepEqual(destinations[0].options,{keepVelocity:true});
+  tall=true;assert.equal(hermesStepUp(player,{x:1,z:0}),false,'cannot climb a two-block wall');
+  tall=false;ceiling=true;assert.equal(hermesStepUp(player,{x:1,z:0}),false,'cannot step through a ceiling');
+  ceiling=false;player.location.y=64.5;assert.equal(hermesStepUp(player,{x:1,z:0}),false,'no stepping while airborne');
+ }
+});
 test('airborne, sneaking, swimming and stationary Hermes cannot ramp',()=>{
   for(const [flag,value] of [['isOnGround',false],['isSneaking',true],['isInWater',true],['isGliding',true]]) {
     const {player,calls}=runner();player[flag]=value;

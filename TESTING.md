@@ -1,5 +1,13 @@
 # In-game test checklist
 
+## 3.4.2 placement regression and size controls (Minecraft verification pending)
+
+- Status must show v3.4.2. In exposed rain, test sand, grass with tall/short grass and flowers, bare stone/quartz. Default pool is 3x3 across, two tall; no flow, no custom perimeter dependency. Five-second cleanup restores plants and removes native structure voids; normal player movement/combat still works. Failure messages identify protection/unloaded terrain/placement exceptions.
+- `/function olympus/poseidon_clutch_single`: original one native water block, brief natural flow, five-second cleanup. `/function olympus/poseidon_clutch_default`: contained 3x3x2. Try `size 5 3 2`, invalid bounds, restart, status, global enable/disable and reset (restores 3x3x2). No Slow Falling, no bucket, rain only throughout.
+- Hermes: run/walk continuously up sand/grass/quartz single-block slopes, with plants and both corner directions. Test ordinary collisions, ground-flag flicker, low ceilings, tall walls, jumping and sneaking. Only supported single-block steps with clear body space may advance; native velocity remains.
+
+Use this checklist for current behavior; earlier versions below are historical.
+
 ## 3.4.1 contained pool and mountain edges (Minecraft verification pending)
 
 - Enable both v3.4.1 packs and verify status. In Survival exposed rain, fall onto flat stone: water must be three blocks across each horizontal axis and two blocks tall. Check no flow beyond the pool, five-second water/edge cleanup, no Slow Falling, no bucket use, normal combat/projectile hits and movement through the invisible perimeter.

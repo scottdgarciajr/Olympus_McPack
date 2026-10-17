@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.4.2 — Rain placement repair, selectable sizes and native ground steps
+
+- Replace custom containment dependency with native pass-through structure voids. Temporarily replace/restore natural plants instead of aborting the whole pool; recognize sand/grass/stone floors without a liquid API query. Placement failures report their reason once per fall.
+- Default rain clutch remains 3x3 across and two tall. Add persistent size controls: single restores original native one-water behavior with brief natural flow; default restores containment; custom width/depth/height bounded to 5/5/3. All modes expire after five seconds, rain only, no Slow Falling/immunity.
+- Hermes uses actual physical foot support and a checked block-grid step for natural full-block ledges, avoiding ground-flag flicker and ray/teleport rejection around grass. Preserve velocity, headroom checks and the one-block limit; no airborne/wall climbing.
+- Automated regression coverage now includes grass/sand floors, vegetation restoration, missing liquid queries, original single-water mode, size persistence and ground-flag flicker. Minecraft play verification remains pending.
+
 ## 3.4.1 — Contained rain pool and mountain-edge stepping
 
 - Poseidon rain clutch now places a 3x3 footprint of ordinary water, two blocks tall. Passable invisible edges prevent flow; water and edges clean up after five seconds. Rain-only, bucket-free, admin toggles and no Slow Falling remain.

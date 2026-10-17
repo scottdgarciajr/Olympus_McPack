@@ -64,7 +64,8 @@ test('clutch uses ordinary water, with passable invisible flow-blocking edges',(
   placeClutchWater(block);assert.deepEqual(changes,['minecraft:water']);
   removeClutchWater(block);assert.deepEqual(changes,['minecraft:water','minecraft:air']);
   const definition=JSON.parse(readFileSync(new URL('../behavior_pack/blocks/clutch_boundary.json',import.meta.url),'utf8'))['minecraft:block'];
-  assert.equal(definition.description.identifier,CLUTCH_BOUNDARY);
+    assert.equal(CLUTCH_BOUNDARY,'minecraft:structure_void');
+    assert.equal(definition.description.identifier,'olympus:clutch_boundary','legacy definition is retained for cleanup');
   assert.equal(definition.components['minecraft:collision_box'],false);
   assert.equal(definition.components['minecraft:selection_box'],false);
   const rule=definition.components['minecraft:liquid_detection'].detection_rules[0];
