@@ -12,6 +12,7 @@ const hellfireShots = new Map();
 const visions = new Map();
 const assistedShots = new Map();
 const solarShots = new Map();
+const moonShots = new Map();
 let lastVisionTick = 0;
 const ANIMALS = new Set(['cow','pig','sheep','chicken','horse','donkey','mule','rabbit','fox','wolf','cat','ocelot','bee','goat','llama','camel','panda','polar_bear','turtle','frog','axolotl','dolphin','squid','glow_squid','cod','salmon','tropical_fish']);
 const colors = { player: {red:1,green:0.82,blue:0.18}, animal: {red:0.38,green:0.9,blue:0.35}, mob: {red:1,green:0.3,blue:0.18} };
@@ -72,6 +73,15 @@ export function onDivineProjectileSpawn(projectile) {
   const tag = () => {
     try {
       const owner = projectile.getComponent('minecraft:projectile')?.owner;
+      if(owner?.typeId==='minecraft:player' && api.role(owner)==='artemis') {
+        if(moonShots.has(projectile.id))return true;
+        const release=recentShotBows.get(owner.id);
+        if(api.heldItem(owner)?.nameTag==='§aArtemis’s Moon Bow' || (release?.name==='§aArtemis’s Moon Bow' && system.currentTick-release.tick<=8)) {
+          moonShots.set(projectile.id,until(12));
+          assistedShots.set(projectile.id,{ownerId:owner.id,god:'artemis',projectile,expires:until(12)});
+        }
+        return true;
+      }
       if (owner?.typeId !== 'minecraft:player' || api.role(owner) !== 'apollo') return !!owner;
       if (assistedShots.has(projectile.id) || solarShots.has(projectile.id) || flareShots.has(projectile.id)) return true;
       const held=api.heldItem(owner)?.nameTag;
@@ -96,6 +106,7 @@ export function onDivineProjectileSpawn(projectile) {
   if (!tag()) for (const delay of [1,2,3]) system.runTimeout(tag,delay);
 }
 export function onDivineBowRelease(player,item) {
+  if(api.role(player)==='artemis' && item?.nameTag==='§aArtemis’s Moon Bow')recentShotBows.set(player.id,{name:item.nameTag,tick:system.currentTick});
   if(api.role(player)==='apollo' && ['§6Apollo’s Prophetic Bow','§eApollo’s Solar Bow'].includes(item?.nameTag)) {
     recentShotBows.set(player.id,{name:item.nameTag,tick:system.currentTick});
     if(item.nameTag==='§6Apollo’s Prophetic Bow' && api.power && !api.power(player).lit)
@@ -169,6 +180,19 @@ function hellfireImpact(event,target) {
   return true;
 }
 export function onDivineProjectileHitEntity(event) {
+  if(event.projectile.typeId==='minecraft:arrow') {
+    const owner=event.source||event.projectile.getComponent('minecraft:projectile')?.owner;
+    const release=owner&&recentShotBows.get(owner.id);
+    if(owner?.typeId==='minecraft:player' && api.role(owner)==='artemis' &&
+       (moonShots.has(event.projectile.id)||(release?.name==='§aArtemis’s Moon Bow'&&system.currentTick-release.tick<=8))) {
+      if(processedFlare.has(event.projectile.id))return 'duplicate';
+      assistedShots.delete(event.projectile.id);
+      moonShots.delete(event.projectile.id);processedFlare.set(event.projectile.id,until(15));
+      const target=event.getEntityHit().entity;
+      if(api.moonPower?.(owner).active && eligible(target,owner))target.applyDamage(10,{cause:EntityDamageCause.projectile,damagingEntity:owner});
+      return 'moon';
+    }
+  }
   if (assistedShots.has(event.projectile.id)) {
     assistedShots.delete(event.projectile.id);
     processedFlare.set(event.projectile.id,until(15));
@@ -186,6 +210,7 @@ export function onDivineProjectileHitEntity(event) {
   return '';
 }
 export function onDivineProjectileHitBlock(event) {
+  moonShots.delete(event.projectile.id);
   if (assistedShots.has(event.projectile.id)) {
     assistedShots.delete(event.projectile.id);
     processedFlare.set(event.projectile.id,until(15));
@@ -283,21 +308,32 @@ export function oracleSight(player) {
   }
   updateVision(player);
 }
+function creatureTrackable(entity,viewer) {
+  if(!detectable(entity,viewer)||entity.typeId.startsWith('olympus:'))return false;
+  const type=entity.typeId.replace('minecraft:','');
+  return !['armor_stand','ender_crystal','boat','chest_boat'].includes(type) && !type.includes('minecart') && !type.endsWith('_boat') && !type.endsWith('_raft');
+}
+function syncArtemisVision(player) {
+  if(api.role(player)!=='artemis'||player.getDynamicProperty('olympus:artemisTrackingOff')===true)return;
+  const old=visions.get(player.id);
+  if(old?.role==='artemis'&&old.dimension===player.dimension.id)return;
+  visions.set(player.id,{role:'artemis',targets:[],counts:{player:0,animal:0,mob:0},chests:[],dimension:player.dimension.id,until:Infinity});
+}
 function updateVision(player) {
   const v=visions.get(player.id);
   if (!v) return;
-  if (system.currentTick>=v.until || api.role(player)!=='apollo' || player.dimension.id!==v.dimension || (api.power && !api.power(player).lit)) {
+  if (system.currentTick>=v.until || api.role(player)!==(v.role||'apollo') || player.dimension.id!==v.dimension || (v.role==='artemis' ? player.getDynamicProperty('olympus:artemisTrackingOff')===true : (api.power && !api.power(player).lit))) {
     visions.delete(player.id);
     player.onScreenDisplay.setActionBar('');
     return;
   }
   v.targets=player.dimension.getEntities({location:player.location,maxDistance:CONFIG.oracle.radius})
-    .filter(e=>detectable(e,player))
+    .filter(e=>v.role==='artemis'?creatureTrackable(e,player):detectable(e,player))
     .sort((a,b)=>(a.typeId==='minecraft:player'?0:1)-(b.typeId==='minecraft:player'?0:1) ||
       distance(a.location,player.location)-distance(b.location,player.location)).slice(0,CONFIG.oracle.maxTargets);
   v.counts={player:0,animal:0,mob:0};
   for (const target of v.targets) v.counts[category(target)]++;
-  const chests=v.chests.filter(at=>{
+  const chests=v.role==='artemis'?[]:v.chests.filter(at=>{
     if (distance(at,player.location)>CONFIG.oracle.chestRadius) return false;
     try { return ['minecraft:chest','minecraft:trapped_chest','minecraft:ender_chest'].includes(player.dimension.getBlock(at)?.typeId); }
     catch { return false; }
@@ -331,7 +367,7 @@ function updateVision(player) {
     const nearest=[...chests].sort((a,b)=>distance(a,player.location)-distance(b,player.location))[0];
     lines.push(`§6chest ${bearing(player.location,nearest)} ${Math.round(distance(nearest,player.location))}m`);
   }
-  const summary=`§bPlayers:${v.counts.player} §aAnimals:${v.counts.animal} §cMobs:${v.counts.mob} §6Chests:${chests.length}`;
+  const summary=`§bPlayers:${v.counts.player} §aAnimals:${v.counts.animal} §cMobs:${v.counts.mob}${v.role==='artemis'?'':` §6Chests:${chests.length}`}`;
   player.onScreenDisplay.setActionBar(lines.length ? `§6Oracle ${summary} §7| ${lines.join(' §7| ')}` : `§6Oracle ${summary} §7| no targets remain nearby`);
 }
 export function assistedArrowTick() {
@@ -339,23 +375,27 @@ export function assistedArrowTick() {
   // snapshot and bounded rescans catch these arrows even after switching items.
   for(const [id,release] of recentShotBows) {
     if(system.currentTick-release.tick>8){recentShotBows.delete(id);continue;}
-    if(release.name!=='§6Apollo’s Prophetic Bow')continue;
-    const player=world.getAllPlayers().find(p=>p.id===id && api.role(p)==='apollo');
+    const moon=release.name==='§aArtemis’s Moon Bow';
+    if(!moon && release.name!=='§6Apollo’s Prophetic Bow')continue;
+    const god=moon?'artemis':'apollo';
+    const player=world.getAllPlayers().find(p=>p.id===id && api.role(p)===god);
     if(!player)continue;
     try {
       for(const arrow of player.dimension.getEntities({type:'minecraft:arrow',location:player.location,maxDistance:24})) {
         if(assistedShots.has(arrow.id)||solarShots.has(arrow.id)||flareShots.has(arrow.id))continue;
         if(arrow.getComponent('minecraft:projectile')?.owner?.id!==id)continue;
         const v=arrow.getVelocity();if(Math.hypot(v.x,v.y,v.z)<0.15)continue;
-        assistedShots.set(arrow.id,{ownerId:id,projectile:arrow,expires:until(12)});
+        assistedShots.set(arrow.id,{ownerId:id,god,projectile:arrow,expires:until(12)});
+        if(moon)moonShots.set(arrow.id,until(12));
       }
     } catch {}
   }
   for (const [id,shot] of assistedShots) {
-    const owner=world.getAllPlayers().find(p=>p.id===shot.ownerId && api.role(p)==='apollo');
+    const owner=world.getAllPlayers().find(p=>p.id===shot.ownerId && api.role(p)===(shot.god||'apollo'));
     if (!owner || shot.expires<=Date.now()) { try { shot.projectile.remove(); } catch {} assistedShots.delete(id); continue; }
-    // Keep the shot record even in darkness so it can NEVER receive bow buffs.
-    if (api.power && !api.power(owner).lit) continue;
+    // Preserve shot identity while environmental powers are unavailable.
+    // Moon arrows retain their existing damage path; Apollo aim arrows stay plain.
+    if (shot.god==='artemis' ? !api.moonPower?.(owner).active : (api.power && !api.power(owner).lit)) continue;
     try {
       const projectile=shot.projectile, v=projectile.getVelocity(), speed=Math.hypot(v.x,v.y,v.z);
       if (speed<0.15) continue;
@@ -387,13 +427,15 @@ export function assistedArrowTick() {
         oracleParticle(owner,projectile.location);
         if(!shot.lockAnnounced) {
           shot.lockAnnounced=true;
-          owner.onScreenDisplay?.setActionBar(`§6Prophetic Bow: steering toward ${bestTarget.name || bestTarget.typeId.replace('minecraft:','')}`);
+          owner.onScreenDisplay?.setActionBar(`§6${shot.god==='artemis'?'Moon Bow':'Prophetic Bow'}: steering toward ${bestTarget.name || bestTarget.typeId.replace('minecraft:','')}`);
         }
       } else shot.target=undefined;
     } catch { assistedShots.delete(id); }
   }
 }
 export function divineTick() {
+  for(const [id,expiry] of moonShots)if(expiry<=Date.now())moonShots.delete(id);
+  for(const player of world.getAllPlayers())syncArtemisVision(player);
   for (const [id,expiry] of solarShots) if (expiry<=Date.now()) solarShots.delete(id);
   for (const [id,v] of visions) {
     if (system.currentTick>=v.until || !world.getAllPlayers().some(p=>p.id===id)) {

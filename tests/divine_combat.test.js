@@ -25,6 +25,45 @@ function target(id,typeId='minecraft:zombie') {
   };
 }
 
+test('Artemis tracking is continuous, creature-only, bounded and never scans chests',()=>{
+  let blockReads=0;
+  const action=[],props=new Map();
+  const system={currentTick:100,runTimeout(){}};
+  const dimension={id:'minecraft:overworld',getBlock(){blockReads++;throw Error('No chest scan permitted');},getEntities:()=>creatures};
+  const player={id:'artemis',typeId:'minecraft:player',name:'Artemis',location:{x:0,y:0,z:0},dimension,
+    getDynamicProperty:k=>props.get(k),getHeadLocation:()=>({x:0,y:1.6,z:0}),spawnParticle(){},onScreenDisplay:{setActionBar:s=>action.push(s)}};
+  const other={...target('other','minecraft:player'),name:'Hunter',location:{x:10,y:0,z:0},dimension};
+  const animal={...target('cow','minecraft:cow'),dimension};
+  const mob={...target('zombie'),dimension};
+  const stand={...target('stand','minecraft:armor_stand'),dimension};
+  const boat={...target('boat','minecraft:oak_boat'),dimension};
+  const sensor={...target('sensor','olympus:weather_sensor'),dimension};
+  const creatures=[other,animal,mob,stand,boat,sensor];
+  const api=runtime({getAllPlayers:()=>[player]},system);
+  api.configureDivine({role:()=> 'artemis',ready(){throw Error('No tracking cooldown');},startCooldown(){throw Error('No tracking cooldown');},power:()=>({lit:false}),tell(){},fail:e=>{throw e;}});
+  api.divineTick();assert.match(action.at(-1),/Players:1.*Animals:1.*Mobs:1/);
+  assert.doesNotMatch(action.at(-1),/chest|stand|boat|sensor/i);
+  other.location.x=20;system.currentTick=20000;api.divineTick();
+  assert.match(action.at(-1),/Hunter E 20m/,'tracking survives well past Apollo duration and refreshes moving targets');
+  assert.equal(blockReads,0);
+  props.set('olympus:artemisTrackingOff',true);system.currentTick+=3;api.divineTick();assert.equal(action.at(-1),'');
+  props.set('olympus:artemisTrackingOff',false);system.currentTick+=3;api.divineTick();assert.match(action.at(-1),/Hunter/);
+});
+
+test('Moon Bow bonus applies once in night/darkness and stops in bright daytime',()=>{
+  let powered=true;
+  const player={id:'moon',typeId:'minecraft:player',dimension:{id:'minecraft:overworld'},getDynamicProperty(){}};
+  const victim=target('victim');
+  const api=runtime({getAllPlayers:()=>[player]},{currentTick:100,runTimeout(){}});
+  api.configureDivine({role:()=> 'artemis',heldItem:()=>({nameTag:'§aArtemis’s Moon Bow'}),moonPower:()=>({active:powered}),fail:e=>{throw e;}});
+  const event=id=>({projectile:{id,typeId:'minecraft:arrow',getComponent:()=>({owner:player})},source:player,getEntityHit:()=>({entity:victim})});
+  const first=event('moon-1');api.onDivineProjectileSpawn(first.projectile);
+  assert.equal(api.onDivineProjectileHitEntity(first),'moon');assert.deepEqual(victim.damage.map(([damage])=>damage),[10]);
+  assert.equal(api.onDivineProjectileHitEntity(first),'duplicate');assert.equal(victim.damage.length,1);
+  powered=false;const second=event('moon-2');api.onDivineProjectileSpawn(second.projectile);api.onDivineProjectileHitEntity(second);
+  assert.equal(victim.damage.length,1,'daytime arrow retains only native bow damage');
+});
+
 test('Solar Flare affects secondary targets once and never adds area damage to its direct hit', () => {
   const props=new Map([['olympus:flareArmed',true]]);
   const player={id:'apollo',typeId:'minecraft:player',dimension:{id:'minecraft:overworld'},
@@ -199,4 +238,49 @@ test('Prophetic Bow selects the closest aim angle, locks its target, and stops s
   const opposite=target('opposite');opposite.location={x:12,y:0,z:-0.1};candidates=[opposite];
   api.assistedArrowTick();assert.equal(queries,1,'retain live lock');assert.ok(adjustments[1].z>0);
   blocked=true;api.assistedArrowTick();assert.equal(adjustments.length,2,'do not curve toward occluded target');
+});
+
+test('Moon Bow uses the same aim selection, turn and wall rules while keeping its existing damage bonus',()=>{
+  const near=target('near'),wide=target('wide');near.location={x:12,y:0,z:1};wide.location={x:12,y:0,z:3};
+  let candidates=[near,wide],blocked=false,powered=true,queries=0;
+  const dimension={id:'minecraft:overworld',getEntities:()=>{queries++;return candidates;},getBlockFromRay:()=>blocked?{}:undefined};
+  const player={id:'artemis',typeId:'minecraft:player',spawnParticle(){}};
+  const adjustments=[],action=[];
+  player.onScreenDisplay={setActionBar:s=>action.push(s)};
+  const arrow={id:'moon-lock',typeId:'minecraft:arrow',dimension,location:{x:0,y:1,z:0},
+    getComponent:()=>({owner:player,shoot:v=>adjustments.push(v)}),getVelocity:()=>({x:2,y:0,z:0})};
+  const api=runtime({getAllPlayers:()=>[player]},{currentTick:100,runTimeout(){}});
+  api.configureDivine({role:()=> 'artemis',heldItem:()=>({nameTag:'§aArtemis’s Moon Bow'}),moonPower:()=>({active:powered})});
+  api.onDivineProjectileSpawn(arrow);api.assistedArrowTick();
+  assert.ok(adjustments[0].z>0 && adjustments[0].z<0.05,'same narrow aim selection as Apollo');
+  assert.ok(Math.abs(Math.hypot(...Object.values(adjustments[0]))-2)<0.0001,'native arrow speed stays unchanged');
+  assert.match(action[0],/Moon Bow: steering toward zombie/);
+  candidates=[wide];api.assistedArrowTick();assert.equal(queries,1,'retain acquired target instead of jumping to another');
+  blocked=true;api.assistedArrowTick();assert.equal(adjustments.length,2,'solid walls stop steering');
+  blocked=false;powered=false;api.assistedArrowTick();assert.equal(adjustments.length,2,'bright daytime pauses steering');
+  powered=true;api.assistedArrowTick();assert.equal(adjustments.length,3,'night/darkness restores steering');
+  const event={projectile:arrow,source:player,getEntityHit:()=>({entity:near})};
+  assert.equal(api.onDivineProjectileHitEntity(event),'moon');
+  assert.equal(api.onDivineProjectileHitEntity(event),'duplicate');
+  assert.deepEqual(near.damage.map(([n])=>n),[10],'aim assist does not duplicate or remove the existing Moon bonus');
+  api.assistedArrowTick();assert.equal(adjustments.length,3,'hit arrows stop steering');
+});
+
+test('Moon Bow delayed ownership survives item switching, but ordinary bows receive no assistance',()=>{
+  let owner,held={nameTag:'§aArtemis’s Moon Bow'},velocity={x:2,y:0,z:0};const adjustments=[];
+  const victim=target('target');victim.location={x:12,y:0,z:2};
+  const dimension={id:'minecraft:overworld',getBlockFromRay:()=>undefined};
+  const player={id:'artemis',typeId:'minecraft:player',location:{x:0,y:0,z:0},dimension,spawnParticle(){}};
+  const arrow={id:'late-moon',typeId:'minecraft:arrow',location:{x:0,y:1,z:0},dimension,
+    getComponent:()=>({owner,shoot:v=>{velocity=v;adjustments.push(v);}}),getVelocity:()=>velocity};
+  dimension.getEntities=query=>query.type==='minecraft:arrow'?[arrow]:[victim];
+  const system={currentTick:100,runTimeout(){}},api=runtime({getAllPlayers:()=>[player]},system);
+  api.configureDivine({role:()=> 'artemis',heldItem:()=>held,moonPower:()=>({active:true})});
+  api.onDivineProjectileSpawn(arrow);api.onDivineBowRelease(player,held);
+  held={typeId:'minecraft:stone'};owner=player;system.currentTick++;
+  api.assistedArrowTick();assert.ok(adjustments[0].z>0.06,'late owner still curves after switching items');
+  const ordinary={...arrow,id:'ordinary-moon-test'};
+  system.currentTick+=10;held={typeId:'minecraft:bow'};api.onDivineProjectileSpawn(ordinary);
+  const event={projectile:ordinary,source:player,getEntityHit:()=>({entity:victim})};
+  assert.equal(api.onDivineProjectileHitEntity(event),'');assert.equal(victim.damage.length,0);
 });

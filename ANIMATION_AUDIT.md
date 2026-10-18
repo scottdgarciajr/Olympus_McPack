@@ -1,4 +1,4 @@
-# Native animation compatibility — v3.4.4
+# Native animation compatibility — v3.4.5
 
 Olympus leaves vanilla player, mob, weapon and item definitions to Minecraft.
 It ships no replacement vanilla animation/controller definitions, copied player

@@ -8,7 +8,10 @@ export const FLAIR = {
   apollo: { color: [1.00, 0.74, 0.23], sound: 'random.levelup' },
   hephaestus: { color: [1.00, 0.45, 0.13], sound: 'random.anvil_use' },
   dionysus: { color: [0.72, 0.34, 0.91], sound: 'random.orb' },
-  kratos: { color: [0.75, 0.12, 0.10], sound: 'random.anvil_use' }
+  kratos: { color: [0.75, 0.12, 0.10], sound: 'random.anvil_use' },
+  athena: { color: [0.71, 0.74, 0.81], sound: 'random.orb' },
+  artemis: { color: [0.40, 0.73, 0.53], sound: 'random.orb' },
+  hestia: { color: [0.91, 0.56, 0.40], sound: 'random.orb' }
 };
 
 function line(points, ax, ay, bx, by, steps = 5) {
@@ -79,6 +82,24 @@ export function flairPoints(god) {
       line(points, -0.22, -0.42, 0.22, -0.42, 4);
       line(points, 0, -0.42, 0, -0.78, 3);
       line(points, -0.42, -0.82, 0.42, -0.82, 5);
+      break;
+    case 'athena':
+      line(points,-0.7,0.8,0.7,0.8,8);
+      line(points,-0.7,0.8,-0.55,-0.35,8);
+      line(points,0.7,0.8,0.55,-0.35,8);
+      line(points,-0.55,-0.35,0,-0.95,6);
+      line(points,0.55,-0.35,0,-0.95,6);
+      break;
+    case 'artemis':
+      ring(points,0,0,0.72,24);
+      line(points,-0.9,0,0.9,0,12);
+      line(points,0.9,0,0.5,0.3,4);
+      break;
+    case 'hestia':
+      line(points,0,1,-0.7,-0.7,10);
+      line(points,-0.7,-0.7,0.7,-0.7,10);
+      line(points,0.7,-0.7,0,1,10);
+      ring(points,0,-0.25,0.2,12);
       break;
     case 'kratos':
       line(points,-0.85,-0.85,0.85,0.85,12);

@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:hestia_clipboard",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Hearth Clipboard"
+      },
+      "minecraft:icon": "olympus_hestia_clipboard",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Paste / Sneak: copy options",
+      "olympus:relic_use": {}
+    }
+  }
+}

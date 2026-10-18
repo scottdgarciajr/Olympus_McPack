@@ -52,12 +52,12 @@ test('cleanup never destroys a building block replacing rain water',()=>{
 });
 
 test('Tidal Sprint momentum ends on dry exit without altering vertical motion or native Riptide',()=>{
-  const impulses=[],player={id:'tidal-exit',isSprinting:true,getVelocity:()=>({x:1.08,y:0.5,z:0}),applyImpulse:v=>impulses.push(v)};
+  const impulses=[],player={id:'tidal-exit',isSprinting:true,isOnGround:true,getVelocity:()=>({x:1.08,y:0.5,z:0}),applyImpulse:v=>impulses.push(v)};
   recordTidalBoost(player);tidalEnvironment(player,true);assert.equal(impulses.length,0);
   tidalEnvironment(player,false);assert.deepEqual(impulses[0],{x:0.28-1.08,y:0,z:0});
   tidalEnvironment(player,false);assert.equal(impulses.length,1,'only remove our boost once');
   recordTidalBoost(player);forgetTidalBoost(player.id);tidalEnvironment(player,false);
-  assert.equal(impulses.length,1,'trident release clears the Tidal marker, retaining native launch momentum');
+  assert.equal(impulses.length,1,'cleared assistance marker cannot brake motion');
 });
 test('clutch uses ordinary water, with passable invisible flow-blocking edges',()=>{
   const changes=[],block={typeId:'minecraft:air',setType(type){this.typeId=type;changes.push(type);},setWaterlogged(){throw Error('ordinary water must not be waterlogged');}};

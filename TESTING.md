@@ -1,3 +1,37 @@
+Current release: **v3.5.11**. Earlier version checklists are historical and contain superseded mechanics.
+
+## 3.5.11 upgrade acceptance
+
+- As an operator on a legacy loaded Hall, run /function olympus/upgrade_gods. Confirm Olympus-specific chat reports dimension and three absolute coordinates, each READY, and inspect/use Athena, Artemis and Hestia enchanting tables there. Repeat without duplicate writes or claim resets.
+- As a member, confirm visible permission rejection. Obstruct one footprint with a chest: report that altar BLOCKED without replacing it; other altars still upgrade. Unloaded chunks and API failures must produce player-visible guidance.
+- Recheck god release/share operator gates using API 2.x permission properties. Confirm Riptide still launches and 3.5.10 clutch behavior remains. Native 3.5.11 upgrade PASS on 2026-10-18: user confirmed “READY, and I can see the altars.” Other permission/obstruction cases remain covered by automated checks; native acceptance for those cases is pending.
+
+## 3.5.10 landing acceptance
+
+- Test native dangerous descents while holding Tidecaller and during exposed rain beside flowers, tall plants, snow layers and shorelines. Confirm a normal pool appears, then the original plants/water levels return after five seconds.
+- Beside signs/fences or irregular terrain, verify single-source fallback catches the actual landing cell without replacing the obstacle. This fallback uses ordinary flowing water. Verify no placement on protected/unloaded terrain, when clutch is disabled, or in the Nether.
+- Recheck Riptide launch. Trident code, inventory locks and weather probe placement are unchanged from the native-verified 3.5.9 release. Native 3.5.10 acceptance pending.
+
+## 3.5.9 acceptance
+
+- Native Riptide: user reproduced only a tiny movement with installed 3.5.8 in local My World. Back up the world and installed storm.js, change only probe placement, reload the same world, then repeat with the same Tidecaller and water. Weather probes must remain at least 12 blocks from every nearby player. PASS: user reported “Launches normally” after this isolated weather-only change on 2026-10-18.
+- Full-release install: returning only to the title screen retained Minecraft's old pack inventory and rewrote the world reference to 3.5.8. Completely close Minecraft before staging matching 3.5.9 packs and references; verify status after restart. PASS: user confirmed “3.5.9, Tidecaller launches” with the full update on 2026-10-18.
+- Verify exposed rain after server restart, covered locations, dry biome boundaries and world ceiling; offset probes retain the player's separate roof check. Verify rainy clutch and held-trident landing clutch independently of charge/release.
+- Hestia: ordinary relic use opens toolbox; healing only uses the labeled Renewal button. Take each tool, check it equips, select carried materials without hotbar rearrangement, paint, select/fill, copy/paste, shape, erase and undo/redo. Confirm resource costs, shared cooldown, protections, reconnect history and private tool vault.
+- Artemis: a fresh jump press while airborne grants exactly one extra jump at light 0–3; landing resets it. Bright night/other-dimension locations alone do not grant double jump. Existing sprint/invisibility environment rules remain.
+- Athena: eligible hostile kills grant 2 bonus raw XP, animals 1, no more than 40 per minute. No bonuses for players, villagers or pets, duplicate death events or crafting. Confirm enchanting workshop costs and caps remain.
+- Build validates scripts, regression tests, generated assets and every packaged source byte. These checks do not simulate native Minecraft launch physics.
+
+## 3.4.5 server rain and Zeus verification (Minecraft verification pending)
+
+- Install both v3.4.5 packs and confirm `/function olympus/status`. Restart a dedicated server while rain is already active. Poseidon should receive Strength II, Haste II and Conduit in exposed rain within the native sensor update; do not issue another weather command first.
+- Test natural rain, `/weather rain`, `/weather thunder`, Crown weather, then `/weather clear`. Check rain under trees, indoors, across desert/savanna boundaries, and two Poseidons in different locations. No rain powers under roofs or in dry biomes after sensor update; clear weather ends them immediately.
+- In Survival rain with no bucket, Riptide upward and land on grass/stone/sand, then repeat two Riptides during the same fall. The 3x3x2 water clutch must catch the landing and disappear after five seconds. Also test ordinary falls, admin clutch OFF, protected ground, and rain stopping in midair. A clear-weather water-origin Riptide must not create rain powers.
+- As Zeus, sneak-use flight on a clear Overworld day at Y70. Keep flying beyond 30 seconds and ascend through Y220; flight must continue. Sprint for fast flight; sneak-use again stops flight. Repeat in rain and thunder.
+- Enter Nether and End during active Overworld flight: unlimited flight stops. Activate there: 30-second flight, then respect three-minute activation cooldown. Return to Overworld during that cooldown: flight is immediately available, but the other-dimension cooldown remains stored.
+- Check Zeus Strength II in rain/thunder and at Y220+ in clear weather. Check underground Mining Fatigue II beneath natural cave ceilings, including mountain caves; exit into open air or go to Y220 and verify fatigue clears. Wood roofs/leaves do not count as natural cave ceilings.
+- From Y220, aim downward at loaded terrain/players and fire multiple lightning strikes: range exceeds 24 blocks, strikes can miss by several blocks, terrain blocks targets behind it, and thunder/Y220 keeps its five-second cooldown. Check no strike/cooldown consumption when aiming into empty sky.
+
 # In-game test checklist
 
 ## 3.4.4 native animations and compass-only Oracle (Minecraft verification pending)
@@ -152,3 +186,86 @@ These steps require a running Bedrock world and have not been verified by the of
 15. Have nine players claim different gods. Check effects and cooldowns stay per player through a server restart. Check the unique aura/emblem and sound on each role's claim and activation. In Creative, use the Olympus Creative Test Kit to switch roles and receive Crown trial offerings, a Dragon Egg, and one test dragon victory; the kit must refuse in Survival.
 
 16. **Hall protection and Crown reconciliation:** Try mining and placing blocks in both Hall levels as a player and detonating TNT beside them; Hall blocks should remain. Test the portable forge outside the Hall, breaking it to recover its item, then placing it elsewhere. Claim and equip the Crown, disconnect/rejoin, and activate Dimensional Dominion; Crown Status should show worn. If the owner is a different player, Dominion must refuse.
+
+
+## Athena, Artemis and Hestia — v3.5.0 acceptance
+
+Offline: `npm test` and `npm run build` validate all role tests, scripts, manifests, twelve relic definitions/icons, giveaway kit, native rendering rules and archive integrity. These do not start Minecraft.
+
+In a backed-up Bedrock test world with both v3.5.0 packs:
+
+1. Fresh setup: confirm the three front altars open the correct role, offering, description and reservation/claim flow. Confirm the original eight bays, throne, forge and forbidden Kratos chamber remain usable.
+2. Old Hall: stand inside it and run setup twice. Confirm the three altars appear without replacing other blocks or resetting claims. Before upgrading another test copy, put a chest in one new footprint: its altar must be skipped and reported, with the chest and contents preserved. Remove the chest and rerun setup.
+3. Claim each with its offering (Athena: 3 books; Artemis: 8 flint; Hestia: 8 coal); verify one owner per god, no second role, and no use of another god's relic. Verify role/relic persistence, full-inventory delivery, and inventory locks on all three relics.
+4. Athena: Resistance I/Haste I/Weakness I passives; relic raises only Resistance to II for 12s. Confirm it survives passive updates, returns to I and cannot reactivate for 180s. No Strength bonus.
+5. Artemis: Speed II/Mining Fatigue I; Night Vision only at Overworld night, ending on daylight or dimension exit. Relic gives Speed III/Jump Boost II for 10s, ready after 120s. Test ordinary fall damage, no automatic steps, and ordinary bow damage. Passive speed must not cancel the burst.
+6. Hestia: Fire Resistance/Haste I/Weakness II. Injure her, then activate Regeneration I for 8s. Verify it expires, never becomes II, never heals allies, and cannot reactivate for 180s. Do not confuse natural hunger healing with the ability.
+7. With stronger potions active, new actives must not lower levels or shorten a longer equal-level effect. Test milk during bursts; these short actives must not be reapplied automatically. Die during a burst: passives return after respawn, burst ends and cooldown stays spent. Rejoin during cooldown: no cooldown reset. Operator role reset clears the old burst effects and state.
+8. Crown each new role: established weakness suppression and half cooldowns work (90/60/90s), with no increased effect levels/durations. Original eight Crown offerings and ownership transfer remain unchanged. Have Kratos hit/kill each new god and verify a representative gift or burden, including lasting kill theft.
+9. Confirm each new relic has a distinct icon/signature, Creative kit selection, correct controls, and one private grouped ready notice after an observed cooldown. Trial duels against Ares, Hermes, Apollo and Hades with equal gear/food should check survivability, pursuit/escape and healing between fights. Record observed outcomes before claiming live PvP balance acceptance.
+
+
+## v3.5.1 acceptance — supersedes earlier Artemis and automatic rain-fall checks
+
+- Install both v3.5.1 packs; status must report v3.5.1. In a loaded existing Hall, operator `/function olympus/upgrade_gods` adds the three new front altars. Run it twice, verify no duplicate structures, unchanged claims/throne/forge, and that obstructing player blocks are preserved and reported. Without a saved Hall it must explain setup is needed; it must not build a new Hall.
+- Native Riptide: use the Tidecaller trident, not the relic. Charge/release in exposed rain: normal Riptide launches you, Tidal Sprint must not brake it, and the 3x3x2 landing pool appears only during descent near the floor. It expires after five seconds. Test a repeated launch in one fall, water launch in rain, clear-water launch (no invented rain), insufficient charge, cancel/switch item, a normal rainy jump/fall without trident use (no pool), protected terrain, and dimension/death/rejoin cleanup. Charging/spinning must survive automatic personal-tool maintenance.
+- Artemis: claim or rejoin an existing Artemis role to receive the Moon Bow. Verify one personal locked bow across inventory, vault and pending delivery. Bow bonus is +10 once per arrow at Overworld night or light 0-3, including daytime caves; no scripted bonus in brighter daytime. Speed II/Night Vision follow these conditions; Weakness III applies otherwise. Huntstride cannot spend cooldown in bright daytime. No flight/aim assist/Solar Flare.
+- Creature tracking starts automatically for Artemis, continues beyond fifteen seconds, refreshes moving/new targets, and resumes after rejoin and dimension changes. Sneak-use toggles it off/on without a cooldown. Only players, mobs and animals appear; no chest bearings/counts/markers, armor stands, boats, minecarts or Olympus helper entities. Verify the existing 48m range/48-target bound and private viewer-only visuals. Apollo retains timed Oracle with chest scanning and his existing sunflight/bow rules.
+- Test equal-gear duels and tracking readability/performance before live PvP rollout; offline regressions do not run the Bedrock engine.
+
+
+## v3.5.2 Artemis aim assist
+
+In night or light 0-3, fire the Moon Bow slightly beside a visible target. Verify it curves using Apollo's existing cone/turn rate, preserves arrow speed, retains a target and does not steer through solid walls. Switch hotbar items immediately after shooting and repeat. Bright daytime must pause steering; night/darkness must restore it for an arrow still in flight. Confirm exactly one existing +10 Moon bonus on hit, normal native bow damage otherwise, no Solar Flare/flight, and unchanged Apollo Prophetic/Solar Bow behavior. Existing Moon Bows gain this script behavior without replacement.
+
+
+## v3.5.3 acceptance — native Tidecaller compatibility, invisibility and sprint
+
+- Activate one matching v3.5.3 Olympus pack pair and confirm status. Older Tidecaller in inventory should become unlocked, retain keep-on-death and existing lore/binding/token, and have Riptide III without Loyalty/Channeling. Other personal gear stays locked. Confirm dropping/storage is possible for Tidecaller, the documented compatibility exception. Vault withdrawal and queued delivery must preserve this policy.
+- Hold Tidecaller as Poseidon and run `/function olympus/riptide_repair`; expect actual Riptide level 3, native lock none and keep-on-death true. The command must not replace the item, reset the role, or modify an ordinary trident/another player's bound tool. Compare a full native charge/release in open water against an ordinary Riptide III trident. Repeat stationary and sprinting, in exposed rain, after canceled charges and after changing hotbar slots. Neither movement scripts nor automatic maintenance may modify a trident during active charge/release. Verify launch before rain landing water; ordinary rainy falls still do not create pools. This remains an engine check, not established by offline mocks.
+- Artemis: sneak-use relic while looking ahead to open Hunt Controls. Toggle invisibility on/off; armor and held items remain visible. Rejoin and verify the chosen toggle persists. Changing roles removes the managed effect; longer external invisibility potions must survive toggling off. Toggle creature tracking independently; no chests appear.
+- Artemis grounded sprint targets 1.22, with no change to Apollo 1.2 flight/Hermes 1.3 sprint/Poseidon 1.08 swim targets. Compare measured flat-ground sprint versus Apollo flight in game; friction may affect actual speed. Walking, idle, sneak, water, gliding, flying and airborne movement must not receive new thrust. No vertical impulse or fall protection is introduced. Faster knockback/native launches must not be braked.
+
+
+## v3.5.4 acceptance — supersedes the v3.5.3 Tidecaller unlock policy
+
+- Activate one matching v3.5.4 pair. Tidecaller, including a carried item unlocked by v3.5.3, must show inventory lock and keep-on-death. It cannot be voluntarily dropped or stored in containers; personal vault operations remain supported. Rejoin, queue delivery and vault withdrawal must preserve both protections.
+- Poseidon's movement controller must match the historical v3.4.4 fixture. There are no new native charge/stop event handlers, charge-history prerequisites, automatic enchantment rewrites or movement suppression. Charge/release Tidecaller in water and exposed rain; verify native launch and the established release boost before any landing-water behavior. Clutch arming is only after this release path; ordinary rainy falls remain unarmed. Compare with the earlier pack in a backed-up test world to isolate engine behavior. Do not claim the launch root cause is proven from the offline fixture alone.
+- The optional `/function olympus/riptide_repair` preserves the held tool and its ownership, restores Riptide III and inventory locking, and must never unlock it. Existing Artemis invisibility/sprint/aim assist and god upgrade tests still apply.
+
+
+## v3.5.5 acceptance — complete trident rollback and independent observation
+
+- Activate one matching v3.5.5 pair. The entire Tidecaller release branch and Poseidon movement controller match the v3.4.4 archival fixtures; inventory lock/keep-on-death remain, with no native item override, repair command, automatic enchantment rewrite or charge/stop lifecycle. Test a normal full charge/release in water, stationary and sprinting, with the existing trident. Verify native launch itself before testing landing water.
+- Clutch observation runs separately from item events and only reads held native Riptide-trident and motion data. Test real launch in exposed rain, clear-water launch, ordinary rainy fall, stationary/incomplete charge, slow swimming/Tidal Sprint, repeated launch in one fall, dimension change and rejoin. Only a rapid aligned acceleration with current rain evidence should arm the next eligible landing. A rain-probe delay up to six ticks is tolerated; expired evidence must not arm later. Observe the documented aligned-knockback limitation. Verify normal containment, protection and five-second cleanup.
+- Artemis sprint/invisibility: bright Overworld daytime disables both; night beside bright torches enables them; daytime cave light 0-3 enables them; Nether and End enable them even in light. Enter bright Overworld daylight with invisibility toggled on: managed invisibility must end and sprint thrust stop immediately; returning to an allowed environment may resume the stored toggle. A new invisibility enable attempt in bright daytime is rejected. External longer invisibility potions stay intact. Tracking/aim assist and the other gods retain their prior rules.
+
+
+## v3.5.6 acceptance — portable server rain and native trident controls
+
+These replace the earlier trident handler/ordinary-rain-fall expectations.
+
+- Activate only one matching v3.5.6 behavior/resource pair. Test native Riptide III tridents, including Tidecaller, stationary and sprinting in open water, exposed rain, and while aiming at a Hall block. No custom Poseidon item-release hook or launch impulse exists. Charged native weapons do not open Hall menus/cancel native use; building and breaking protections remain. Selected personal charged weapons retain durability until put away; inventory locking/death protection remain.
+- In exposed Overworld rain, make a dangerous ordinary fall without using or holding a trident. It must place the standard clutch pool near landing. Stop rain or move under a roof/into a dry biome: ordinary fall clutch must stop. In clear weather an ordinary fall must not clutch. A water-origin Riptide-shaped launch may arm its next landing after switching hotbar items; approximate recognition never edits the item or movement. Test aligned knockback to assess the documented approximation. Existing admin off must disable both rain and Riptide landing paths and clear previously armed state.
+- On a fresh compatible Bedrock Dedicated Server or Realm, install both packs without copying any local-world weather settings. Start/join while already raining, then test exposed-rain fall clutch before changing weather. Restart during rain and repeat, then test thunder, clear weather, roofs, dry biomes, two distant players, role changes and disconnect cleanup. No per-player/local configuration or external weather service is required. Actual engine verification is still necessary even though fresh-runtime API-double tests pass.
+- Retest Artemis's approved night/darkness/other-dimension sprint/invisibility availability, continuous creature-only Oracle and Moon Bow aim assist. Preserve other gods and Hall upgrade command.
+
+## v3.5.7 acceptance — native movement, new utilities, Zeus balance
+
+Offline tests cover launch/release isolation, held-stack migration exclusion, generic momentum preservation, rain/landing observer boundaries, foundation costs/protection/rollback, enchant costs/caps/refunds, and sky/ground/dimension power transitions. Native Minecraft launch behavior and actual PvP balance remain unverified here.
+
+- Activate one matching v3.5.7 pack pair; status must show v3.5.7. Compare Tidecaller and an ordinary Riptide III trident stationary/sprinting in water and exposed rain, aiming horizontally/upward, including at Hall blocks. They must launch through native controls. Selected gear stays locked and is only maintained once put away. Do not reset roles/inventory to test.
+- Launch from clear-weather water, descend onto an unprotected floor, verify landing-only pool and 5s cleanup; an ordinary clear fall must not clutch. Test independent exposed-rain falls on a fresh server/Realm, a roof, rain ending, and administrative clutch disable. No item use event should place water or change velocity.
+- Hestia: sneak-use while looking ahead at a top face, building blocks in next hotbar slot; verify up to 9 placements/15s, exact item debit, creatures/terrain/protected regions skipped. Normal-use remains Renewal. Check short stacks and slot-9 wrap.
+- Athena: ordinary gear in next slot, within 2 horizontal/1 vertical blocks of enchanting table, >=6 levels and 3 lapis. Sneak-use upgrades Unbreaking one level only up to III, preserves other enchantments, charges exact cost and starts 180s timer. Bound gear/tridents, insufficient cost, no table, incompatible gear and cooldown must leave inventory/XP unchanged. Normal-use remains Aegis.
+- Zeus: compare clear Y219/Y220, ordinary rain/thunder, roofs/caves at both altitudes, and Nether/End. Only exposed high sky or thunder grants Strength II/Resistance I and unlimited flight. Underground/other dimensions impose Mining Fatigue II; ground is unbuffed. Check lightning intervals (5s/45s), range/spread/occlusion, 15s/90s limited flight, 1.3/0.8 sprint targets, leaving/reentering sky mid-cooldown, portal transitions, and thunder ending mid-flight. A sky exit grants one 15s descent window and cannot renew forever. Compare against unchanged Apollo in sun, ground and caves; record combat/time-to-kill observations before declaring competitive balance.
+
+## v3.5.8 acceptance
+
+- Activate one matching v3.5.8 pack pair; verify status. Compare Tidecaller against v3.4.4 in water/rain with sprint on/off and upward/horizontal aim. The archived movement, swim, release, gear maintenance and item construction/delivery paths match exactly, including the original delayed boost. Actual native launch verification remains necessary.
+- Clear-weather dangerous falls with any trident held must clutch without launch/rain detection; ascending/charging/releasing alone must never place water. Put it away and ordinary dry falls must stop clutched protection. Rain independently works with empty hands. Verify admin off, protected terrain, Nether exclusion and 5s cleanup on a fresh server/Realm.
+- Zeus: activate at Y70, ascend through Y220 and keep flying past the original timer. Verify sky-entry feedback, active position/weather transitions and one 15s descent window on exit. Retest thunder, roofs, caves, dimensions, fatigue and limited cooldowns. Apollo values remain unchanged.
+- Hestia: test every toolbox option, handbook, 128-block/16m bounds, palette capture/clear, resource preview/cancel, cut returns, copy/paste spending, transformations, fill/outline/hollow/clear, brushes, raise/lower and quick shapes. Confirm 20s shared build cooldown and exact resources in Survival and Creative. Reject ores/fluids/containers/special/protected blocks and edits through/beneath creatures/players.
+- Test Hestia undo/redo across 25+ edits, restart/rejoin, intervening edits, changed dimension, spent restoration materials, full inventories and rejected native writes. History caps at 24, persists, uses resource accounting and discards redo after new edits. No duplicate resources; grass returns dirt and needs grass to restore. Change role/resources/protection/entities between preview and confirmation; stale operations must reject.
+- Athena: test all eight recipes/caps/costs, compatibility, conflicts and shared 3m cooldown. Bookbinding consumes one entire source book plus 12 levels/8 lapis; verify equal-level combination, higher transfer, native caps, Mending/Fortune, multienchantment books, source-book readability on the pinned API, missing tables/costs, slot wrapping, role changes, bound gear/tridents and rejected writes/refunds. No rare books generated or over-cap application. Other target enchantments/name/durability must remain.
+- Retest Hephaestus forge/Divine Fortune IV, Apollo/Artemis bows, other god combat, Crown, locks/vault, cooldown notices, portable rain and Hall upgrade. Actual PvP/economy balance still requires gameplay comparisons.

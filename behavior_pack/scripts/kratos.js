@@ -1,6 +1,8 @@
+import {NEW_GODS} from './new_gods.js';
 // Each god kill adds one gift or burden until Kratos dies. Copies persist on Kratos,
 // independently of the victim's connection, and repeated effects do not stack.
 const POWERS = {
+  ...Object.fromEntries(Object.entries(NEW_GODS).map(([god,spec])=>[god,spec.stolen])),
   hermes: [['Traveler speed','speed',2],['Traveler burden','weakness',1]],
   zeus: [['Stolen lightning','olympus:lightning',0],['Thunder burden','mining_fatigue',1]],
   poseidon: [['Sea blessing','conduit_power',0],['Tidal haste','haste',1],['Dryland burden','slowness',1]],

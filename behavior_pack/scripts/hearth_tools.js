@@ -1,0 +1,60 @@
+// Generated from hearth_tools.json.
+export const HEARTH_TOOLS=[
+  {
+    "id": "toolbox",
+    "name": "Hestia's Toolbox",
+    "button": "Open building tools",
+    "mode": "toolbox",
+    "color": "#d99038"
+  },
+  {
+    "id": "builder",
+    "name": "Hearth Selection Wand",
+    "button": "Tap two corners / Sneak: tools",
+    "mode": "select",
+    "color": "#ffb44f"
+  },
+  {
+    "id": "brush",
+    "name": "Hearth Paint Brush",
+    "button": "Paint / Sneak: brush options",
+    "mode": "sphere",
+    "color": "#69b96d"
+  },
+  {
+    "id": "clipboard",
+    "name": "Hearth Clipboard",
+    "button": "Paste / Sneak: copy options",
+    "mode": "paste",
+    "color": "#eee1bb"
+  },
+  {
+    "id": "terrain",
+    "name": "Hearth Terrain Shaper",
+    "button": "Shape ground / Sneak: options",
+    "mode": "raise",
+    "color": "#9e8563"
+  },
+  {
+    "id": "eraser",
+    "name": "Hearth Eraser",
+    "button": "Erase block / Sneak: options",
+    "mode": "erase",
+    "color": "#eb888c"
+  },
+  {
+    "id": "trowel",
+    "name": "Hearth Building Trowel",
+    "button": "Build shape / Sneak: options",
+    "mode": "foundation",
+    "color": "#acb8c6"
+  },
+  {
+    "id": "undo",
+    "name": "Hearth Undo Charm",
+    "button": "Undo / Sneak: redo options",
+    "mode": "undo",
+    "color": "#73c5dc"
+  }
+];
+export const hearthTool=id=>HEARTH_TOOLS.find(tool=>id===`olympus:hestia_${tool.id}`);

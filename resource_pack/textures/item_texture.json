@@ -53,6 +53,39 @@
     "olympus_kratos": {
       "textures": "textures/items/kratos_relic"
     },
+    "olympus_athena": {
+      "textures": "textures/items/athena_relic"
+    },
+    "olympus_artemis": {
+      "textures": "textures/items/artemis_relic"
+    },
+    "olympus_hestia": {
+      "textures": "textures/items/hestia_relic"
+    },
+    "olympus_hestia_toolbox": {
+      "textures": "textures/items/hestia_toolbox"
+    },
+    "olympus_hestia_builder": {
+      "textures": "textures/items/hestia_builder"
+    },
+    "olympus_hestia_brush": {
+      "textures": "textures/items/hestia_brush"
+    },
+    "olympus_hestia_clipboard": {
+      "textures": "textures/items/hestia_clipboard"
+    },
+    "olympus_hestia_terrain": {
+      "textures": "textures/items/hestia_terrain"
+    },
+    "olympus_hestia_eraser": {
+      "textures": "textures/items/hestia_eraser"
+    },
+    "olympus_hestia_trowel": {
+      "textures": "textures/items/hestia_trowel"
+    },
+    "olympus_hestia_undo": {
+      "textures": "textures/items/hestia_undo"
+    },
     "olympus_mountain": {
       "textures": "textures/items/mountain_sigil"
     },

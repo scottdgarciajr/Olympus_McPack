@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:artemis_relic",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Artemis Hunt Relic"
+      },
+      "minecraft:icon": "olympus_artemis",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Use: Huntstride / Sneak: Hunt Controls",
+      "olympus:relic_use": {}
+    }
+  }
+}

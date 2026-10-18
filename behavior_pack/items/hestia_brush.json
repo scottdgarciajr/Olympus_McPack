@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:hestia_brush",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Hearth Paint Brush"
+      },
+      "minecraft:icon": "olympus_hestia_brush",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Paint / Sneak: brush options",
+      "olympus:relic_use": {}
+    }
+  }
+}

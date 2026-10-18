@@ -53,6 +53,11 @@ for (god, (x, y, z)), color in zip(ALTARS.items(), COLORS):
     put(x, 5, z, 'enchanting_table')
     for dx in (-2, 2):
         put(x+dx, 3, z, 'sea_lantern')
+# Compact front altars preserve the throne, original bays and vault access.
+for x in (10, 16, 22):
+    put(x, 3, 6, 'chiseled_quartz_block')
+    put(x, 4, 6, 'chiseled_quartz_block')
+    put(x, 5, 6, 'enchanting_table')
 # The Divine Forge uses the Hall's existing Hephaestus bay.
 put(5, 3, 29, 'smithing_table')
 

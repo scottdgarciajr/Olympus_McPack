@@ -75,3 +75,6 @@ export function stockMissingRelics(container, gods, createItem) {
   }
   return true;
 }
+
+// Chargeable native weapons cannot place/modify Hall blocks by using them.
+export function nativeChargeWeapon(item) {return ['minecraft:trident','minecraft:bow','minecraft:crossbow'].includes(item?.typeId);}

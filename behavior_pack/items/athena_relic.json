@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:athena_relic",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Athena Aegis Relic"
+      },
+      "minecraft:icon": "olympus_athena",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Use: Aegis / Sneak: Enchanting Workshop",
+      "olympus:relic_use": {}
+    }
+  }
+}

@@ -1,3 +1,5 @@
 node_modules/
 __pycache__/
 *.pyc
+local-test-backups/
+references/riptide-pack-repair-plan.json

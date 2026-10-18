@@ -1,3 +1,4 @@
+import {hearthTool} from './hearth_tools.js';
 import { isPersonalGodTool, lockGodItem, serializeGodItem, restoreGodItem } from './god_items.js';
 const VAULT='olympus:tool_vault', JOURNAL='olympus:tool_vault_transaction', TOKEN='olympus:tool_token';
 const bagOf=player=>player.getComponent('minecraft:inventory')?.container;
@@ -9,16 +10,16 @@ function findToken(bag,id) { for(let slot=0;slot<bag.size;slot++)if(bag.getItem(
 
 export function ownsToolAnywhere(player,item) {
   if(!isPersonalGodTool(item))return false;
-  const matches=record=>record.type===item.typeId && record.name===item.nameTag;
+  const matches=record=>record.type===item.typeId && (hearthTool(item.typeId)||record.name===item.nameTag);
   if(vaultRecords(player).some(matches))return true;
   try { if(JSON.parse(player.getDynamicProperty('olympus:pending_god_items')||'[]').some(matches))return true; } catch {}
   const bag=bagOf(player);
   if(bag)for(let slot=0;slot<bag.size;slot++) {
-    const other=bag.getItem(slot);if(other?.typeId===item.typeId && other.nameTag===item.nameTag)return true;
+    const other=bag.getItem(slot);if(other?.typeId===item.typeId && (hearthTool(item.typeId)||other.nameTag===item.nameTag))return true;
   }
   const gear=player.getComponent('minecraft:equippable');
   for(const slot of ['Offhand','Mainhand']) {
-    const other=gear?.getEquipment(slot);if(other?.typeId===item.typeId && other.nameTag===item.nameTag)return true;
+    const other=gear?.getEquipment(slot);if(other?.typeId===item.typeId && (hearthTool(item.typeId)||other.nameTag===item.nameTag))return true;
   }
   return false;
 }

@@ -13,7 +13,7 @@
       },
       "minecraft:icon": "olympus_temple_seal",
       "minecraft:max_stack_size": 1,
-      "minecraft:interact_button": "Place Hall of Eight Gods",
+      "minecraft:interact_button": "Place Hall of Olympus",
       "olympus:relic_use": {}
     }
   }

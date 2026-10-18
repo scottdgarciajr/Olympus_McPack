@@ -1,4 +1,8 @@
+import {NEW_GODS} from './new_gods.js';
 const GOD_TIMERS={
+  ...Object.fromEntries(Object.entries(NEW_GODS).map(([god,spec])=>[god,[[`cd_${spec.ability}`,spec.label]]])),
+  athena:[['cd_athenaAegis','Aegis'],['cd_athenaStudy','Scholarly Craft']],
+  hestia:[['cd_hestiaRenewal','Hearth Renewal']],
   hermes:[['cd_hermesPearl','Divine Pearl']],
   ares:[['cd_aresRage','War Rage']],
   apollo:[['cd_apolloSolarFlare','Solar Flare'],['cd_apolloOracle','Oracle’s Sight']],

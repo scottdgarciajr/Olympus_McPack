@@ -1,7 +1,14 @@
-import { world, system, ItemStack, EnchantmentTypes, MolangVariableMap, InputButton, ButtonState, EntityDamageCause, EquipmentSlot } from '@minecraft/server';
+import { world, system, ItemStack, EnchantmentTypes, MolangVariableMap, InputButton, ButtonState, EntityDamageCause, EquipmentSlot, BlockPermutation, PlayerPermissionLevel } from '@minecraft/server';
 import { ActionFormData } from '@minecraft/server-ui';
 import { CONFIG } from './config.js';
-import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, dionysusBuffAmplifier, divineOreDrop, stockMissingRelics } from './rules.js';
+import {showHearthBuilder,showHearthToolbox,useHearthTool,forgetHearthTool} from './hearth_builder.js';
+import {useGodUtility,GOD_UTILITY_OPTIONS} from './god_utilities.js';
+import {athenaKillFromEvent} from './athena_wisdom.js';
+import {HEARTH_TOOLS,hearthTool} from './hearth_tools.js';
+import {artemisDoubleJump,artemisInvisibility,forgetArtemis,artemisSprint,artemisMobilityAvailable} from './artemis_mobility.js';
+import {NEW_GODS, newGodTick, useNewGod, installNewAltars, artemisPower} from './new_gods.js';
+import {createWeatherReader,zeusUnderground,lightningAim} from './storm.js';
+import { cooldownRemaining, abilityNeedsCooldown, claimRejection, aresStrengthAmplifier, aresResistanceAmplifier, movementDirection, nextMadnessStacks, dionysusBlindnessChance, dionysusBuffAmplifier, divineOreDrop, stockMissingRelics, nativeChargeWeapon } from './rules.js';
 import { FLAIR, flairPoints } from './flair.js';
 import { configureCrown, crowned, crownCooldownSeconds, atThrone, showThrone, showStatus, showLeaderboard, resetCrown, recoverCrown, transferOnDeath, crownTick, crownDominionTick, crownOwnerLeft, cleanCrownDrops, crownFlair, revealCrown, crownHelp, crownSetup, crownControl, CROWN_OFFERINGS, recordDragonVictory } from './crown.js';
 import { kratosStrike, kratosKill, kratosTick, kratosDeath, kratosStatus, kratosUsePower } from './kratos.js';
@@ -30,16 +37,18 @@ system.runInterval(()=>{
   }catch(error){if(CONFIG.debug)fail(error);}
 },20);
 
-const GODS = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus', 'kratos'];
+const GODS = ['hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus', 'kratos', ...Object.keys(NEW_GODS)];
 const TITLES = {
+  ...Object.fromEntries(Object.entries(NEW_GODS).map(([god, spec]) => [god, spec.title])),
   hermes: 'God of Travelers', zeus: 'God of Thunder', poseidon: 'God of the Sea',
   hades: 'God of the Underworld', ares: 'God of War', apollo: 'God of the Sun',
   hephaestus: 'God of Craftsmanship', dionysus: 'God of Wine and Madness', kratos: 'Forbidden God Slayer'
 };
 const DESCRIPTIONS = {
+  ...Object.fromEntries(Object.entries(NEW_GODS).map(([god, spec]) => [god, spec.description])),
   hermes: 'Speed VI, Flash-fast sprint and automatic one-block steps on natural grass/sand while moving, fall protection, and toggleable Divine Leap; Weakness III. Divine Pearl every 5 minutes.',
-  zeus: 'Mining Fatigue II. Thunder or Overworld Y220+ grants lightning every 5 seconds; rain/thunder or Y220+ removes the 30-second flight activation cooldown.',
-  poseidon: 'Strength II in water/rain; Haste I underwater with modest adaptive mining compensation; Haste II in rain; Conduit Power, clear water vision, no swimming hunger, mild walking-speed swim cruise, fast Tidal Sprint, and bucket-free rain clutch placing 3x3 water, 2 blocks tall, for 5 seconds without spreading; no Slow Falling; administrator toggle. Slowness III and Weakness III in Nether/desert.',
+  zeus: 'Sky domain: exposed Overworld Y220+ or thunderstorm. Strength II, Resistance I, unlimited flight (1.3 sprint speed), lightning every 5s. Elsewhere: no combat buffs, 15s flight/90s cooldown at 0.8 sprint speed, lightning/45s. Mining Fatigue II underground and in other dimensions. Rain alone grants no sky power; lightning aims up to 384 blocks with spread.',
+  poseidon: 'Strength II in water/rain; Haste I underwater with modest adaptive mining compensation; Haste II in rain; Conduit Power, clear water vision, no swimming hunger, mild walking-speed swim cruise, fast Tidal Sprint, and exposed rain or holding a trident during a dangerous fall enables bucket-free clutch water: 3x3 water, 2 blocks tall, for 5 seconds without spreading; no Slow Falling; administrator toggle. Slowness III and Weakness III in Nether/desert.',
   hades: 'Fire Resistance and Night Vision; sheltered from daylight weakness. Nether/End power and Hellfire from fire or lava.',
   ares: 'Strength II and Resistance II; Slowness III. Strength V and Resistance III rage for 30 seconds every 5 minutes.',
   apollo: 'Light-powered Solar Bow and fast flight, strongest in direct sun. Plain aim-assist arrows and gold Oracle compass and colored trails. Weakness III at night or in darkness.',
@@ -48,9 +57,10 @@ const DESCRIPTIONS = {
   kratos: 'Each melee hit on a god steals a random divine gift or burden for 8 seconds. Each god kill adds one random gift or burden until Kratos dies; there is no copy limit, and burdens accumulate too.'
 };
 const CONTROLS = {
+  ...Object.fromEntries(Object.entries(NEW_GODS).map(([god, spec]) => [god, spec.controls])),
   hermes: 'Speed VI always; sprint for Speed XIV. Move into one-block ledges to step up automatically, including during normal fast walking. Grounded only; tall walls still require a route around. Use relic: pearl (5m). Sneak-use: mobility menu for Slow Falling and Divine Leap toggles. Weakness III.',
-  zeus: 'Use relic: lightning; sneak-use: 30s flight. Overworld Y220+: full storm power, 5s lightning and no flight activation cooldown. Below Y220, clear weather has 3m cooldowns; rain removes cooldowns and thunder lightning has a 5s interval.',
-  poseidon: 'Sneak-use: Tidal Sprint toggle; boost only while sprinting. Jump to rise/leave water. Strength II water/rain; Haste I water with adaptive mining / II rain; clear water vision and no swimming hunger. Mild swim cruise always assists movement in water, even with Tidal Sprint off. Rain Clutch: fall in exposed rain; water appears automatically with no bucket or clicking, then disappears after 5s. Clear weather, Nether and protected areas excluded. Protection comes only from landing in water; there is no fall-damage immunity. A 3x3 pool, 2 blocks tall, is placed once per fall without spreading; no Slow Falling. Administrators can enable/disable or resize the clutch; single mode restores the original one-water placement. Strength, Haste and Conduit end on leaving water/rain; water vision ends on leaving water. Tidal boost momentum ends on dry exit.',
+  zeus: 'Use relic: aimed lightning (384m, distance spread), every 5s in the sky domain or 45s elsewhere. Sneak-use: toggle flight. Exposed Overworld Y220+ OR thunderstorm: unlimited flight, Strength II, Resistance I, no god debuff, 1.3 sprint speed. Elsewhere, including Nether/End: 15s flight, 90s cooldown, 0.8 sprint speed, no combat buff. Leaving sky power gives 15s to descend and starts flight cooldown. Mining Fatigue II underground or in other dimensions; ordinary rain gives no sky power.',
+  poseidon: 'Sneak-use: Tidal Sprint toggle; boost only while sprinting. Jump to rise/leave water. Strength II water/rain; Haste I water with adaptive mining / II rain; clear water vision and no swimming hunger. Mild swim cruise always assists movement in water, even with Tidal Sprint off. Landing Clutch: exposed Overworld rain automatically cushions dangerous falls. Outside rain, holding any trident during a dangerous fall enables clutch. Poseidon movement, release behavior and gear upkeep match archived v3.4.4; clutch never hooks trident use or detects launches. Water appears near the landing floor and disappears after 5s. Ordinary clear-weather falls, Nether and protected areas excluded. Protection comes only from landing in water; there is no fall-damage immunity. A 3x3 pool, 2 blocks tall, is placed once per fall without spreading; no Slow Falling. Administrators can enable/disable or resize the clutch; single mode restores the original one-water placement. Strength, Haste and Conduit end on leaving water/rain; water vision ends on leaving water. The working v3.4.4 Tidal Sprint and Tidecaller release behavior are retained.',
   hades: 'Use relic while physically in fire, soul fire, or lava: Hellfire fireball (15s). Sneak-use checks readiness. Fire Resistance/Night Vision always; night and otherworld buffs remain.',
   ares: 'Use relic: War Rage, Strength V and Resistance III for 30s (5m). Strength II, Resistance II, Slowness III are passive.',
   apollo: 'Use relic: Lightflight, Solar Flare, gold Oracle compass, Get / Recover Prophetic Bow. Flight: walking speed normally, sprint for fast speed; unlimited in sun, otherwise 5s per minute. Prophetic Bow: draw/release normally with one arrow; no damage buffs. Night/darkness: Weakness III; darkness disables powers.',
@@ -60,22 +70,25 @@ const CONTROLS = {
 };
 const MANAGED = ['speed', 'weakness', 'slow_falling', 'strength', 'mining_fatigue', 'conduit_power',
   'slowness', 'fire_resistance', 'night_vision', 'haste', 'resistance',
-  'levitation', 'nausea', 'blindness', 'regeneration'];
+  'levitation', 'nausea', 'blindness', 'regeneration', 'jump_boost'];
 const prefix = '§6[Olympus]§r ';
-const PACK_VERSION = '3.4.4';
+const PACK_VERSION = '3.5.11';
 const TEMPLE_SIZE = { x: 33, y: 15, z: 33 };
 const TEMPLE_ALTARS = {
+  ...Object.fromEntries(Object.entries(NEW_GODS).map(([god, spec]) => [god, spec.altar])),
   hermes: [5, 5, 6], zeus: [27, 5, 6], poseidon: [5, 5, 13], hades: [27, 5, 13],
   ares: [5, 5, 20], apollo: [27, 5, 20], hephaestus: [5, 5, 27], dionysus: [27, 5, 27], kratos: [16, -5, 23]
 };
 const OFFERINGS = {
+  ...Object.fromEntries(Object.entries(NEW_GODS).map(([god, spec]) => [god, spec.offering])),
   hermes: ['minecraft:feather', 8], zeus: ['minecraft:copper_ingot', 1],
   poseidon: ['minecraft:cod', 3], hades: ['minecraft:bone', 4],
   ares: ['minecraft:stone_sword', 1], apollo: ['minecraft:bow', 1],
   hephaestus: ['minecraft:furnace', 1], dionysus: ['minecraft:sweet_berries', 3], kratos: ['minecraft:iron_sword',1]
 };
 const WEAKNESSES = {
-  hermes: 'Weakness III', zeus: 'Mining Fatigue II', poseidon: 'Slowness III and Weakness III in Nether or desert',
+  ...Object.fromEntries(Object.entries(NEW_GODS).map(([god, spec]) => [god, spec.weakness])),
+  hermes: 'Weakness III', zeus: 'Mining Fatigue II underground or in other dimensions; suppressed only in the exposed sky domain', poseidon: 'Slowness III and Weakness III in Nether or desert',
   hades: 'Slowness III and Weakness III by day', ares: 'Slowness III',
   apollo: 'Weakness III at night or in darkness; no powers in darkness',
   hephaestus: 'Weakness III', dionysus: 'Rising Nausea and possible Blindness as madness stacks', kratos: 'No innate combat buffs; stolen burdens can harm him'
@@ -96,11 +109,14 @@ const warnedFlair = new Set();
 const godPenalties = new Map();
 const godBuffs = new Map();
 const PERSONAL_TOOLS = {
+  hestia: ['olympus:hestia_toolbox',"Hestia's Toolbox"],
+  artemis: ['minecraft:bow', '§aArtemis’s Moon Bow'],
   poseidon: ['minecraft:trident', '§bPoseidon’s Tidecaller'],
   apollo: ['minecraft:bow', '§eApollo’s Solar Bow'],
   hephaestus: ['minecraft:diamond_pickaxe', '§6Hephaestus’s Divine Fortune IV']
 };
-let currentWeather;
+const liveWeather=createWeatherReader();
+system.runInterval(()=>liveWeather.tick(world,system.currentTick,world.getAllPlayers().filter(p=>role(p)==='poseidon')),1);
 const key = (name) => `olympus:${name}`;
 const role = (p) => {
   const god=p.getDynamicProperty(key('role')) || '';
@@ -110,25 +126,25 @@ const role = (p) => {
 function revoked(god) { try { return JSON.parse(world.getDynamicProperty(key(`revoked_${god}`))||'[]'); } catch { return []; } }
 const hermesSlowfallEnabled = (p) => p.getDynamicProperty(key('hermesSlowfall')) !== false;
 const poseidonSpeedEnabled = (p) => p.getDynamicProperty(key('poseidonSpeed')) !== false;
-function weather() {
-  if (currentWeather) return currentWeather;
-  currentWeather = world.getDynamicProperty(key('weather')) || 'Clear';
-  return currentWeather;
-}
+function weather() { return liveWeather.get(); }
 function inRain(player) {
-  if (player.dimension.id !== 'minecraft:overworld') return false;
-  if(weather()==='Clear')return false;
+  if (player.dimension.id !== 'minecraft:overworld' || weather()==='Clear') return false;
+  // Biome lookup is optional on the pinned stable API. Its absence must not
+  // swallow the sky check and disable every rain power on dedicated servers.
   try {
-    const biome = player.dimension.getBiome(player.location).id;
-    if (['desert', 'savanna', 'badlands'].some(name => biome.includes(name))) return false;
+    const biome = player.dimension.getBiome?.(player.location)?.id || '';
+    if (['desert', 'savanna', 'badlands', 'frozen', 'snow', 'ice', 'grove'].some(name => biome.includes(name))) return false;
+  } catch {}
+  try {
     const top = player.dimension.getTopmostBlock({ x: Math.floor(player.location.x), z: Math.floor(player.location.z) });
-    return !!top && top.location.y < player.location.y + 1;
+    if(top && top.location.y >= player.location.y + 1)return false;
+    return liveWeather.rain(player) ?? true;
   } catch { return false; }
 }
 function zeusStorm(player) {
-  return player.dimension.id === 'minecraft:overworld' && (weather() !== 'Clear' || player.location.y >= 220);
+  return player.dimension.id === 'minecraft:overworld' && skyExposed(player) && (player.location.y >= 220 || weather() === 'Thunder');
 }
-function zeusThunder(player) { return player.dimension.id === 'minecraft:overworld' && (weather() === 'Thunder' || player.location.y >= 220); }
+function zeusThunder(player) { return zeusStorm(player); }
 function submerged(player) {
   if (!player.isInWater) return false;
   if (player.isSwimming) return true;
@@ -153,11 +169,11 @@ function owners(god) {
 function sharedGod(god) { return world.getDynamicProperty(key(`shared_${god}`))===true; }
 const owner = (god) => owners(god)[0] || '';
 const now = () => Date.now();
-configureCrown({ role, temple: () => temple(), offeringCount: (p,id) => offeringCount(p,id), takeOffering: (p,id,n) => takeOffering(p,id,n), weather, setWeather: value => { currentWeather = value; world.setDynamicProperty(key('weather'), value); }, fail });
+configureCrown({ role, temple: () => temple(), offeringCount: (p,id) => offeringCount(p,id), takeOffering: (p,id,n) => takeOffering(p,id,n), weather, setWeather: value => { liveWeather.set(value,system.currentTick); }, fail });
 configureDominion(fail);
 configureForge({ role, temple: () => temple(), fail });
 configureUtilityForge({blocked:(dimension,point)=>inHall(dimension,point)||temporaryBlock(dimension,point)||isForge(dimension,point),fail});
-configureDivine({role,ready,startCooldown,tell,heldItem,fail,power:apolloPower});
+configureDivine({role,ready,startCooldown,tell,heldItem,fail,power:apolloPower,moonPower:artemisEnvironment});
 const nameOf = (god) => god.charAt(0).toUpperCase() + god.slice(1);
 function tell(player, message) { player.sendMessage(prefix + message); }
 function fail(e) { console.warn(`[Olympus] ${e?.stack || e}`); }
@@ -358,6 +374,7 @@ function remaining(player, ability) {
   return cooldownRemaining(player.getDynamicProperty(key(`cd_${ability}`)), now());
 }
 function ready(player, ability, label) {
+  if (ability === 'zeusFlight' && zeusStorm(player)) return true;
   if (ability === 'zeusLightning') {
     const stormMs = cooldownRemaining(player.getDynamicProperty(key('cd_zeusStormLightning')), now());
     const normalMs = zeusStorm(player) ? 0 : remaining(player, ability);
@@ -374,17 +391,19 @@ function ready(player, ability, label) {
   player.onScreenDisplay.setActionBar(`§e${label}: ${Math.floor(seconds / 60)}m ${seconds % 60}s remaining`);
   return false;
 }
-function startCooldown(player, ability) {
+function startCooldown(player, ability, workUnits) {
+  if (ability === 'zeusFlight' && zeusStorm(player)) return;
   if (ability === 'zeusLightning') {
-    if (zeusThunder(player)) player.setDynamicProperty(key('cd_zeusStormLightning'), now() + CONFIG.zeusThunderLightningSeconds * 1000);
-    else if (!zeusStorm(player)) player.setDynamicProperty(key('cd_zeusLightning'), now() + CONFIG.cooldownSeconds.zeusLightning * 1000);
+    player.setDynamicProperty(key('cd_zeusStormLightning'), now() + CONFIG.zeusThunderLightningSeconds * 1000);
+    player.setDynamicProperty(key('cd_zeusLightning'), now() + CONFIG.cooldownSeconds.zeusLightning * 1000);
     return;
   }
   if (!abilityNeedsCooldown(ability, zeusStorm(player))) {
     player.setDynamicProperty(key(`cd_${ability}`), undefined);
     return;
   }
-  player.setDynamicProperty(key(`cd_${ability}`), now() + crownCooldownSeconds(player, CONFIG.cooldownSeconds[ability]) * 1000);
+  const seconds=ability==='hestiaFoundation'&&Number.isFinite(workUnits)?Math.max(1,CONFIG.cooldownSeconds[ability]*Math.min(128,workUnits)/128):CONFIG.cooldownSeconds[ability];
+  player.setDynamicProperty(key(`cd_${ability}`), now() + crownCooldownSeconds(player, seconds) * 1000);
 }
 function mountain() {
   const raw = world.getDynamicProperty(key('mountain'));
@@ -555,7 +574,8 @@ function placeTemple(dimension, site) {
   world.structureManager.place('olympus:hall_of_eight', dimension, site, { includeBlocks: true, includeEntities: false });
   world.setDynamicProperty(key('temple'), JSON.stringify({ ...site, dimension: dimension.id }));
   ensureForbiddenVault();
-  world.sendMessage(prefix + `Hall of Eight Gods placed in ${dimension.id} at ${site.x}, ${site.y}, ${site.z}.`);
+  ensureNewAltars();
+  world.sendMessage(prefix + `Hall of Olympus placed in ${dimension.id} at ${site.x}, ${site.y}, ${site.z}.`);
 }
 function ensureForbiddenVault(player) {
   const t=temple();
@@ -573,6 +593,22 @@ function ensureForbiddenVault(player) {
     if (player) tell(player,'The forbidden chamber is open beneath the Hall. Descend the scaffolding near the rear center.');
   } catch(e) { fail(e); if (player) tell(player,'The lower chamber could not be added. Stand inside the loaded Hall and run setup again.'); }
 }
+function ensureNewAltars(player) {
+  const t=temple(); if(!t)return;
+  try {
+    const dimension=t.dimension||'minecraft:overworld';
+    const blocked=installNewAltars(world.getDimension(dimension),t);
+    if(player) {
+      tell(player,`Hall altar upgrade: ${dimension}.`);
+      for(const [god,spec] of Object.entries(NEW_GODS)) {
+        const [x,y,z]=spec.altar,at=`${t.x+x}, ${t.y+y}, ${t.z+z}`;
+        tell(player,`${nameOf(god)} altar: ${blocked.includes(god)?'BLOCKED or unloaded':'READY'} at ${at}.`);
+      }
+      if(blocked.length)tell(player,'Load these locations and clear only obstructing blocks above the floor, then rerun /function olympus/upgrade_gods. Existing blocks are preserved.');
+      else tell(player,'Upgrade complete: Athena, Artemis and Hestia are near the front of the Hall. Use their enchanting tables to claim.');
+    }
+  } catch(e) { fail(e); if(player)tell(player,`Altar upgrade failed: ${String(e?.message||e).slice(0,140)}. Stand inside the loaded Hall and rerun /function olympus/upgrade_gods.`); }
+}
 function ensureForgeStation(player) {
   const t = temple();
   if (!t) return;
@@ -584,7 +620,7 @@ function ensureForgeStation(player) {
   } catch (e) { fail(e); tell(player, 'The Hall chunk must be loaded to add the forge. Return to the Hall and run setup again.'); }
 }
 function placeTempleWithSeal(player) {
-  if (temple()) { tell(player, 'The Hall of Eight Gods is already placed.'); return; }
+  if (temple()) { tell(player, 'The Hall of Olympus is already placed.'); return; }
   if (templeBuilding) { tell(player, 'Temple placement is already running.'); return; }
   templeBuilding = true;
   const dimension = player.dimension;
@@ -603,7 +639,7 @@ function placeTempleWithSeal(player) {
   })());
 }
 function setupTemple(player) {
-  if (temple()) { ensureForgeStation(player); ensureForbiddenVault(player); tell(player, 'The Hall of Eight Gods is already placed.'); return; }
+  if (temple()) { ensureForgeStation(player); ensureForbiddenVault(player); ensureNewAltars(player); tell(player, 'The Hall of Olympus is already placed.'); return; }
   if (templeBuilding) { tell(player, 'Temple site search is already running.'); return; }
   if (player.dimension.id !== 'minecraft:overworld') { tell(player, 'Run setup in the Overworld.'); return; }
   templeBuilding = true;
@@ -660,7 +696,7 @@ function showChoice(player, god) {
   if (!atSummit(player) || role(player)) { tell(player, 'You must be unclaimed and at the summit to choose.'); return; }
   new ActionFormData().title(`§6${nameOf(god)} — ${TITLES[god]}`)
     .body(`${DESCRIPTIONS[god]}\n\n${CONTROLS[god]}`)
-    .button('Find this god at the Hall of Eight Gods', `textures/items/${god}_relic`)
+    .button('Find this god at the Hall of Olympus', `textures/items/${god}_relic`)
     .button('Back to all gods')
     .show(player).then(result => {
       if (result.canceled) return;
@@ -690,7 +726,10 @@ function reset(player) {
   player.setDynamicProperty(key('role'), undefined);
   for (const id of MANAGED) { try { player.removeEffect(id); } catch {} }
   for (const ability of Object.keys(CONFIG.cooldownSeconds)) player.setDynamicProperty(key(`cd_${ability}`), undefined);
+  player.setDynamicProperty(key('artemisInvisible'),undefined);
+  artemisInvisibility(player,false,system.currentTick);
   player.setDynamicProperty(key('rageUntil'), undefined);
+  player.setDynamicProperty(key('newGodUntil'), undefined);
   player.setDynamicProperty(key('hermesSlowfall'), undefined);
   player.setDynamicProperty(key('hermesLeap'), undefined);
   player.setDynamicProperty(key('flareArmed'), undefined);
@@ -710,7 +749,7 @@ function reset(player) {
   tell(player, `${nameOf(god)} has been released. Its place is available again.`);
 }
 function releaseGod(operator,god) {
-  if (!operator.isOp()) { tell(operator,'Only a world operator can release a claimed god.'); return; }
+  if (operator.playerPermissionLevel!==PlayerPermissionLevel.Operator) { tell(operator,'Only a world operator can release a claimed god.'); return; }
   if (!GODS.includes(god)) { tell(operator,`Unknown god: ${god}.`); return; }
   const previous=owners(god);
   if (!previous.length) { tell(operator,`${nameOf(god)} is already available.`); return; }
@@ -721,7 +760,7 @@ function releaseGod(operator,god) {
   tell(operator,`${nameOf(god)} is free to claim again. Previous owners lose that role on return.`);
 }
 function openGod(operator,god) {
-  if (!operator.isOp()) { tell(operator,'Only a world operator can share a god.'); return; }
+  if (operator.playerPermissionLevel!==PlayerPermissionLevel.Operator) { tell(operator,'Only a world operator can share a god.'); return; }
   if (!GODS.includes(god)) { tell(operator,`Unknown god: ${god}.`); return; }
   world.setDynamicProperty(key(`shared_${god}`),true);
   tell(operator,`${nameOf(god)} now accepts additional claimants. Existing owners keep their powers.`);
@@ -810,6 +849,8 @@ function divineFortunePickaxe() {
 function giveEquipment(player, god) {
   try {
     if (god === 'poseidon') giveItem(player, enchantedItem('minecraft:trident', '§bPoseidon’s Tidecaller', [['riptide', 3], ['unbreaking', 3]], ['§bLaunch yourself in water or rain', '§7Riptide III is the game maximum.']));
+    if (god === 'artemis') giveArtemisBow(player);
+    if (god === 'hestia') takeHearthTool(player,'toolbox');
     if (god === 'apollo') {
       giveItem(player, enchantedItem('minecraft:bow', '§eApollo’s Solar Bow', [['power', 5], ['infinity', 1], ['unbreaking', 3]], [`§eOlympus v${PACK_VERSION} Solar Bow`, '§e+10 damage in sun / +4 in other light', '§7Carry one arrow for Infinity.']));
       giveItem(player, new ItemStack('minecraft:arrow', 1));
@@ -824,6 +865,34 @@ function giveEquipment(player, god) {
       giveItem(player, meal);
     }
   } catch (e) { fail(e); tell(player, 'Equipment could not be created. Ask the operator to check the content log.'); }
+}
+function equipHearthTool(player,type) {
+  const bag=player.getComponent('minecraft:inventory')?.container;if(!bag)return false;
+  let slot=-1;for(let i=0;i<bag.size;i++)if(bag.getItem(i)?.typeId===type){slot=i;break;}
+  if(slot<0)return false;
+  if(slot<9){player.selectedSlotIndex=slot;return true;}
+  const selected=player.selectedSlotIndex,old=bag.getItem(selected),tool=bag.getItem(slot);
+  try{bag.setItem(slot,old);bag.setItem(selected,tool);}catch(error){bag.setItem(slot,tool);bag.setItem(selected,old);throw error;}
+  return true;
+}
+function takeHearthTool(player,id,equip=false) {
+  const definition=HEARTH_TOOLS.find(tool=>tool.id===id);if(!definition||role(player)!=='hestia')return;
+  const type=`olympus:hestia_${id}`,saved=vaultRecords(player).find(record=>record.type===type);
+  if(saved){const result=withdrawTool(player,saved.properties['olympus:tool_token'],ItemStack,EnchantmentTypes);tell(player,result==='withdrawn'?`${definition.name} taken out of your toolbox.`:'Free one inventory slot to take out that tool.');return result==='withdrawn'&&(equip?equipHearthTool(player,type):true);}
+  if(ownsToolAnywhere(player,{typeId:type,nameTag:definition.name})){const found=equip?equipHearthTool(player,type):true;tell(player,found?`${definition.name} ready.`:`${definition.name} is reserved for delivery; free an inventory slot.`);return found;}
+  const item=new ItemStack(type,1);item.nameTag=definition.name;
+  item.setLore([definition.button,'Choose materials in Hestia’s toolbox; placements consume resources.']);giveItem(player,item);
+  const found=equip?equipHearthTool(player,type):true;if(found)tell(player,`${definition.name} ready. ${definition.button}.`);return found;
+}
+function putHearthToolsAway(player) {
+  const bag=player.getComponent('minecraft:inventory')?.container;let count=0;
+  for(let i=0;i<(bag?.size||0);i++){const item=bag.getItem(i),tool=hearthTool(item?.typeId);if(!tool||tool.id==='toolbox')continue;if(storeTool(player,i,ItemStack,EnchantmentTypes)==='stored')count++;}
+  tell(player,`${count} building tools put away. Take them out again from the toolbox.`);
+}
+function giveArtemisBow(player) {
+  if(ownsToolAnywhere(player,{typeId:'minecraft:bow',nameTag:'§aArtemis’s Moon Bow'}))return;
+  giveItem(player,enchantedItem('minecraft:bow','§aArtemis’s Moon Bow',[['power',5],['infinity',1],['unbreaking',3]],['§aAim assist and +10 damage at Overworld night or light 0-3','§7No flight; carry one arrow for Infinity.']));
+  giveItem(player,new ItemStack('minecraft:arrow',1));
 }
 function givePropheticBow(player) {
   const bag=player.getComponent('minecraft:inventory')?.container;
@@ -904,36 +973,52 @@ function sunlight(player) {
   if (!daylight() || player.dimension.id !== 'minecraft:overworld') return false;
   try { return player.dimension.getSkyLightLevel(player.location) >= 14; } catch { return false; }
 }
+function artemisEnvironment(player) { return artemisPower(player,player.dimension.id==='minecraft:overworld'&&!daylight()); }
 function apolloPower(player) { return lightPower(player, sunlight(player), daylight(), system.currentTick); }
 function startFlight(player, seconds, label) {
   player.setDynamicProperty(key('flightUntil'), now() + seconds * 1000);
   effect(player, 'slow_falling', seconds + 7);
-  tell(player, `${label}: ${seconds}s. Jump rises, sneak descends, release both to hover. Move normally to steer.`);
+  if(role(player)==='zeus')player.setDynamicProperty(key('zeusSkyFlight'),zeusStorm(player));
+  tell(player, `${label}: ${role(player)==='zeus' && zeusStorm(player)?'unlimited in the exposed sky above Y220 or a thunderstorm':seconds+'s'}. Jump rises, sneak descends, release both to hover. Move normally to steer.`);
 }
 function updateFlight(player) {
-  const until = Number(player.getDynamicProperty(key('flightUntil')) || 0);
+  let until = Number(player.getDynamicProperty(key('flightUntil')) || 0);
   if (!until) return;
   const apollo = role(player) === 'apollo';
   const power = apollo ? apolloPower(player) : undefined;
+  const zeus=role(player)==='zeus',stormFlight=zeus && zeusStorm(player);
+  if(stormFlight) {
+    if(player.getDynamicProperty(key('zeusSkyFlight'))!==true)player.onScreenDisplay?.setActionBar('§bSky domain reached: flight is now unlimited.');
+    player.setDynamicProperty(key('zeusSkyFlight'),true);
+    player.setDynamicProperty(key('flightUntil'),now()+CONFIG.zeusFlightSeconds*1000);
+  } else if(zeus && player.getDynamicProperty(key('zeusSkyFlight'))===true) {
+    // Leaving the sky domain starts a finite descent window and its cooldown.
+    player.onScreenDisplay?.setActionBar('§eLeaving sky power: 15 seconds of flight to descend.');
+    player.setDynamicProperty(key('zeusSkyFlight'),false);
+    until=now()+CONFIG.zeusFlightSeconds*1000;
+    player.setDynamicProperty(key('flightUntil'),until);startCooldown(player,'zeusFlight');
+  } else if(zeus && until>now()+CONFIG.zeusFlightSeconds*1000) {
+    until=now()+CONFIG.zeusFlightSeconds*1000;player.setDynamicProperty(key('flightUntil'),until);
+  }
   if (apollo && power.sun) player.setDynamicProperty(key('flightUntil'), now() + CONFIG.apolloLightFlightSeconds * 1000);
-  if ((!power?.sun && until <= now()) || !['zeus', 'apollo'].includes(role(player)) ||
+  if ((!power?.sun && !stormFlight && until <= now()) || !['zeus', 'apollo'].includes(role(player)) ||
       (apollo && !power.lit)) {
     player.setDynamicProperty(key('flightUntil'), undefined);
     return;
   }
-  if (apollo) effect(player, 'slow_falling', 2);
+  effect(player, 'slow_falling', 2);
   try {
     const jump = player.inputInfo.getButtonState(InputButton.Jump) === ButtonState.Pressed || player.isJumping;
     const sneak = player.inputInfo.getButtonState(InputButton.Sneak) === ButtonState.Pressed || player.isSneaking;
-    const target = jump ? (apollo ? 0.65 : 0.30) : sneak ? (apollo ? -0.45 : -0.18) : 0.035;
+    const target = jump ? 0.65 : sneak ? -0.45 : 0.035;
     const velocity = player.getVelocity();
     const vertical = velocity.y;
     player.applyImpulse({ x: 0, y: Math.max(-0.45, Math.min(0.45, target - vertical)), z: 0 });
     const input = player.inputInfo.getMovementVector();
     const view = player.getViewDirection();
     const direction = movementDirection(input, view);
-    const speed = apollo ? (player.isSprinting ? (power.sun ? CONFIG.apolloSunFlightSpeed : CONFIG.apolloLightFlightSpeed) : CONFIG.apolloFlightWalkSpeed) : 0.32;
-    const acceleration = apollo ? 0.28 : 0.09;
+    const speed = apollo ? (player.isSprinting ? (power.sun ? CONFIG.apolloSunFlightSpeed : CONFIG.apolloLightFlightSpeed) : CONFIG.apolloFlightWalkSpeed) : (player.isSprinting ? (stormFlight ? CONFIG.zeusFlightSprintSpeed : CONFIG.zeusLimitedFlightSprintSpeed) : CONFIG.zeusFlightWalkSpeed);
+    const acceleration = 0.28;
     const desiredX = direction.x * Math.min(1, Math.hypot(input.x, input.y)) * speed;
     const desiredZ = direction.z * Math.min(1, Math.hypot(input.x, input.y)) * speed;
     player.applyImpulse({
@@ -957,7 +1042,10 @@ function updatePlayer(player) {
         if (hermesSlowfallEnabled(player)) effect(player, 'slow_falling', 5);
         break;
       case 'zeus':
-        godPenalty(player, 'mining_fatigue', 5, 1);
+        if(!zeusStorm(player) && (otherworld || zeusUnderground(player)))godPenalty(player,'mining_fatigue',5,1);
+        else clearGodPenalty(player,'mining_fatigue');
+        if(zeusStorm(player)){godBuff(player,'strength',1);godBuff(player,'resistance',0);}
+        else {clearGodBuff(player,'strength');clearGodBuff(player,'resistance');}
         break;
       case 'poseidon':
         if(player.getEffect('slow_falling'))player.removeEffect('slow_falling');
@@ -974,7 +1062,7 @@ function updatePlayer(player) {
         else if (inRain(player)) godBuff(player, 'haste', CONFIG.poseidonRainHasteAmplifier);
         else clearGodBuff(player, 'haste');
         if(!player.isInWater)clearGodBuff(player,'night_vision');
-        if (dim === 'minecraft:nether' || (dim === 'minecraft:overworld' && player.dimension.getBiome(player.location).id === 'minecraft:desert')) {
+        if (dim === 'minecraft:nether' || (dim === 'minecraft:overworld' && player.dimension.getBiome?.(player.location)?.id === 'minecraft:desert')) {
           godPenalty(player, 'slowness', 5, 2); godPenalty(player, 'weakness', 5, 2);
         }
         break;
@@ -998,6 +1086,11 @@ function updatePlayer(player) {
         break;
       case 'hephaestus':
         effect(player, 'haste', 5, 3); godPenalty(player, 'weakness', 5, 2); break;
+      case 'athena':
+      case 'artemis':
+      case 'hestia':
+        newGodTick(player,god,{buff:godBuff,penalty:godPenalty,clearBuff:clearGodBuff,clearPenalty:clearGodPenalty,night:dim==='minecraft:overworld'&&!daylight(),now:now()});
+        break;
       case 'kratos':
         kratosTick(player); break;
     }
@@ -1083,8 +1176,69 @@ function showToolVault(player) {
     tell(player,messages[outcome]||'Vault action did not complete.');
   }).catch(fail);
 }
+function artemisMenu(player) {
+  new ActionFormData().title('§aARTEMIS — HUNT CONTROLS')
+    .body('Sprint boost and invisibility require night, darkness (light 0-3), or another dimension. Bright Overworld daytime disables both. Armor and held items remain visible. Creature tracking is independent; normal relic use activates Huntstride. At block light 0-3, release/press jump again in the air for one extra jump; landing resets it.')
+    .button(`Invisibility: ${player.getDynamicProperty(key('artemisInvisible'))===true?'ON':'OFF'} — toggle`)
+    .button(`Creature tracking: ${player.getDynamicProperty(key('artemisTrackingOff'))===true?'OFF':'ON'} — toggle`)
+    .button('Close').show(player).then(result=>{
+      if(role(player)!=='artemis')return;
+      if(result.selection===0) {
+        const enabled=player.getDynamicProperty(key('artemisInvisible'))!==true;
+        const available=artemisMobilityAvailable(player,daylight());
+        if(enabled&&!available) {tell(player,'Invisibility requires night, darkness or another dimension.');return;}
+        player.setDynamicProperty(key('artemisInvisible'),enabled);
+        artemisInvisibility(player,enabled,system.currentTick,available);
+        tell(player,`Artemis invisibility ${enabled?'ON':'OFF'}. Native invisibility leaves equipment visible.`);
+      }
+      if(result.selection===1) {
+        const off=player.getDynamicProperty(key('artemisTrackingOff'))!==true;
+        player.setDynamicProperty(key('artemisTrackingOff'),off);
+        tell(player,`Continuous creature tracking ${off?'OFF':'ON'}.`);
+      }
+    }).catch(fail);
+}
+function hearthBuilderApi() {
+  return {Form:ActionFormData,ItemStack,resolve:(type,states)=>BlockPermutation.resolve(type,states),ready,startCooldown,tell,fail,
+    allowed:player=>role(player)==='hestia'&&(heldItem(player)?.typeId==='olympus:hestia_relic'||!!hearthTool(heldItem(player)?.typeId)),
+    blocked:(dimension,point)=>inHall(dimension,point)||temporaryBlock(dimension,point)||isForge(dimension,point),
+    takeTool:(player,id)=>takeHearthTool(player,id,true),storeTools:putHearthToolsAway,vault:showToolVault,
+    renewal:player=>useNewGod(player,'hestia',{ready,startCooldown,now:now(),tell,flair:showFlair}),
+    shape:(player,shape)=>useGodUtility(player,'hestia',{ready,startCooldown,tell,blocked:(dimension,point)=>inHall(dimension,point)||temporaryBlock(dimension,point)||isForge(dimension,point)},shape)};
+}
+function athenaBookMenu(player) {
+  const bag=player.getComponent('minecraft:inventory')?.container,book=bag?.getItem((player.selectedSlotIndex+2)%9);
+  if(book?.typeId!=='minecraft:enchanted_book'){tell(player,'Put target gear in the next slot and an enchanted book in the second slot after the relic.');return;}
+  const options=book.getComponent('minecraft:enchantable')?.getEnchantments()||[];
+  if(!options.length){tell(player,'No readable enchantments on that book. No costs spent.');return;}
+  const form=new ActionFormData().title('Athena’s Bookbinding').body('Select one book enchantment. The entire source book is consumed, including its other enchantments. Costs 12 XP levels + 8 lapis, near an enchanting table; shared 3m study cooldown. Equal levels combine +1 up to the native cap; otherwise the higher level transfers. Bound gear/tridents excluded.');
+  for(const enchantment of options)form.button(`${enchantment.type.id.replace('minecraft:','')} ${enchantment.level}`);
+  form.button('Cancel').show(player).then(result=>{
+    const option=options[result.selection];if(result.canceled||!option||role(player)!=='athena'||heldItem(player)?.typeId!=='olympus:athena_relic')return;
+    useGodUtility(player,'athena',{ready,startCooldown,tell,enchantmentTypes:EnchantmentTypes,blocked:()=>false},'book:'+option.type.id);
+  }).catch(fail);
+}
+function godUtilityMenu(player,god) {
+  const options=GOD_UTILITY_OPTIONS[god];
+  const form=new ActionFormData().title(god==='hestia'?'Hearth Construction':'Athena’s Studies')
+    .body(god==='hestia'?'Open World Builder for selections, copy/cut/paste, terrain brushes, palettes, cost previews and 24 undo/redo steps. Quick shapes use the next hotbar slot and a top face within 6m. Shared 20s construction cooldown; every new block costs materials.':'Put ordinary gear in the next hotbar slot. Stand within 2 blocks of an enchanting table. Upgrades add one level up to their listed cap and consume XP levels/lapis. Book transfer consumes the entire source book (second slot after relic), 12 XP levels and 8 lapis. Shared 3m cooldown. Bound god gear and tridents excluded.');
+  for(const option of options)form.button(option.menu);
+  form.button('Close').show(player).then(result=>{
+    const option=options[result.selection];
+    if(result.canceled||!option||role(player)!==god||heldItem(player)?.typeId!==`olympus:${god}_relic`)return;
+    if(god==='hestia'&&option.id==='builder'){showHearthBuilder(player,hearthBuilderApi());return;}
+    if(god==='athena'&&option.id==='books'){athenaBookMenu(player);return;}
+    useGodUtility(player,god,{ready,startCooldown,tell,enchantmentTypes:EnchantmentTypes,
+      blocked:(dimension,point)=>inHall(dimension,point)||temporaryBlock(dimension,point)||isForge(dimension,point)},option.id);
+  }).catch(fail);
+}
 function special(player, god, sneaking) {
   try {
+    if(sneaking && (god==='athena'||god==='hestia')) {
+      godUtilityMenu(player,god);return;
+    }
+    if(god==='artemis' && sneaking) {artemisMenu(player);return;}
+    if(useNewGod(player,god,{ready,startCooldown,now:now(),tell,flair:showFlair,moonPower:artemisEnvironment}))return;
     if (god === 'hermes') {
       if (sneaking) { hermesMobilityMenu(player); return; }
       if (!ready(player, 'hermesPearl', 'Divine Pearl')) return;
@@ -1092,32 +1246,30 @@ function special(player, god, sneaking) {
       startCooldown(player, 'hermesPearl'); tell(player, 'Divine Ender Pearl granted. Use it to teleport; another is available in 5 minutes.'); showFlair(player, god, true);
     } else if (god === 'zeus') {
       if (sneaking) {
+        if(player.getDynamicProperty(key('flightUntil'))){player.setDynamicProperty(key('flightUntil'),undefined);tell(player,'Storm Ascension stopped.');return;}
         if (!ready(player, 'zeusFlight', 'Storm Ascension')) return;
         startFlight(player, CONFIG.zeusFlightSeconds, 'Storm Ascension');
         startCooldown(player, 'zeusFlight');
-        if (zeusStorm(player)) tell(player, 'Storm power: flight has no activation cooldown during rain/thunder or at Overworld Y220+.');
+        if(zeusStorm(player))tell(player,'Sky domain: unlimited flight. Sneak-use again to stop; sprint for fast flight.');
         showFlair(player, god, true);
         return;
       }
       if (!ready(player, 'zeusLightning', 'Lightning Strike')) return;
-      const target = player.getEntitiesFromViewDirection({ maxDistance: 24 })
-        .find(hit => hit.entity.id !== player.id && hit.entity.typeId !== 'minecraft:item')?.entity;
-      const hit = player.getBlockFromViewDirection({ maxDistance: 24 });
-      const aim = target?.location || hit?.block?.location;
-      if (!aim) { tell(player, 'Aim at a block or enemy within 24 blocks.'); return; }
-      player.dimension.spawnEntity('minecraft:lightning_bolt', target ? { x: aim.x, y: aim.y, z: aim.z } : { x: aim.x + 0.5, y: aim.y + 1, z: aim.z + 0.5 });
+      const aim = lightningAim(player,CONFIG.zeusLightningRange);
+      if (!aim) { tell(player, 'No loaded target in sight. Lightning reaches 384 blocks with distance-based aim spread.'); return; }
+      player.dimension.spawnEntity('minecraft:lightning_bolt', aim);
       startCooldown(player, 'zeusLightning');
-      tell(player, zeusThunder(player) ? 'Lightning Strike! Another strike is ready in 5 seconds.' : zeusStorm(player) ? 'Lightning Strike! Rain power.' : 'Lightning Strike!');
+      tell(player, zeusThunder(player) ? 'Lightning Strike! Another strike is ready in 5 seconds.' : 'Lightning Strike! Another strike is ready in 45 seconds.');
       showFlair(player, god, true);
     } else if (god === 'poseidon') {
       if (sneaking) {
         const enabled = !poseidonSpeedEnabled(player);
         player.setDynamicProperty(key('poseidonSpeed'), enabled);
-        tell(player, `v${PACK_VERSION}: Tidal Sprint ${enabled ? 'ON' : 'OFF'}. Water/rain: Strength II; Haste I in water with modest mining compensation, Haste II in rain. Hold sprint for the boost; release sprint for normal control. Hold jump to leave water. Rain Clutch is automatic only in exposed rain, needs no bucket, and places ${rainClutchSize(world).join("x")} water (width/depth/height), for 5s. No Slow Falling. Mild swim cruise remains available with Tidal Sprint off.`);
+        tell(player, `v${PACK_VERSION}: Tidal Sprint ${enabled ? 'ON' : 'OFF'}. Water/rain: Strength II; Haste I in water with modest mining compensation, Haste II in rain. Hold sprint for the boost; release sprint for normal control. Hold jump to leave water. Landing Clutch works for exposed rainy falls or holding a trident during a fall, needs no bucket, and places ${rainClutchSize(world).join("x")} water (width/depth/height), for 5s. No Slow Falling. Mild swim cruise remains available with Tidal Sprint off.`);
         showFlair(player, god, true);
       } else {
         tell(player,`v${PACK_VERSION}: Strength II in water/rain; Haste I in water with modest mining compensation, Haste II in rain. ${CONTROLS.poseidon}`);
-        tell(player,`Rain Clutch ${!rainClutchEnabled(world,player.name)?'DISABLED by administrator':inRain(player)?'READY':'waiting for exposed rain'}: fall toward a solid floor in rain. No bucket or clicking needed; ${rainClutchSize(world).join("x")} water (width/depth/height) disappears after 5 seconds; no Slow Falling. Disabled in clear weather, Nether and protected areas.`);
+        tell(player,`Landing Clutch ${!rainClutchEnabled(world,player.name)?'DISABLED by administrator':inRain(player)?'rain protection ACTIVE':'holding a trident enables dry-fall protection'}: dangerous falls in exposed rain are protected independently of trident use. Outside rain, hold any trident while falling. Movement, Tidecaller release behavior and gear protection match v3.4.4; clutch does not participate in trident use. ${rainClutchSize(world).join("x")} water lasts 5 seconds; no fall immunity. Nether and protected areas excluded.`);
       }
     } else if (god === 'hades') {
       if (sneaking) {
@@ -1149,6 +1301,7 @@ function special(player, god, sneaking) {
   } catch (e) { fail(e); tell(player, 'The ability failed. Ask the operator to check the content log.'); }
 }
 function useRelic(player, id, sneaking = player.isSneaking) {
+  if(id==='olympus:hestia_relic'||hearthTool(id)){useHearthTool(player,id,sneaking,hearthBuilderApi());return;}
   if (id !== 'olympus:crown_control' && id !== 'olympus:mountain_sigil' && id !== 'olympus:temple_seal' && !(id.startsWith('olympus:') && id.endsWith('_relic'))) return;
   const last = lastRelicUse.get(player.id) || 0;
   if (now() - last < 1500) return;
@@ -1264,6 +1417,8 @@ world.afterEvents.itemUse.subscribe((event) => {
 });
 world.beforeEvents.playerInteractWithBlock.subscribe((event) => {
   if (!event.isFirstEvent) return;
+  if(nativeChargeWeapon(event.itemStack))return; // Preserve native weapon use while aiming at protected/interactable blocks.
+  if(hearthTool(event.itemStack?.typeId)) {event.cancel=true;const player=event.player,sneaking=player.isSneaking,id=event.itemStack.typeId;system.run(()=>{try{useRelic(player,id,sneaking);}catch(error){fail(error);}});return;}
   const m = mountain();
   const b = event.block.location;
   const player = event.player;
@@ -1361,7 +1516,7 @@ world.afterEvents.playerBreakBlock.subscribe((event) => {
 });
 world.afterEvents.playerPlaceBlock.subscribe((event) => {
   if (!inHall(event.player.dimension.id,event.block.location)) return;
-  try { event.block.setType('minecraft:air'); tell(event.player,'The Hall of Eight Gods resists alteration.'); }
+  try { event.block.setType('minecraft:air'); tell(event.player,'The Hall of Olympus resists alteration.'); }
   catch(e) { fail(e); }
 });
 world.beforeEvents.playerBreakBlock.subscribe((event) => {
@@ -1438,17 +1593,24 @@ world.afterEvents.itemReleaseUse.subscribe((event) => {
       } catch (e) { if (CONFIG.debug) fail(e); }
     }, 2);
   }
-  if (role(event.source) === 'apollo' && ['§eApollo’s Solar Bow','§6Apollo’s Prophetic Bow'].includes(event.itemStack?.nameTag)) {
+  if ((role(event.source) === 'apollo' && ['§eApollo’s Solar Bow','§6Apollo’s Prophetic Bow'].includes(event.itemStack?.nameTag)) ||
+      (role(event.source)==='artemis' && event.itemStack?.nameTag==='§aArtemis’s Moon Bow')) {
     onDivineBowRelease(event.source,event.itemStack);
-    cosmeticFlair(event.source, 'apollo');
+    cosmeticFlair(event.source, role(event.source));
+  }
+});
+world.afterEvents.playerDimensionChange.subscribe(event=>{
+  if(role(event.player)==='zeus' && event.toDimension.id!=='minecraft:overworld') {
+    // updateFlight converts active sky flight into a bounded descent window.
+    if(event.player.getDynamicProperty(key('zeusSkyFlight'))!==true)event.player.setDynamicProperty(key('flightUntil'),undefined);
   }
 });
 world.afterEvents.weatherChange.subscribe((event) => {
   if (!event.dimension.endsWith('overworld')) return;
-  currentWeather = event.newWeather;
-  world.setDynamicProperty(key('weather'), currentWeather);
+  liveWeather.set(event.newWeather,system.currentTick);
 });
 world.afterEvents.entityDie.subscribe((event) => {
+  try{athenaKillFromEvent(event,role);}catch(error){fail(error);}
   try { transferOnDeath(event); } catch(e) { fail(e); }
   try {
     const victim=event.deadEntity;
@@ -1465,6 +1627,7 @@ world.afterEvents.entityDie.subscribe((event) => {
     }
     if (victim.typeId==='minecraft:player') {
       kratosDeath(victim);
+      victim.setDynamicProperty(key('newGodUntil'),undefined);
       const source=event.damageSource;
       const direct=source?.damagingEntity;
       let projectileOwner;
@@ -1477,7 +1640,7 @@ world.afterEvents.entityDie.subscribe((event) => {
     }
   } catch (e) { fail(e); }
 });
-world.afterEvents.playerLeave.subscribe((event) => { forgetEnvironment(event.playerId);hermesSprintIntent.delete(event.playerId);forgetTidalBoost(event.playerId);poseidonWetState.delete(event.playerId); try { crownOwnerLeft(event.playerId); } catch (e) { fail(e); } });
+world.afterEvents.playerLeave.subscribe((event) => { forgetEnvironment(event.playerId);hermesSprintIntent.delete(event.playerId);forgetTidalBoost(event.playerId);forgetArtemis(event.playerId);forgetHearthTool(event.playerId);poseidonWetState.delete(event.playerId); try { crownOwnerLeft(event.playerId); } catch (e) { fail(e); } });
 system.afterEvents.scriptEventReceive.subscribe((event) => {
   if(event.id==='olympus:poseidon_clutch'){const message=rainClutchCommand(world,event.message);if(event.sourceEntity?.typeId==='minecraft:player')tell(event.sourceEntity,message);else console.warn(message);return;}
   if (!event.id.startsWith('olympus:')) return;
@@ -1486,6 +1649,11 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   try {
     if (event.id === 'olympus:reset') reset(player);
     if (event.id === 'olympus:setup') setupTemple(player);
+    if(event.id==='olympus:upgrade_gods') {
+      if(player.playerPermissionLevel!==PlayerPermissionLevel.Operator) {tell(player,'Only a world operator can upgrade the Hall.');return;}
+      if(!temple()) {tell(player,'No saved Hall exists. Run /function olympus/setup first.');return;}
+      try {ensureNewAltars(player);}catch(e){fail(e);tell(player,`Hall upgrade failed: ${String(e?.message||e).slice(0,140)}`);}
+    }
     if (event.id === 'olympus:crown_setup') { if (!temple()) setupTemple(player); crownSetup(player); }
     if (event.id === 'olympus:crown_status') showStatus(player);
     if (event.id === 'olympus:crown_reset') resetCrown(player);
@@ -1504,7 +1672,7 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
       if (role(player) === 'hermes') tell(player, `Slow Falling ${hermesSlowfallEnabled(player) ? 'ON' : 'OFF'}; Divine Leap ${player.getDynamicProperty(key('hermesLeap'))===true?'ON':'OFF'}. Sneak-use your relic for the mobility menu.`);
       if (role(player) === 'poseidon') tell(player, `Your Tidal Sprint is ${poseidonSpeedEnabled(player) ? 'ON' : 'OFF'}. Sneak-use your relic to toggle it.`);
     }
-    if (event.id === 'olympus:controls') tell(player, role(player) ? CONTROLS[role(player)] + ' Tool Vault: sneak, look straight down, and use your relic.' : 'Reserve a god at its temple altar, gather the offering, and return within 10 minutes.');
+    if (event.id === 'olympus:controls') tell(player, role(player) ? CONTROLS[role(player)] + (role(player)==='hestia'?' Renewal and Tool Vault are in the toolbox.':' Tool Vault: sneak, look straight down, and use your relic.') : 'Reserve a god at its temple altar, gather the offering, and return within 10 minutes.');
     if (event.id === 'olympus:upgrade_mountain') {
       const old = mountain();
       if (!old) { tell(player, 'No Mount Olympus has been summoned yet.'); return; }
@@ -1518,13 +1686,14 @@ system.afterEvents.scriptEventReceive.subscribe((event) => {
   } catch (e) { fail(e); }
 });
 world.afterEvents.playerSpawn.subscribe((event) => {
-  protectOwnedGear(event.player);
+  protectOwnedGear(event.player);forgetArtemis(event.player.id);forgetHearthTool(event.player.id);
   // Command fog stacks survive world reloads. Remove stale saved layers before
   // the environment tick restores Poseidon's layer for a current Poseidon.
   clearEnvironment(event.player, true);forgetTidalBoost(event.player.id);poseidonWetState.delete(event.player.id);
   if (!event.initialSpawn) {
     try {
       event.player.setDynamicProperty(key('flightUntil'), undefined);
+      event.player.setDynamicProperty(key('newGodUntil'), undefined);
       hermesTurboTick.delete(event.player.id);
     } catch {}
     return;
@@ -1532,9 +1701,11 @@ world.afterEvents.playerSpawn.subscribe((event) => {
   system.runTimeout(() => {
     try {
       const god = role(event.player);
-      tell(event.player, god ? `Olympus v${PACK_VERSION}: Welcome back, ${nameOf(god)}.` : `Olympus v${PACK_VERSION}: Visit the Hall of Eight Gods, reserve an altar, and return with its offering.`);
+      tell(event.player, god ? `Olympus v${PACK_VERSION}: Welcome back, ${nameOf(god)}.` : `Olympus v${PACK_VERSION}: Visit the Hall of Olympus, reserve an altar, and return with its offering.`);
       if(god==='apollo')givePropheticBow(event.player);
-      if (god) tell(event.player, CONTROLS[god] + ' Tool Vault: sneak, look straight down, and use your god relic.');
+      if(god==='artemis')giveArtemisBow(event.player);
+      if(god==='hestia')takeHearthTool(event.player,'toolbox');
+      if (god) tell(event.player, CONTROLS[god] + (god==='hestia'?' Renewal and Tool Vault are in your toolbox.':' Tool Vault: sneak, look straight down, and use your god relic.'));
     }
     catch (e) { if (CONFIG.debug) fail(e); }
   }, 40);
@@ -1556,7 +1727,12 @@ system.runInterval(() => {
 system.runInterval(() => {
   for (const player of world.getAllPlayers()) {
     suppressOldPenalties(player);
+    const artemisAvailable=role(player)==='artemis'&&artemisMobilityAvailable(player,daylight());
+    artemisInvisibility(player,role(player)==='artemis'&&player.getDynamicProperty(key('artemisInvisible'))===true,system.currentTick,artemisAvailable);
+    if(role(player)==='artemis')try{artemisSprint(player,CONFIG.artemisSprintSpeed,artemisAvailable);artemisDoubleJump(player,player.inputInfo.getButtonState(InputButton.Jump)===ButtonState.Pressed,artemisEnvironment(player).dark);}catch(e){if(CONFIG.debug)fail(e);}
+    else forgetArtemis(player.id);
     if(role(player)!=='poseidon')updateFlight(player);
+    if(role(player)==='zeus')updatePlayer(player);
     if (role(player) === 'hermes') { hermesFallProtection(player); hermesMotion(player); }
     try { seaEnvironment(player, role(player) === 'poseidon'); } catch (e) { if (CONFIG.debug) fail(e); }
     if (role(player) === 'poseidon') {
@@ -1565,7 +1741,7 @@ system.runInterval(() => {
       const wetState=player.isInWater?'water':inRain(player)?'rain':'dry';
       if(poseidonWetState.get(player.id)!==wetState){poseidonWetState.set(player.id,wetState);updatePlayer(player);}
       poseidonMotion(player);
-      try { bucketClutch(player, inRain(player) && rainClutchEnabled(world,player.name), (dim,p)=>inHall(dim,p)||temporaryBlock(dim,p)||isForge(dim,p), (dim,points,blocked,report)=>spawnRainWater(world,dim,points,blocked,Date.now(),report),rainClutchSize(world)); }
+      try { bucketClutch(player, inRain(player), (dim,p)=>inHall(dim,p)||temporaryBlock(dim,p)||isForge(dim,p), (dim,points,blocked,report)=>spawnRainWater(world,dim,points,blocked,Date.now(),report),rainClutchSize(world),rainClutchEnabled(world,player.name),heldItem(player)?.typeId==='minecraft:trident'); }
       catch (e) { fail(e); }
     }
   }

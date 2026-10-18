@@ -1,4 +1,5 @@
 // Environment powers kept separate from claims, Crown records, and forge systems.
+import {canPlaceClutchWater} from './rain_water.js';
 const swimmers = new Map();
 const fogged = new Set();
 const falls = new Map();
@@ -73,13 +74,21 @@ export function seaEnvironment(player, active) {
   });
 }
 
-export function bucketClutch(player, raining, blocked, spawnWater, size=[3,3,2]) {
+export function bucketClutch(player, raining, blocked, spawnWater, size=[3,3,2], enabled=true,holdingTrident=false) {
+  if(!enabled) {falls.delete(player.id);return false;}
   const p = player.location, velocity = player.getVelocity();
-  if (player.isInWater || player.isOnGround) { falls.set(player.id,{top:p.y,used:false}); return false; }
-  const fall = falls.get(player.id) || { top: p.y, used: false };
+  let fall = falls.get(player.id);
+  if(!raining&&!holdingTrident) {falls.delete(player.id);return false;}
+  if(!fall) {fall={top:p.y,used:false,dimension:player.dimension.id};falls.set(player.id,fall);}
+  if(fall.dimension!==player.dimension.id) {falls.delete(player.id);return false;}
+  if (player.isInWater || player.isOnGround) {
+    // Native ground/water flags can lag the first rising launch ticks.
+    if (velocity.y <= 0 && Math.hypot(velocity.x,velocity.z)<1.2) falls.delete(player.id);
+    return false;
+  }
   fall.top = Math.max(fall.top, p.y);
   falls.set(player.id, fall);
-  if (!raining || player.dimension.id!=='minecraft:overworld' || velocity.y > -0.5 || fall.used || (fall.top-p.y<2 && velocity.y>-0.9)) return false;
+  if (player.dimension.id!=='minecraft:overworld' || velocity.y > -0.5 || fall.used || (fall.top-p.y<2 && velocity.y>-0.9)) return false;
   // Stable raycasts find the actual collidable landing surface. isSolid is a
   // pre-release API and was always undefined in the previous stable build.
   const reach = Math.max(2, Math.ceil(-velocity.y * 2) + 1);
@@ -94,14 +103,23 @@ export function bucketClutch(player, raining, blocked, spawnWater, size=[3,3,2])
       const air = player.dimension.getBlock(location);
       // The placer accepts air AND restorable plants. Rejecting non-air here
       // prevents grass landings from ever reaching that placement logic.
-      if (!air || blocked(player.dimension.id, location) || blocked(player.dimension.id,floor.location)) continue;
+      if (!canPlaceClutchWater(air) || blocked(player.dimension.id, location) || blocked(player.dimension.id,floor.location)) continue;
       const locations=[];
       for(let dx=-Math.floor(size[0]/2);dx<Math.ceil(size[0]/2);dx++)for(let dz=-Math.floor(size[1]/2);dz<Math.ceil(size[1]/2);dz++)for(let dy=0;dy<size[2];dy++)
         locations.push({x:location.x+dx,y:location.y+dy,z:location.z+dz});
       const report=reason=>{if(!fall.warned){fall.warned=true;try{player.sendMessage('§e[Rain Clutch] '+reason);}catch{}}};
-      if(!spawnWater(player.dimension.id,locations,blocked,report))continue;
+      let reason;
+      let placedSize=size;
+      let placed=spawnWater(player.dimension.id,locations,blocked,message=>{reason=message;});
+      // A sign, fence or irregular shoreline can prevent a sealed large pool.
+      // Catch the actual landing cell with an ordinary bucket-sized source.
+      if(!placed && locations.length>1 && reason?.startsWith('Perimeter cannot contain water beside ')) {
+        placed=spawnWater(player.dimension.id,[location],blocked,message=>{reason=message;});
+        placedSize=[1,1,1];
+      }
+      if(!placed){if(reason)report(reason);continue;}
       fall.used = true;
-      try { player.sendMessage(`§b[Olympus v3.4.4] Rain Clutch: ${size[0]}x${size[1]} water, ${size[2]} tall; disappears in 5 seconds.`); } catch {}
+      try { player.sendMessage(`§b[Olympus v3.5.11] Rain Clutch: ${placedSize[0]}x${placedSize[1]} water, ${placedSize[2]} tall; disappears in 5 seconds.`); } catch {}
       return true;
     } catch {}
   }

@@ -11,6 +11,15 @@ class Item {
   getLore(){return this.lore;}
   setLore(lore){this.lore=lore;}
 }
+
+test('Tidecaller regains inventory lock while retaining keep-on-death and ownership',()=>{
+  const item=new Item('minecraft:trident');item.nameTag='§bPoseidon’s Tidecaller';item.lockMode='none';
+  assert.equal(lockGodItem(item,'Poseidon'),true);
+  assert.equal(item.lockMode,'inventory');assert.equal(item.keepOnDeath,true);assert.equal(item.getDynamicProperty('olympus:bound_owner'),'Poseidon');
+  assert.equal(lockGodItem(item,'Poseidon'),false,'do not rewrite an already compatible held trident');
+  const bow=new Item('minecraft:bow');bow.nameTag='§aArtemis’s Moon Bow';lockGodItem(bow,'Artemis');assert.equal(bow.lockMode,'inventory');
+});
+
 test('all personal relics and god tools use inventory locks; forged products stay tradeable',()=>{
   for(const god of ['hermes','zeus','poseidon','hades','ares','apollo','hephaestus','dionysus','kratos']) {
     const relic=new Item(`olympus:${god}_relic`);assert.equal(lockGodItem(relic,'owner'),true);

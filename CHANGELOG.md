@@ -1,5 +1,106 @@
 # Changelog
 
+## 3.5.11 - Repair temple upgrade permissions
+
+- Replace removed Player.isOp() calls with the supported playerPermissionLevel / PlayerPermissionLevel.Operator check. The old upgrade handler could throw after Minecraft printed generic function success. Apply the same correction to god release/share commands.
+- Report dimension and absolute altar coordinates, READY/BLOCKED status, obstruction guidance and visible native errors. Preserve original altars, existing claims and obstructing blocks.
+- All 3.5.10 clutch improvements, native Riptide behavior and probe clearance remain unchanged. Regression checks exercise API 2.x permission properties without an isOp mock. Native 3.5.11 upgrade confirmed by the user: READY messages and all three added altars visible.
+
+## 3.5.10 - Clutch beside flowers and water
+
+- Support modern flowers, thin plants, snow layers and natural water in landing pools and their perimeter. Restore original block states and water levels after five seconds, including overlapping pools.
+- Fall back to one native water source at the actual landing cell when an obstacle prevents the large pool from fitting. The source may flow normally until cleanup. Protected/unloaded terrain still rejects placement; solid landing cells cannot falsely report success.
+- Preserve all 3.5.9 features, inventory locks, native trident behavior and the verified weather probe fix. Automated checks cover restoration, overlap, fallback and protected terrain; native landing checks remain pending.
+
+## 3.5.9 - Separate Hearth tools, earned wisdom and weather probe clearance
+
+- Move weather detector entities off players, maintaining at least 12 blocks of clearance. Native A/B testing confirmed that changing only weather probe placement restored normal Tidecaller launch in the same world. The user also confirmed status 3.5.9 and normal launch with the complete installed update. Preserve the archived 3.4.4 trident behavior and inventory protections.
+- Hestia's relic opens her toolbox. Seven separately equipped tools provide selection, painting, clipboard, terrain, erasing, quick construction and undo. Materials can be selected from anywhere in inventory; placements consume resources and small edits have shorter shared cooldowns. Healing is an explicitly labeled toolbox action.
+- Artemis gains one extra jump in actual darkness, reset by landing. Athena earns bounded bonus raw XP from eligible mob kills, capped at 40 per minute, alongside her existing enchanting workshop.
+- Retain the earlier gods, dynamic Zeus sky flight, Hall upgrade command, resource accounting, persistent history and native gear protections. Automated build, regression and archive parity checks pass.
+
+## 3.5.8 - Resource builder, enchanting workshop and actual 3.4.4 Poseidon rollback
+
+- Restore archived Poseidon movement, swim helper, complete release behavior, gear maintenance and construction/delivery, including the original delayed release boost. Remove the launch observer. Clutch now uses exposed rain OR dangerous descent with any trident held. Inventory locking remains.
+- Verify live Zeus flight transitions from Y70 through Y220 beyond the initial timer; add sky-entry/exit feedback.
+- Add Hestia World Builder: selections, clipboard/transforms, fills/outlines, brushes, terrain tools, palettes, cost previews and 24 persistent undo/redo steps. Resource accounting, 128-block/16m bounds, shared 20s build cooldown, protected/special-block and creature checks.
+- Expand Athena to eight capped enchanting recipes and consumed-book transfer/combination, XP/lapis costs, native caps/conflicts and shared 3m cooldown. Retain other gods and exclusive forge/bow advantages. Add in-game handbook and BUILDER_AND_ENCHANTING.md.
+- Offline regression checks and archive comparisons pass; actual native Riptide and competitive-balance verification remain pending.
+
+## 3.5.7 — Passive landing clutch, distinct utilities, Zeus sky domain
+
+- Keep the native trident stack, Riptide III, inventory lock and death protection. No native charge/use/release handler, extra launch boost or enchantment repair is added. Selected charged weapons are now excluded from all periodic stack writes, even metadata migration. Generic movement assistance yields to fast external momentum and airborne dry exits, removing a remaining braking path without consulting trident state or the clutch observer. Clutch observes launch motion and only places water during descent; portable exposed-rain clutch remains.
+- Hestia retains her existing powers and gains Hearth Foundation on sneak-use: a bounded 3x3 floor consuming carried building blocks one-for-one, 15s cooldown. It skips existing terrain, protected Hall/Forge/Dominion locations and creatures, and rolls placement back on rejected writes.
+- Athena retains Aegis/passives and gains Scholarly Craft on sneak-use: ordinary gear in the next hotbar slot gains one Unbreaking level (max III) near an enchanting table. Cost: 6 XP levels + 3 lapis per upgrade, 180s cooldown. Bound gear and all tridents excluded; other enchantments preserved. No free XP or material generation. Both utilities require Survival/Creative.
+- Zeus gains full power only in exposed Overworld Y220+ or thunderstorms: Strength II, Resistance I, unlimited flight at 1.3 sprint target, five-second lightning interval. Ground/other-dimension power: no combat buff, 15s flight per 90s at 0.8 sprint target, lightning per 45s. Mining Fatigue II underground and in other dimensions. Sky exit starts a 15s descent window and flight cooldown; ordinary rain and covered terrain grant no full power. Ground lightning timers persist across sky casts. Apollo and other gods' configured speeds remain unchanged.
+- Preserve the previous weather/Zeus infrastructure, Artemis controls/aim/tracking, forge, Crown, inventory locks and Hall upgrade command. Offline regression/build validation does not substitute for native Riptide and balance playtesting.
+
+
+## 3.5.6 — Native trident use and portable rain/landing clutch
+
+- Remove the entire custom Poseidon trident-release branch, including its old extra launch impulse. No charge/stop hooks, repair command or enchantment edits are installed. Preserve the native trident, original inventory/death protections and general swim controller.
+- Let native tridents, bows and crossbows pass through block-interaction cancellation so aiming at Hall/interactive blocks does not intercept native weapon use. Block placement/break protection remains. Defer selected native charged-weapon durability maintenance until the item is put away, preventing periodic stack replacement during use.
+- As approved, use approximate read-only launch recognition for the next Riptide-shaped landing, including water-origin launches in clear weather. Do not claim exact native Riptide-state detection. Independently restore exposed-rain fall clutch with no trident prerequisite. Ordinary clear falls remain unarmed; admin disable overrides both paths. Retain bounded placement, cleanup and terrain protections.
+- Server-native weather events/probes initialize existing rain on startup/rejoin with no saved/local-world weather dependency. Add fresh dedicated-server/Realm runtime regression checks, including missing optional biome APIs, roofs, native dry probes and clear weather.
+- Preserve Artemis night/darkness/other-dimension sprint/invisibility gating, aim assist and creature tracking. 138 offline tests pass; native engine/server gameplay acceptance remains pending.
+
+## 3.5.5 — Complete trident rollback and independent clutch observer
+
+- Restore the entire Poseidon release handler and movement controller to the archived v3.4.4 implementation. Retain the original native trident definition, Riptide equipment creation, inventory locking, keep-on-death and release boost. Remove all trident repair commands/helpers, automatic enchantment edits and charge lifecycle hooks. Release handling no longer arms water or writes rain state.
+- Detect launch-like acceleration with a separate read-only observer in the player tick. It only reads native held-trident/enchantment/velocity state and returns an arming decision; it cannot write the item, change movement/input/effects, or change weather. Existing rain, landing, terrain protection and water cleanup rules remain. Ordinary falls do not arm water. Aligned knockback while holding a Riptide trident is a documented motion-detection limitation.
+- Restrict Artemis's invisibility and 1.22 grounded sprint to Overworld night, darkness at light 0-3, or another dimension. Bright Overworld daytime disables both, while creature tracking remains independent. Preserve the chosen invisibility toggle for resumption when eligible; preserve longer external potion effects.
+- Validate exact archived release/controller parity and passive observer isolation, plus rain/dimension/acceleration boundaries and Artemis environment transitions. 133 offline tests pass; native engine verification remains pending.
+
+## 3.5.4 — Restore Tidecaller protections and earlier Riptide path
+
+- Restore Tidecaller's native inventory lock and keep-on-death policy. Automatically relock existing carried, queued and vaulted tools. The v3.5.3 unlock exception was speculative and is superseded.
+- Restore Poseidon's v3.4.4 movement controller and original release boost. Remove the added charge-history lifecycle, charge/stop handlers, velocity-baseline rejection and movement suppression. Keep clutch arming after the established release path, rain recognition and ordinary-fall gating.
+- Remove automatic enchantment repair from the periodic inventory protection loop. Keep the explicit held-item repair command, which restores both Riptide III and inventory locking without replacing the tool or resetting the role.
+- Preserve Artemis invisibility, 1.22 sprint, aim assist, continuous creature Oracle, other gods and the Hall upgrade command. Add a provenance-documented archived movement fixture and regression checks for inventory locking and post-release-only clutch integration. Offline tests do not establish the native launch root cause; Minecraft verification remains pending.
+
+## 3.5.3 — Tidecaller native-use compatibility and Artemis mobility
+
+- Exempt only Tidecaller from native inventory locking; keep its owner metadata and keep-on-death flag. This deliberate compatibility exception allows dropping/storage/trading. Older carried/vault Tidecallers follow the new flag policy.
+- Repair existing carried Tidecaller Riptide III and remove conflicting Loyalty/Channeling in place, outside charging. Add `/function olympus/riptide_repair` for explicit held-item repair and a report of real enchantment/flags. No role reset, replacement tool or fabricated launch.
+- Pause all scripted Poseidon movement during native charge and release grace. Clear suppression on canceled use while retaining the grace for successful releases. Native launch confirmation continues to gate rain landing water.
+- Add Artemis sneak-use Hunt Controls with invisibility and creature-tracking toggles. Native invisibility leaves equipment visible and preserves longer external potion effects. Add grounded sprint target 1.22 blocks/tick; preserve Apollo, Hermes and Poseidon speeds, as explicitly selected. No flight, fall immunity, swimming boost or extra airborne thrust.
+- Automated checks cover trident migration/repair, canceled-use suppression, real swim-controller suspension, invisibility ownership and sprint gates/targets. Minecraft launch and movement acceptance remains pending.
+
+## 3.5.2 — Artemis Moon Bow aim assist
+
+- Reuse Apollo's Prophetic Bow steering for Artemis's Moon Bow at Overworld night or light 0-3. Share the existing aim cone, turn rate, target lock, speed preservation and solid-wall checks. Bright daytime pauses steering.
+- Preserve Moon Bow's existing +10 conditional damage, once per hit, without adding Solar Flare or changing Apollo's plain Prophetic arrows. Handle delayed projectile ownership and item switching using the same bounded release snapshots.
+- Update controls, bow lore, versioned package and latest marker. Automated checks cover target/wall behavior, environmental gating, speed preservation, damage/duplicate handling and late ownership. Bedrock gameplay verification remains pending.
+
+## 3.5.1 — Native Riptide, night Artemis and explicit Hall upgrade
+
+- Require a charged native Tidecaller launch, including forward acceleration, before arming rain landing water. Ordinary falls and failed uses never arm a pool. Preserve native momentum through Tidal Sprint/dry exits, defer trident rewrites during charge/spin, and avoid mistaking a clear-weather water launch for rain. Landing water retains bounded placement, containment, cleanup and admin controls.
+- Make Artemis a night/darkness counterpart to Apollo: locked Power V/Infinity I/Unbreaking III Moon Bow with +10 damage at Overworld night or light 0-3; Speed II and Night Vision in those conditions, Weakness III otherwise. Huntstride needs night/darkness. No flight, aim assist or Solar Flare.
+- Continuous Artemis Oracle uses the existing private compass, trails and creature particles, with no expiration/cooldown and no chest scanner. Default on, sneak-use relic to toggle. Preserve the existing 48m creature range and 48-target cap.
+- Add operator command `/function olympus/upgrade_gods` to add the three new altars to a saved Hall without rebuilding or resetting claims. Obstructions are preserved and reported. Setup still supports the same upgrade.
+- Publish a clearly versioned 3.5.1 archive, identical FINAL alias and LATEST marker. Regression checks exercise real event wiring, launch/landing sequencing, ordinary/failed-use rejection, tracker persistence and exclusions, Moon Bow damage and safe upgrade routing. Minecraft gameplay acceptance remains pending.
+
+
+## 3.5.0 — Athena, Artemis and Hestia
+
+- Release packaging now produces `dist/Olympus_SMP_v3.5.0.mcaddon`, an identical `Olympus_SMP_FINAL.mcaddon` compatibility copy, and `LATEST.txt` naming the current release with its SHA-256. Validate complete archive/source parity and consistent release versions. All v3.4.5 Zeus, rain/weather-sensor, Riptide-clutch and earlier compatibility features remain included.
+
+- Add three conservative roles using native effects: Athena's brief defensive Aegis, Artemis's bounded Huntstride, and Hestia's short self regeneration. All have passive weaknesses; no new Strength, damage multipliers, ally healing or terrain changes.
+- Integrate twelve relics with claims, operator assignment, Creative kit, personal equipment locks, cosmetic signatures, controls, cooldown-ready notices, Crown cooldown/weakness rules, and Kratos gift/burden theft.
+- Add compact front altars to fresh Halls. Setup fills clear footprints in existing Halls, preserves obstructions, and can be rerun. Keep the original structure identifier and eight Crown domains.
+- Bump generated manifests, dependency versions and package to 3.5.0. Preserve existing pack UUIDs and earlier pending changes.
+- Offline validation covers burst duration, cooldown rejection, passive interaction, external effect preservation, conditional night vision, regeneration refresh prevention, and safe repeated altar upgrades. In-game acceptance remains pending.
+
+
+## 3.4.5 — Zeus survivability and server rain detection
+
+- Zeus now has unlimited toggleable flight throughout the Overworld, with no activation cooldown. Nether/End flight remains 30 seconds with a three-minute cooldown; portals stop unlimited flight. Sprint speed and ascent match Apollo.
+- Add Strength II during Overworld rain/thunder and Y220+ storm power. Apply Mining Fatigue II only beneath a natural underground ceiling; clear it immediately in the open and always at Y220+.
+- Replace the 24-block lightning limit with a 384-block ray and angular aim spread. Terrain blocks entity targeting; distant strikes can miss by several blocks. Existing lightning cooldown rules remain.
+- Initialize weather with an invisible native environment sensor, including server startup during rain. Per-Poseidon native wet probes remove dependency on optional biome APIs for local rain. Sensors clean up after reload/disconnect and expire if scripts stop.
+- Native rainy Riptide launches refresh rain recognition and rearm landing water clutch. Existing real-water placement, admin controls, protection checks and five-second cleanup remain.
+- Add regression coverage for startup weather, missing biome API, flight duration/dimensions/cooldowns, Strength/fatigue, long-range lightning obstruction/spread and Riptide clutch rearming. Dedicated-server gameplay verification remains pending.
+
 ## 3.4.4 — Native Minecraft animations and compass-only Oracle
 
 - Remove copied vanilla player/mob behavior and client definitions, generated mesh outlines/controllers and their generators. Minecraft now supplies all vanilla entity/weapon animations, including Hermes's spear. No replacement animation set is bundled.

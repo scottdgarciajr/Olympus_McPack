@@ -1,0 +1,170 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "olympus:weather_sensor",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "properties": {
+        "olympus:weather": {
+          "type": "enum",
+          "values": [
+            "unknown",
+            "clear",
+            "rain",
+            "thunder"
+          ],
+          "default": "unknown",
+          "client_sync": false
+        },
+        "olympus:rain": {
+          "type": "enum",
+          "values": [
+            "unknown",
+            "wet",
+            "dry"
+          ],
+          "default": "unknown",
+          "client_sync": false
+        }
+      }
+    },
+    "components": {
+      "minecraft:collision_box": {
+        "width": 0,
+        "height": 0
+      },
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": false
+      },
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "cause": "all",
+            "deals_damage": "no"
+          }
+        ]
+      },
+      "minecraft:pushable": {
+        "is_pushable": false,
+        "is_pushable_by_piston": false
+      },
+      "minecraft:environment_sensor": {
+        "triggers": [
+          {
+            "filters": {
+              "test": "weather",
+              "value": "clear"
+            },
+            "event": "olympus:clear"
+          },
+          {
+            "filters": {
+              "all_of": [
+                {
+                  "test": "weather",
+                  "value": "precipitation"
+                },
+                {
+                  "test": "weather",
+                  "value": "thunderstorm",
+                  "operator": "!="
+                }
+              ]
+            },
+            "event": "olympus:rain"
+          },
+          {
+            "filters": {
+              "test": "weather",
+              "value": "thunderstorm"
+            },
+            "event": "olympus:thunder"
+          },
+          {
+            "filters": {
+              "all_of": [
+                {
+                  "test": "in_water_or_rain",
+                  "value": true
+                },
+                {
+                  "test": "in_water",
+                  "value": false
+                }
+              ]
+            },
+            "event": "olympus:wet"
+          },
+          {
+            "filters": {
+              "none_of": [
+                {
+                  "all_of": [
+                    {
+                      "test": "in_water_or_rain",
+                      "value": true
+                    },
+                    {
+                      "test": "in_water",
+                      "value": false
+                    }
+                  ]
+                }
+              ]
+            },
+            "event": "olympus:dry"
+          }
+        ]
+      },
+      "minecraft:timer": {
+        "time": 120,
+        "looping": false,
+        "time_down_event": {
+          "event": "olympus:expire",
+          "target": "self"
+        }
+      }
+    },
+    "events": {
+      "olympus:clear": {
+        "set_property": {
+          "olympus:weather": "'clear'"
+        }
+      },
+      "olympus:rain": {
+        "set_property": {
+          "olympus:weather": "'rain'"
+        }
+      },
+      "olympus:thunder": {
+        "set_property": {
+          "olympus:weather": "'thunder'"
+        }
+      },
+      "olympus:expire": {
+        "add": {
+          "component_groups": [
+            "olympus:despawn"
+          ]
+        }
+      },
+      "olympus:wet": {
+        "set_property": {
+          "olympus:rain": "'wet'"
+        }
+      },
+      "olympus:dry": {
+        "set_property": {
+          "olympus:rain": "'dry'"
+        }
+      }
+    },
+    "component_groups": {
+      "olympus:despawn": {
+        "minecraft:instant_despawn": {}
+      }
+    }
+  }
+}

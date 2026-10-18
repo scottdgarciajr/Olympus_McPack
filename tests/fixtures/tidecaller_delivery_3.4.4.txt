@@ -1,0 +1,31 @@
+function giveItem(player, item) {
+  if(isPersonalGodTool(item) && ownsToolAnywhere(player,item)) {
+    tell(player,'You already own that tool. Stored tools can be withdrawn from your private Tool Vault.');return;
+  }
+  lockGodItem(item,player.name);
+  const inventory = player.getComponent('minecraft:inventory')?.container;
+  if (!inventory) { tell(player, 'Inventory unavailable; equipment could not be delivered.'); return; }
+  const left = inventory.addItem(item);
+  if (left) {
+    if(isPersonalGodItem(left)) {
+      queueGodItem(player,left);
+      return;
+    }
+    player.dimension.spawnItem(left, player.location);
+    tell(player, 'Your inventory was full, so the equipment dropped at your feet.');
+  }
+}
+function enchantedItem(type, name, enchants, lore = []) {
+  const item = new ItemStack(type, 1);
+  item.nameTag = name;
+  item.keepOnDeath = true;
+  const component = item.getComponent('minecraft:enchantable');
+  if (!component) throw new Error(`Missing enchantable component on ${type}`);
+  for (const [id, level] of enchants) {
+    const enchantmentType = EnchantmentTypes.get(`minecraft:${id}`);
+    if (!enchantmentType) throw new Error(`Unknown enchantment ${id}`);
+    component.addEnchantment({ type: enchantmentType, level: Math.min(level, enchantmentType.maxLevel) });
+  }
+  if (lore.length) item.setLore(lore);
+  return item;
+}

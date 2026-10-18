@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-VERSION = [3, 4, 4]
+VERSION = [3, 5, 11]
 VERSION_TEXT = '.'.join(map(str, VERSION))
 GODS = {
     'hermes': ('Hermes Winged Relic', '#f4cf58'),
@@ -18,6 +18,9 @@ GODS = {
     'hephaestus': ('Hephaestus Forge Relic', '#da8e4d'),
     'dionysus': ('Dionysus Goblet Relic', '#b06bd5'),
     'kratos': ('Kratos God Slayer Relic', '#6d2529'),
+    'athena': ('Athena Aegis Relic', '#b5bdcf'),
+    'artemis': ('Artemis Hunt Relic', '#66bb88'),
+    'hestia': ('Hestia Hearth Relic', '#e89068'),
 }
 RELIC_BUTTONS = {
     'hermes': 'Use: Pearl / Sneak: Mobility Menu',
@@ -29,6 +32,9 @@ RELIC_BUTTONS = {
     'hephaestus': 'Open Divine Forge Guide',
     'dionysus': 'Use: Madness Guide / Divine Harvest',
     'kratos': 'Use: Stolen Power Status',
+    'athena': 'Use: Aegis / Sneak: Enchanting Workshop',
+    'artemis': 'Use: Huntstride / Sneak: Hunt Controls',
+    'hestia': 'Open toolbox (Renewal inside)',
 }
 
 def relic_icon(god, color):
@@ -73,6 +79,16 @@ def relic_icon(god, color):
         d.polygon(pts([(9, 10), (23, 10), (20, 18), (17, 21), (15, 21), (12, 18)]), fill=color, outline=light)
         d.line(pts([(16, 21), (16, 24), (12, 24), (20, 24)]), fill=light, width=scale)
         d.ellipse(box((18, 11, 20, 13)), fill=light)
+    elif god == 'athena':
+        d.polygon(pts([(10, 9), (22, 9), (21, 19), (16, 25), (11, 19)]), fill=color, outline=light)
+        d.line(pts([(16, 11), (16, 21)]), fill=light, width=scale)
+    elif god == 'artemis':
+        d.arc(box((8, 8, 23, 25)), -80, 80, fill=light, width=2*scale)
+        d.line(pts([(17, 9), (17, 24)]), fill=color, width=scale)
+        d.line(pts([(10, 16), (24, 16), (21, 13)]), fill=light, width=scale)
+    elif god == 'hestia':
+        d.polygon(pts([(16, 7), (23, 20), (20, 24), (12, 24), (9, 20)]), fill=color, outline=light)
+        d.polygon(pts([(16, 15), (19, 22), (13, 22)]), fill=light)
     elif god == 'kratos':
         d.line(pts([(10, 24), (22, 8)]), fill=light, width=3*scale)
         d.line(pts([(9, 11), (21, 23)]), fill='#e4624d', width=3*scale)
@@ -87,7 +103,7 @@ bp_uuid = 'a06ad1f9-8b44-4af1-995a-95dc9c684c25'
 rp_uuid = 'def06a91-6e05-457a-a359-714565d4c32c'
 write_json(BP / 'manifest.json', {
     'format_version': 2,
-    'header': {'name': f'Olympus SMP Behavior v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Native Minecraft animations; particle-only Oracle compass. Optional Vibrant Visuals; private grouped cooldown-ready chat alerts. Hermes: physical ground checks for grass/sand steps. Poseidon: Strength II water/rain, Haste I water with adaptive mining / II rain, mild swim cruise, sprint-held Tidal Sprint, rain clutch defaults to 3x3 water, 2 tall; native containment; 5s cleanup; configurable size and original single-water option; no Slow Falling; admin clutch toggle; Hephaestus: 14 forge creations including 10 balanced utility items; wet powers end on dry exit. Private Tool Vault. Apollo: normal Prophetic Bow, gold Oracle compass and colored trails, sprint Sunflight. Zeus: Y220+ storm power.', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
+    'header': {'name': f'Olympus SMP Behavior v{VERSION_TEXT}', 'description': f'v{VERSION_TEXT} | Hestia: easy toolbox with seven resource-powered building tools, 24 undo/redo steps; Athena: enchanting workshop and earned bonus mob XP; Artemis: darkness double jump, Moon Bow aim assist, tracking, conditional invisibility/sprint. Poseidon: v3.4.4 movement/release and locked Tidecaller, held-trident/rain landing clutch. Weather probes stay away from players. Zeus: live Y220/thunder sky power. Includes Forge, Crown, Tool Vault, native animations, optional Vibrant Visuals and upgrade_gods command.', 'uuid': bp_uuid, 'version': VERSION, 'min_engine_version': [1, 21, 120]},
     'modules': [
         {'type': 'data', 'uuid': '45604c22-4d55-478e-beb7-fca61db38eaf', 'version': VERSION},
         {'type': 'script', 'language': 'javascript', 'entry': 'scripts/main.js', 'uuid': 'c6515f3a-93dc-4971-987c-ad95b689d22f', 'version': VERSION}
@@ -133,6 +149,31 @@ for god, (label, color) in GODS.items():
     texture_data[f'olympus_{god}'] = {'textures': f'textures/items/{god}_relic'}
     relic_icon(god, color).save(RP / 'textures' / 'items' / f'{god}_relic.png')
 
+# Original Hestia tools share the existing native item-use component.
+hearth_tools=json.loads((ROOT/'hearth_tools.json').read_text(encoding='utf-8'))
+(BP/'scripts'/'hearth_tools.js').write_text('// Generated from hearth_tools.json.\nexport const HEARTH_TOOLS='+json.dumps(hearth_tools,indent=2)+';\nexport const hearthTool=id=>HEARTH_TOOLS.find(tool=>id===`olympus:hestia_${tool.id}`);\n',encoding='utf-8')
+for tool in hearth_tools:
+    name='hestia_'+tool['id']; icon='olympus_'+name
+    write_json(BP/'items'/f'{name}.json',{'format_version':'1.21.90','minecraft:item':{
+        'description':{'identifier':'olympus:'+name,'menu_category':{'category':'items'}},
+        'components':{'minecraft:display_name':{'value':tool['name']},'minecraft:icon':icon,'minecraft:max_stack_size':1,'minecraft:interact_button':tool['button'],'olympus:relic_use':{}}}})
+    texture_data[icon]={'textures':'textures/items/'+name}
+    im=Image.new('RGBA',(32,32),(0,0,0,0));draw=ImageDraw.Draw(im);color=tool['color']
+    if tool['id']=='toolbox':
+        draw.rectangle((4,12,28,27),fill='#6e4029',outline='#f3c46e',width=2);draw.rectangle((10,6,22,12),outline=color,width=3);draw.rectangle((5,17,27,19),fill=color);draw.rectangle((14,15,18,22),fill='#ffdd7c')
+    elif tool['id']=='clipboard':
+        draw.rectangle((7,5,25,28),fill='#805536',outline='#f6b861',width=2);draw.rectangle((10,9,22,25),fill=color);draw.rectangle((13,4,19,9),fill='#b7a78e');draw.line((12,14,21,14),fill='#79593b',width=1);draw.line((12,19,21,19),fill='#79593b',width=1)
+    elif tool['id']=='undo':
+        draw.arc((5,5,27,27),-130,165,fill=color,width=4);draw.polygon([(3,7),(13,8),(7,17)],fill=color)
+    else:
+        draw.line((7,27,23,8),fill='#805536',width=4);draw.line((8,27,24,8),fill='#e6ae61',width=1)
+        if tool['id']=='brush':draw.rectangle((17,3,28,10),fill=color);draw.rectangle((17,9,27,14),fill='#d9c49a')
+        elif tool['id']=='terrain':draw.polygon([(16,3),(28,6),(25,15),(19,16)],fill=color,outline='#ede1c2')
+        elif tool['id']=='eraser':draw.polygon([(17,2),(29,11),(22,18),(12,9)],fill=color,outline='#f5ddd1')
+        elif tool['id']=='trowel':draw.polygon([(23,2),(30,16),(15,12)],fill=color,outline='#e5edf5')
+        else:draw.polygon([(23,1),(25,7),(31,9),(25,12),(22,18),(20,12),(15,9),(21,7)],fill=color)
+    im.save(RP/'textures'/'items'/f'{name}.png')
+
 for name,label,button,hook,icon in [
     ('creative_test_kit','Olympus Creative Test Kit','Open God and Crown Test Menu','olympus:creative_test_kit_use','olympus_creative_test_kit'),
     ('war_trophy','War Trophy','An offering from a player victory',None,'olympus_war_trophy')]:
@@ -169,7 +210,7 @@ write_json(BP / 'items' / 'temple_seal.json', {
         'components': {
             'minecraft:display_name': {'value': 'Hall Placement Seal'},
             'minecraft:icon': 'olympus_temple_seal', 'minecraft:max_stack_size': 1,
-            'minecraft:interact_button': 'Place Hall of Eight Gods', 'olympus:relic_use': {}
+            'minecraft:interact_button': 'Place Hall of Olympus', 'olympus:relic_use': {}
         }
     }
 })
@@ -245,10 +286,11 @@ write_json(RP / 'textures' / 'item_texture.json', {'resource_pack_name': 'Olympu
 
 functions = BP / 'functions' / 'olympus'
 functions.mkdir(parents=True, exist_ok=True)
-(functions / 'give_all.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus relic kit for operators. Players claim gods at the Hall of Eight Gods altars with offerings. Overflow may drop at your feet."}]}\n' + '\n'.join(f'give @s olympus:{g}_relic 1' for g in GODS) + '\n', encoding='utf-8')
+(functions / 'give_all.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus relic kit for operators. Players claim gods at the Hall of Olympus altars with offerings. Overflow may drop at your feet."}]}\n' + '\n'.join(f'give @s olympus:{g}_relic 1' for g in GODS) + '\n', encoding='utf-8')
 (functions / 'creative_kit.mcfunction').write_text('give @s olympus:creative_test_kit 1\n',encoding='utf-8')
 (functions / 'summon_mountain.mcfunction').write_text('give @s olympus:mountain_sigil 1\ntellraw @s {"rawtext":[{"text":"Use the sigil in a large clear area in the Overworld. Mount Olympus rises 33 blocks east of you."}]}\n', encoding='utf-8')
-(functions / 'help.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus: /function olympus/setup searches near world spawn and places the Hall of Eight Gods. Interact with a god altar to reserve for 10 minutes, gather its offering, and return to claim. /function olympus/controls shows powers. /function olympus/status and /function olympus/reset are operator tools."}]}\n', encoding='utf-8')
+(functions / 'help.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus: /function olympus/setup searches near world spawn and places the Hall of Olympus. Interact with a god altar to reserve for 10 minutes, gather its offering, and return to claim. /function olympus/controls shows powers. /function olympus/status and /function olympus/reset are operator tools."}]}\n', encoding='utf-8')
+(functions / 'upgrade_gods.mcfunction').write_text('scriptevent olympus:upgrade_gods\n', encoding='utf-8')
 (functions / 'setup.mcfunction').write_text('scriptevent olympus:setup\n', encoding='utf-8')
 (functions / 'status.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus function layer loaded. Script diagnostic follows:"}]}\nscriptevent olympus:status\n', encoding='utf-8')
 (functions / 'reset.mcfunction').write_text('scriptevent olympus:reset\n', encoding='utf-8')
@@ -256,7 +298,7 @@ functions.mkdir(parents=True, exist_ok=True)
 (functions / 'upgrade_mountain.mcfunction').write_text('scriptevent olympus:upgrade_mountain\n', encoding='utf-8')
 for name in ('crown_setup', 'crown_status', 'crown_reset', 'crown_recover', 'crown_glory', 'crown_help'):
     (functions / f'{name}.mcfunction').write_text(f'scriptevent olympus:{name}\n', encoding='utf-8')
-(functions / 'help.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus: /function olympus/setup places the Hall of Eight Gods. Reserve a god at its altar for 10 minutes, then return with its offering to claim. The center contains the Crown throne. /function olympus/crown_status and /function olympus/crown_help explain the Crown trial."}]}\n', encoding='utf-8')
+(functions / 'help.mcfunction').write_text('tellraw @s {"rawtext":[{"text":"Olympus: /function olympus/setup places the Hall of Olympus. Reserve a god at its altar for 10 minutes, then return with its offering to claim. Upgrade an existing Hall: /function olympus/upgrade_gods. The center contains the Crown throne. /function olympus/crown_status and /function olympus/crown_help explain the Crown trial."}]}\n', encoding='utf-8')
 (RP / 'textures' / 'particle').mkdir(parents=True, exist_ok=True)
 Image.new('RGBA', (1, 1), (255, 255, 255, 255)).save(RP / 'textures' / 'particle' / 'oracle_spark.png')
 # A non-colliding carrier for real water, with flow disabled in every direction.

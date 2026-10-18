@@ -1,0 +1,15 @@
+  if (role(event.source) === 'poseidon' && event.itemStack?.nameTag === '§bPoseidon’s Tidecaller') {
+    const player = event.source;
+    forgetTidalBoost(player.id); // Preserve native Riptide momentum on water exit.
+    cosmeticFlair(player, 'poseidon');
+    system.runTimeout(() => {
+      try {
+        if (role(player) !== 'poseidon' || (!player.isInWater && !inRain(player))) return;
+        const velocity = player.getVelocity();
+        if (Math.hypot(velocity.x, velocity.y, velocity.z) < 0.65) return; // Native Riptide actually launched.
+        const view = player.getViewDirection();
+        player.applyImpulse({ x: view.x * 0.85, y: Math.max(0.08, view.y * 0.35), z: view.z * 0.85 });
+        showFlair(player, 'poseidon', true);
+      } catch (e) { if (CONFIG.debug) fail(e); }
+    }, 2);
+  }

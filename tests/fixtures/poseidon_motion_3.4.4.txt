@@ -1,0 +1,46 @@
+function poseidonMotion(player) {
+  try {
+    const wet=player.isInWater || inRain(player);
+    tidalEnvironment(player,wet);
+    if(player.isInWater) {
+      const input=player.inputInfo.getMovementVector(),direction=movementDirection(input,player.getViewDirection());
+      const magnitude=Math.min(1,Math.hypot(input.x,input.y));
+      poseidonSwimCruise(player,{x:direction.x*magnitude,z:direction.z*magnitude},CONFIG.poseidonCruiseSpeed);
+    }
+    if (!wet || !poseidonSpeedEnabled(player) || !player.isSprinting) return;
+    const input = player.inputInfo.getMovementVector();
+    const magnitude = Math.hypot(input.x, input.y);
+    const swimJump = player.isInWater &&
+      (player.inputInfo.getButtonState(InputButton.Jump) === ButtonState.Pressed || player.isJumping);
+    if (magnitude < 0.2 && !swimJump) return;
+    const view = player.getViewDirection();
+    const horizontal = Math.hypot(view.x, view.z) || 1;
+    const forwardX = view.x / horizontal, forwardZ = view.z / horizontal;
+    const direction = movementDirection(input, view);
+    // Jump takes priority over camera pitch and eases horizontal thrust so the
+    // player can rise beside a bank instead of being driven into its wall.
+    const speed = swimJump ? 0.45 : CONFIG.poseidonSwimSpeed;
+    const desiredX = direction.x * speed;
+    const desiredZ = direction.z * speed;
+    const velocity = player.getVelocity();
+    const steeringVertically = player.isInWater && Math.abs(view.y) > 0.15 && Math.abs(input.y) >= 0.2;
+    const verticalTarget = swimJump ? Math.max(0.55, velocity.y) : view.y * input.y * 0.6;
+    recordTidalBoost(player);
+    player.applyImpulse({
+      x: Math.max(-0.5, Math.min(0.5, desiredX - velocity.x)),
+      // Looking level must not cancel vanilla swimming, jumping or bank-exit momentum.
+      y: swimJump || steeringVertically ? Math.max(-0.2, Math.min(0.2, verticalTarget - velocity.y)) : 0,
+      z: Math.max(-0.5, Math.min(0.5, desiredZ - velocity.z))
+    });
+    const previous = poseidonTrailTick.get(player.id) || 0;
+    if (system.currentTick - previous >= 2) {
+      poseidonTrailTick.set(player.id, system.currentTick);
+      const color = new MolangVariableMap();
+      color.setColorRGB('variable.color', { red: 0.1, green: 0.7, blue: 1 });
+      player.dimension.spawnParticle('minecraft:colored_flame_particle', {
+        x: player.location.x - forwardX * 0.65, y: player.location.y + 0.85,
+        z: player.location.z - forwardZ * 0.65
+      }, color);
+    }
+  } catch (e) { if (CONFIG.debug) fail(e); }
+}

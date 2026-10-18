@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:hestia_undo",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Hearth Undo Charm"
+      },
+      "minecraft:icon": "olympus_hestia_undo",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Undo / Sneak: redo options",
+      "olympus:relic_use": {}
+    }
+  }
+}

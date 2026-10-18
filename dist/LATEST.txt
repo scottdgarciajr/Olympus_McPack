@@ -1,0 +1,22 @@
+LATEST RELEASE: Olympus SMP v3.5.11
+INSTALL: Olympus_SMP_v3.5.11.mcaddon
+COMPATIBILITY ALIAS: Olympus_SMP_FINAL.mcaddon (identical contents)
+SHA256: f621ff96545c311ff826ec645e5f4d9d45c279e030cb6346b9743d4dd6c1c21a
+
+Includes v3.4.5 systems plus Athena, Artemis and Hestia.
+Hestia: normal-use relic opens toolbox; seven separate tools, material picker, resource costs and 24 undo/redo steps.
+Athena: enchanting workshop plus earned bonus XP on mob kills (40 raw XP/min cap).
+Zeus: flight reevaluates position every tick, including ascent from Y70 through Y220; sky/thunder power, limited elsewhere.
+Artemis: darkness-only double jump, Moon Bow aim assist, creature Oracle, invisibility toggle and ground sprint.
+Poseidon movement, Tidecaller release, swim helper and gear upkeep restored from the working v3.4.4 archive.
+Clutch: exposed rainy falls OR falling while holding any trident. No launch detector or trident-use clutch hook.
+Landing pools restore flowers and natural water; nearby obstacles allow single-source fallback. Native 3.5.10 landing acceptance pending.
+Weather probes no longer sit on players; spawn/teleport clearance is at least 12 blocks from all nearby players.
+No local-world dependencies; native inventory/death protections remain.
+Artemis sprint/invisibility: night, darkness or other dimensions only.
+Both behavior and resource packs are included; activate only this matching pair.
+Temple upgrade uses supported API 2.x operator permissions; user confirmed READY messages and all three altars visible in v3.5.11.
+Existing worlds: stand in the loaded Hall and run /function olympus/upgrade_gods
+to add the three new altars without rebuilding the Hall.
+Older numbered archives in this directory are previous releases.
+Native v3.5.9 local A/B test: same Tidecaller launches normally after weather-only probe relocation (unchanged in this release). Offline checks passed; other gameplay/server acceptance remains pending.

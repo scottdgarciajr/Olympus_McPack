@@ -1,10 +1,13 @@
+import {HEARTH_TOOLS,hearthTool} from './hearth_tools.js';
 // Explicit personal-item allowlist: forged products and ordinary resources are
 // intentionally absent, so Hephaestus can still sell/store what he crafts.
 const PERSONAL_IDS = new Set([
-  ...['hermes','zeus','poseidon','hades','ares','apollo','hephaestus','dionysus','kratos'].map(god=>`olympus:${god}_relic`),
-  'olympus:crown','olympus:crown_control'
+  ...['hermes','zeus','poseidon','hades','ares','apollo','hephaestus','dionysus','kratos','athena','artemis','hestia'].map(god=>`olympus:${god}_relic`),
+  'olympus:crown','olympus:crown_control',...HEARTH_TOOLS.map(tool=>`olympus:hestia_${tool.id}`)
 ]);
 const TOOLS = new Map([
+  ...HEARTH_TOOLS.map(tool=>[tool.name,`olympus:hestia_${tool.id}`]),
+  ['§aArtemis’s Moon Bow','minecraft:bow'],
   ['§bPoseidon’s Tidecaller','minecraft:trident'],
   ['§eApollo’s Solar Bow','minecraft:bow'],
   ['§6Apollo’s Prophetic Bow','minecraft:bow'],
@@ -15,12 +18,11 @@ export function isPersonalGodItem(item) {
   if(PERSONAL_IDS.has(item.typeId) || TOOLS.get(item.nameTag)===item.typeId)return true;
   try { return typeof item.getDynamicProperty('olympus:bound_owner')==='string'; } catch { return false; }
 }
-export function isPersonalGodTool(item) { return !!item && TOOLS.get(item.nameTag)===item.typeId; }
+export function isPersonalGodTool(item) { return !!item && (!!hearthTool(item.typeId)||TOOLS.get(item.nameTag)===item.typeId); }
 export function lockGodItem(item, owner) {
   if(!isPersonalGodItem(item))return false;
   let changed=false;
-  // 'inventory' is the stable ItemLockMode.inventory value. It keeps the item
-  // movable within personal inventory/equipment while preventing giving/storing.
+  // Personal equipment, including Tidecaller, remains inventory-locked.
   if(item.lockMode!=='inventory'){item.lockMode='inventory';changed=true;}
   if(!item.keepOnDeath){item.keepOnDeath=true;changed=true;}
   if(owner)try {

@@ -1,0 +1,3 @@
+These independent fixtures come from dist/Olympus_SMP_v3.4.4.mcaddon, with CRCRLF/CRLF normalized to LF. Archived behavior_pack/scripts/main.js SHA-256: 24d1a13ef52d339f725d6082a33d54d62e1c598e9041f2278ef56690ef3fdeec.
+
+Current v3.5.9 regression checks require exact matches for Poseidon movement, the original Tidecaller release branch, the swim helper, gear maintenance, trident creation and item delivery/enchanting helpers. Earlier releases changed/removed some of these paths; v3.5.8 restores the working archive as requested. Clutch is a separate falling/held-trident condition and never enters those archived functions. The new god allowlist and Artemis bow remain additional supported equipment.

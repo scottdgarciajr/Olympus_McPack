@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:item": {
+    "description": {
+      "identifier": "olympus:hestia_trowel",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:display_name": {
+        "value": "Hearth Building Trowel"
+      },
+      "minecraft:icon": "olympus_hestia_trowel",
+      "minecraft:max_stack_size": 1,
+      "minecraft:interact_button": "Build shape / Sneak: options",
+      "olympus:relic_use": {}
+    }
+  }
+}

@@ -1,0 +1,30 @@
+function protectOwnedGear(player) {
+  const god = role(player);
+  try {
+    const inventory = player.getComponent('minecraft:inventory')?.container;
+    if (!inventory) return;
+    for (let slot = 0; slot < inventory.size; slot++) {
+      const item = inventory.getItem(slot);
+      if (!isPersonalGodItem(item)) continue;
+      const changed=lockGodItem(item,player.name);
+      const durability = item.getComponent('minecraft:durability');
+      if (changed || (isOwnedGear(item,god) && durability && durability.damage > 0)) {
+        item.keepOnDeath = true;
+        if (isOwnedGear(item,god) && durability) durability.damage = 0;
+        inventory.setItem(slot, item);
+      }
+    }
+    const equippable = player.getComponent('minecraft:equippable');
+    for(const slot of [EquipmentSlot.Offhand,EquipmentSlot.Head]) {
+      const offhand = equippable?.getEquipment(slot);
+      if (!isPersonalGodItem(offhand))continue;
+      const changed=lockGodItem(offhand,player.name);
+      const durability = offhand.getComponent('minecraft:durability');
+      if (changed || (isOwnedGear(offhand,god) && durability && durability.damage > 0)) {
+        offhand.keepOnDeath = true;
+        if (isOwnedGear(offhand,god) && durability) durability.damage = 0;
+        equippable.setEquipment(slot, offhand);
+      }
+    }
+  } catch (e) { if (CONFIG.debug) fail(e); }
+}

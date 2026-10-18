@@ -5,12 +5,14 @@ import subprocess
 import uuid
 import zipfile
 import runpy
+import shutil
+import hashlib
 
 ROOT = Path(__file__).parent
 BP = ROOT / 'behavior_pack'
 RP = ROOT / 'resource_pack'
-OUT = ROOT / 'dist' / 'Olympus_SMP_FINAL.mcaddon'
-GODS = ('hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus', 'kratos')
+DIST = ROOT / 'dist'
+GODS = ('hermes', 'zeus', 'poseidon', 'hades', 'ares', 'apollo', 'hephaestus', 'dionysus', 'kratos', 'athena', 'artemis', 'hestia')
 
 def check(condition, message):
     if not condition:
@@ -22,6 +24,13 @@ def read_json(path):
 
 bp = read_json(BP / 'manifest.json')
 rp = read_json(RP / 'manifest.json')
+release_version = bp['header']['version']
+release_text = '.'.join(map(str, release_version))
+OUT = DIST / f'Olympus_SMP_v{release_text}.mcaddon'
+check(rp['header']['version'] == release_version, 'Behavior/resource pack versions disagree')
+check(read_json(ROOT / 'package.json')['version'] == release_text, 'Package version disagrees with packs')
+check(all(module['version'] == release_version for pack in (bp, rp) for module in pack['modules']), 'Module versions disagree with packs')
+check(any(d.get('uuid') == rp['header']['uuid'] and d.get('version') == release_version for d in bp['dependencies']), 'Resource dependency version disagrees with release')
 check('pbr' in rp.get('capabilities',[]) and 'raytraced' not in rp['capabilities'], 'Resource pack must allow optional Vibrant Visuals without requiring RTX')
 runpy.run_path(str(ROOT / 'validate_native_rendering.py'))
 for pack in (bp,rp):
@@ -73,6 +82,7 @@ flow=clutch['minecraft:liquid_detection']['detection_rules'][0]
 check(not flow['can_contain_liquid'] and flow['on_liquid_touches']=='blocking', 'Clutch edges must stop fluid flow')
 check((RP/'textures'/'blocks'/'clutch_invisible.png').is_file(), 'Clutch edge texture missing')
 script = (BP / 'scripts' / 'main.js').read_text(encoding='utf-8')
+check(f"const PACK_VERSION = '{release_text}';" in script, 'In-game version disagrees with release')
 for god in GODS:
     item = read_json(BP / 'items' / f'{god}_relic.json')['minecraft:item']
     check(item['description']['identifier'] == f'olympus:{god}_relic', f'Wrong {god} item ID')
@@ -92,9 +102,10 @@ check(seal['description']['identifier'] == 'olympus:temple_seal', 'Temple seal I
 check('olympus:relic_use' in seal['components'], 'Temple seal is not usable')
 seal_icon = seal['components']['minecraft:icon']
 check(seal_icon in texture_index and (RP / (texture_index[seal_icon]['textures'] + '.png')).exists(), 'Temple seal texture missing')
-for command in ('give_all', 'help', 'status', 'reset', 'summon_mountain', 'controls', 'upgrade_mountain', 'setup', 'crown_setup', 'crown_status', 'crown_reset', 'crown_recover', 'crown_glory', 'crown_help','creative_kit'):
+for command in ('give_all', 'help', 'status', 'reset', 'summon_mountain', 'controls', 'upgrade_mountain', 'upgrade_gods', 'setup', 'crown_setup', 'crown_status', 'crown_reset', 'crown_recover', 'crown_glory', 'crown_help','creative_kit'):
     path = BP / 'functions' / 'olympus' / (command + '.mcfunction')
     check(path.is_file() and path.stat().st_size > 0, f'Function {command} missing')
+check((BP / 'functions' / 'olympus' / 'upgrade_gods.mcfunction').read_text().strip() == 'scriptevent olympus:upgrade_gods', 'God upgrade command missing')
 check((BP / 'functions' / 'olympus' / 'setup.mcfunction').read_text().strip() == 'scriptevent olympus:setup', 'Temple setup function missing')
 check(read_json(BP / 'items' / 'creative_test_kit.json')['minecraft:item']['components'].get('olympus:creative_test_kit_use') == {}, 'Creative god/Crown menu item missing')
 check(read_json(BP / 'items' / 'war_trophy.json')['minecraft:item']['description']['identifier'] == 'olympus:war_trophy', 'PvP trophy missing')
@@ -136,7 +147,8 @@ structure_path = BP / 'structures' / 'olympus' / 'hall_of_eight.mcstructure'
 check(structure_path.is_file() and structure_path.stat().st_size > 10000, 'Bedrock temple structure missing')
 check((BP / 'structures' / 'olympus' / 'forbidden_vault.mcstructure').stat().st_size > 1000, 'Kratos lower chamber missing')
 check('ensureForbiddenVault(player)' in script and "showTempleAltar(player,'kratos')" in script, 'Lower altar is disconnected')
-check((BP / 'functions' / 'olympus' / 'give_all.mcfunction').read_text().count('give @s ') == 9, 'Kit must contain nine relics')
+check((BP / 'functions' / 'olympus' / 'give_all.mcfunction').read_text().count('give @s ') == len(GODS), 'Kit must contain every god relic')
+check('olympus:riptide_repair' not in script and not (BP / 'functions' / 'olympus' / 'riptide_repair.mcfunction').exists(), 'Rolled-back trident repair workaround must not ship')
 check('system.afterEvents.scriptEventReceive' in script, 'Admin script events disconnected')
 check('system.runInterval' in script and 'entityHitEntity' in script, 'Gameplay event loop missing')
 check('claimRejection(old, owner(god)' in script and 'not_at_summit' not in script, 'Relic claims must work anywhere')
@@ -153,6 +165,13 @@ with zipfile.ZipFile(OUT, 'w', zipfile.ZIP_DEFLATED) as archive:
                 archive.write(path, f'{prefix}/{path.relative_to(folder).as_posix()}')
 with zipfile.ZipFile(OUT) as archive:
     check(archive.testzip() is None, 'ZIP CRC failure')
+    # Validate every source file, including carried-forward features, against the
+    # finished download rather than merely checking selected archive entries.
+    for folder, prefix in ((BP, 'behavior_pack'), (RP, 'resource_pack')):
+        for path in folder.rglob('*'):
+            if path.is_file():
+                name = f'{prefix}/{path.relative_to(folder).as_posix()}'
+                check(archive.read(name) == path.read_bytes(), f'Archive source mismatch: {name}')
     bundled_rp=json.loads(archive.read('resource_pack/manifest.json'))
     check('pbr' in bundled_rp.get('capabilities',[]) and 'raytraced' not in bundled_rp['capabilities'], 'Installable server resource pack must permit player-selected Vibrant Visuals')
     names = set(archive.namelist())
@@ -165,4 +184,32 @@ with zipfile.ZipFile(OUT) as archive:
     check('behavior_pack/structures/olympus/hall_of_eight.mcstructure' in names, 'Temple was not bundled')
     check(not any('/st_' in name or 'super_tnt' in name for name in names), 'Destructive Combine Anything content must not be bundled')
     check(len(names) == len(set(names)), 'Duplicate ZIP entries')
-print(f'PASS: manifests, UUIDs, {len(GODS)} relics, functions, textures, JS syntax, rule tests, ZIP. Built {OUT} ({OUT.stat().st_size:,} bytes)')
+# Keep the historical download path usable while making the actual release
+# unmistakable in Explorer. Both names must contain exactly the same build.
+alias = DIST / 'Olympus_SMP_FINAL.mcaddon'
+shutil.copy2(OUT, alias)
+digest = hashlib.sha256(OUT.read_bytes()).hexdigest()
+check(hashlib.sha256(alias.read_bytes()).hexdigest() == digest, 'Latest alias differs from versioned release')
+(DIST / 'LATEST.txt').write_text(
+    f'LATEST RELEASE: Olympus SMP v{release_text}\n'
+    f'INSTALL: {OUT.name}\n'
+    f'COMPATIBILITY ALIAS: {alias.name} (identical contents)\n'
+    f'SHA256: {digest}\n\n'
+    'Includes v3.4.5 systems plus Athena, Artemis and Hestia.\n'
+    'Hestia: normal-use relic opens toolbox; seven separate tools, material picker, resource costs and 24 undo/redo steps.\n'
+    'Athena: enchanting workshop plus earned bonus XP on mob kills (40 raw XP/min cap).\n'
+    'Zeus: flight reevaluates position every tick, including ascent from Y70 through Y220; sky/thunder power, limited elsewhere.\n'
+    'Artemis: darkness-only double jump, Moon Bow aim assist, creature Oracle, invisibility toggle and ground sprint.\n'
+    'Poseidon movement, Tidecaller release, swim helper and gear upkeep restored from the working v3.4.4 archive.\n'
+    'Clutch: exposed rainy falls OR falling while holding any trident. No launch detector or trident-use clutch hook.\n'
+    'Landing pools restore flowers and natural water; nearby obstacles allow single-source fallback. Native 3.5.10 landing acceptance pending.\n'
+    'Weather probes no longer sit on players; spawn/teleport clearance is at least 12 blocks from all nearby players.\n'
+    'No local-world dependencies; native inventory/death protections remain.\n'
+    'Artemis sprint/invisibility: night, darkness or other dimensions only.\n'
+    'Both behavior and resource packs are included; activate only this matching pair.\n'
+    'Temple upgrade uses supported API 2.x operator permissions; user confirmed READY messages and all three altars visible in v3.5.11.\n'
+    'Existing worlds: stand in the loaded Hall and run /function olympus/upgrade_gods\n'
+    'to add the three new altars without rebuilding the Hall.\n'
+    'Older numbered archives in this directory are previous releases.\n'
+    'Native v3.5.9 local A/B test: same Tidecaller launches normally after weather-only probe relocation (unchanged in this release). Offline checks passed; other gameplay/server acceptance remains pending.\n', encoding='utf-8')
+print(f'PASS: manifests, UUIDs, {len(GODS)} relics, functions, textures, JS syntax, rule tests, ZIP/source parity. Built {OUT} ({OUT.stat().st_size:,} bytes); FINAL alias verified identical; latest release marked in dist/LATEST.txt')

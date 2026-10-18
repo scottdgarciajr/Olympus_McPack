@@ -3,6 +3,9 @@ export const CLUTCH_WATER='minecraft:water',CLUTCH_BOUNDARY='minecraft:structure
 const OLD_BOUNDARY='olympus:clutch_boundary';
 const OLD_CARRIER='olympus:clutch_water';
 const PLANTS=new Set(['short_grass','tallgrass','tall_grass','fern','large_fern','deadbush','dead_bush','dandelion','poppy','blue_orchid','allium','azure_bluet','oxeye_daisy','cornflower','lily_of_the_valley','white_tulip','orange_tulip','pink_tulip','red_tulip','sunflower','lilac','rose_bush','peony'].map(id=>'minecraft:'+id));
+for(const id of ['torchflower','pitcher_plant','pink_petals','wildflowers','firefly_bush','bush','short_dry_grass','tall_dry_grass','closed_eyeblossom','open_eyeblossom','snow_layer','vine','glow_lichen','hanging_roots','waterlily'])PLANTS.add('minecraft:'+id);
+const NATURAL_WATER=new Set(['minecraft:water','minecraft:flowing_water']);
+export const canPlaceClutchWater=block=>!!block && (block.isAir || block.typeId==='minecraft:air' || PLANTS.has(block.typeId) || NATURAL_WATER.has(block.typeId));
 const FULL_BLOCKS=new Set(['stone','grass_block','grass','dirt','coarse_dirt','rooted_dirt','dirt_with_roots','sand','red_sand','gravel','quartz_block','smooth_quartz','sandstone','red_sandstone','cobblestone','deepslate','cobbled_deepslate','snow','ice','packed_ice','blue_ice','bedrock','netherrack','end_stone'].map(id=>'minecraft:'+id));
 const sides=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
 const coordinate=(dimension,p)=>`${dimension}:${p.x},${p.y},${p.z}`;
@@ -31,14 +34,16 @@ export function spawnRainWater(world,dimensionId,locations,blocked,now=Date.now(
   const dimension=world.getDimension(dimensionId),water=new Map(),edges=new Map(),changed=[],snapshots=new Map();
   const tracked=p=>(read(world,shardKey(dimensionId,p))?.blocks||[]).some(([x,y,z,,kind])=>x===p.x && y===p.y && z===p.z && kind!==1);
   const reject=reason=>{report(reason);return 0;};
-  const replaceable=block=>block.isAir || PLANTS.has(block.typeId);
+  const replaceable=canPlaceClutchWater;
   const edge=(block,p)=>block.typeId===OLD_BOUNDARY || block.typeId===CLUTCH_BOUNDARY && (read(world,shardKey(dimensionId,p))?.blocks||[]).some(([x,y,z,,kind])=>x===p.x && y===p.y && z===p.z && kind===1);
-  const restore=block=>PLANTS.has(block.typeId)?{type:block.typeId,states:block.permutation.getAllStates()}:undefined;
+  // Preserve pre-existing water (including its flow level); never snapshot
+  // another temporary pool as permanent water when pools overlap.
+  const restore=(block,p)=>PLANTS.has(block.typeId) || NATURAL_WATER.has(block.typeId)&&!tracked(p)?{type:block.typeId,states:block.permutation.getAllStates()}:undefined;
   try {
     for(const p of locations) {
       const block=dimension.getBlock(p);
       if(!block || blocked(dimensionId,p))return reject('Pool reaches unloaded or protected terrain.');
-      if(replaceable(block) || edge(block,p) || block.typeId===CLUTCH_WATER && tracked(p))water.set(coordinate(dimensionId,p),{p,block,restore:restore(block)});
+      if(replaceable(block) || edge(block,p))water.set(coordinate(dimensionId,p),{p,block,restore:restore(block,p)});
     }
     if(!water.size)return reject('No replaceable space at landing.');
     // A 1x1x1 selection is the original working native-water mode.
@@ -52,8 +57,8 @@ export function spawnRainWater(world,dimensionId,locations,blocked,now=Date.now(
       const block=dimension.getBlock(at);if(!block)return reject('Pool perimeter is unloaded.');
       if(replaceable(block) || edge(block,at)) {
         if(blocked(dimensionId,at))return reject('Pool perimeter is protected.');
-        edges.set(id,{p:at,block,restore:restore(block)});
-      } else if(block.typeId!==CLUTCH_BOUNDARY && !FULL_BLOCKS.has(block.typeId) && !block.isLiquidBlocking('Water'))return reject(`Perimeter cannot contain water beside ${block.typeId}.`);
+        edges.set(id,{p:at,block,restore:restore(block,at)});
+      } else if(block.typeId!==CLUTCH_BOUNDARY && !FULL_BLOCKS.has(block.typeId) && !block.isLiquidBlocking?.('Water'))return reject(`Perimeter cannot contain water beside ${block.typeId}.`);
     }
     const mutate=(block,type)=>{changed.push({block,permutation:block.permutation,type:block.typeId});block.setType(type);};
     // Seal all exposed faces BEFORE spawning ordinary water. These edges have
